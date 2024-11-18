@@ -30,8 +30,3 @@ def read_csv(file_path):
     for row in reader:
       data.append(row)
     return data
-
-# Example usage:
-file_path = "files/Unicorn_Companies.csv"
-data = read_csv(file_path)
-print(data)
