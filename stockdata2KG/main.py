@@ -9,8 +9,6 @@ password = "neo4jtest"
 
 def main():
      ##todo
-
-
     driver = GraphDatabase.driver(neo4j_uri, auth=(username, password))
     with driver.session() as session:
         session.run("CREATE CONSTRAINT IF NOT EXISTS ON (n:Node) ASSERT n.id IS UNIQUE")
