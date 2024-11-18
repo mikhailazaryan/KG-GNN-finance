@@ -1,18 +1,12 @@
 import csv
 
-## structure of the unicorn_companies.csv
+# important questions: are we iteratively adding to the graph or add them all at once? More interesting would be step by step
 
-## Field,Description
-## Company,Company name
-## Valuation,Company valuation in billions (B) of dollars
-## Date Joined,The date in which the company reached $1 billion in valuation
-## Industry,Company industry
-## City,City the company was founded in
-## Country,Country the company was founded in
-## Continent,Continent the company was founded in
-## Year Founded,Year the company was founded
-## Funding,Total amount raised across all funding rounds in billions (B) or millions (M) of dollars
-## Select Investors,Top 4 investing firms or individual investors (some have less than 4)
+# so what is the data format? We cannot have it tabular I think, as it will be hard to get
+
+# Chunking: convert large text (string) into several junks
+
+
 
 def read_csv(file_path):
   """Reads a CSV file and returns a list of rows.
