@@ -3,7 +3,7 @@ from neo4j import GraphDatabase
 import csv
 
 csv_file = './files/Unicorn_Companies.csv'
-neo4j_uri = "neo4j://localhost:7687"
+neo4j_uri = "neo4j://localhost:7474"
 username = "neo4j"
 password = "neo4jtest"
 
