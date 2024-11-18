@@ -10,12 +10,12 @@ password = "neo4jtest"
 ## File Paths
 csv_file = './files/Unicorn_Companies.csv'
 
-def initialize_sceleton():
+def initialize_graph():
     driver = GraphDatabase.driver(neo4j_uri, auth=(username, password))
     with driver.session() as session:
         session.run()
 
-def buildgraph():
+def build_graph():
     driver = GraphDatabase.driver(neo4j_uri, auth=(username, password))
     with driver.session() as session:
 
