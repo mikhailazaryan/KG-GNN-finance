@@ -1,4 +1,47 @@
 import csv
+import json
+
+from stockdata2KG.wikidata import wikidata_wbsearchentities, wikidata_wbgetentities
+
+id_of_company = None
+wikidata = None
+
+def crawl_wikidata(search_string_or_id):
+  global id_of_company
+  id_of_company = wikidata_wbsearchentities(search_string_or_id, 'id')
+  global wikidata
+  wikidata = wikidata_wbgetentities(id_of_company)
+
+  main_company_node()
+  stock_market_index()
+  industry()
+  founders()
+
+def main_company_node():
+  company_dict = {
+    "node": wikidata_wbsearchentities(id_of_company, 'label'),
+    "label": "company",
+    "isin" : extract_value_from_id('P946'),
+    "inception" : extract_value_from_id('P571')['time'].split('+')[1].split('-')[0],
+  }
+  print (company_dict)
+
+def stock_market_index():
+  stock_market_index_dict = {
+    "stock_market_index" : wikidata_wbsearchentities(extract_value_from_id('P361')['id'], 'label') # only returns top index, not the others
+  }
+  print(stock_market_index_dict)
+
+def industry():
+  industry_dict = {
+    "industry" : wikidata_wbsearchentities(extract_value_from_id('P452')['id'], 'label')
+  }
+  print(industry_dict)
+
+def founders():
+  founder_dict = {wikidata_wbsearchentities(extract_value_from_id('P112')['id'], 'label')}
+  print(founder_dict)
+
 
 # important questions: are we iteratively adding to the graph or add them all at once? More interesting would be step by step
 # so what is the data format? We cannot have it tabular I think, as it will be hard to get
@@ -77,21 +120,6 @@ import csv
 
 
 
+def extract_value_from_id(id):
+  return wikidata["entities"][id_of_company]["claims"][id][0]["mainsnak"]["datavalue"]["value"]
 
-
-def read_csv(file_path):
-  """Reads a CSV file and returns a list of rows.
-
-  Args:
-    file_path: The path to the CSV file.
-
-  Returns:
-    A list of rows, where each row is a list of values.
-  """
-
-  with open(file_path, 'r') as csvfile:
-    reader = csv.reader(csvfile)
-    data = []
-    for row in reader:
-      data.append(row)
-    return data
