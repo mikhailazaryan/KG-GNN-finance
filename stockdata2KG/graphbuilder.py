@@ -13,7 +13,8 @@ csv_file = './files/Unicorn_Companies.csv'
 def initialize_graph():
     driver = GraphDatabase.driver(neo4j_uri, auth=(username, password))
     with driver.session() as session:
-        session.run()
+        session.run("CREATE (n:Company {name: 'Apple'})")
+        print("success")
 
 def build_graph():
     driver = GraphDatabase.driver(neo4j_uri, auth=(username, password))

@@ -1,5 +1,3 @@
-import csv
-import json
 
 from stockdata2KG.wikidata import wikidata_wbsearchentities, wikidata_wbgetentities
 
@@ -13,9 +11,12 @@ def crawl_wikidata(search_string_or_id):
   wikidata = wikidata_wbgetentities(id_of_company)
 
   main_company_node()
-  stock_market_index()
+  #stock_market_index()
   industry()
   founders()
+
+  list = [('stock_market_index', 'P361')]
+  create_dict(list[0][0], list[0][1])
 
 def main_company_node():
   company_dict = {
@@ -38,9 +39,19 @@ def industry():
   }
   print(industry_dict)
 
+
 def founders():
   founder_dict = {wikidata_wbsearchentities(extract_value_from_id('P112')['id'], 'label')}
   print(founder_dict)
+
+
+def create_dict(dict_name, id):
+  dict_name = {
+    "stock_market_index" : wikidata_wbsearchentities(extract_value_from_id(id)['id'], 'label') # only returns top index, not the others
+  }
+  print(dict_name)
+
+
 
 
 # important questions: are we iteratively adding to the graph or add them all at once? More interesting would be step by step
@@ -122,4 +133,33 @@ def founders():
 
 def extract_value_from_id(id):
   return wikidata["entities"][id_of_company]["claims"][id][0]["mainsnak"]["datavalue"]["value"]
+
+
+
+
+# def founders():
+#     founders_list = []
+#     values = list(extract_value_from_id('P112'))
+#     for i, value in enumerate(values):
+#       founder_info = wikidata_wbsearchentities(value, 'label')
+#       founders_list.append({"founder_" + str(i + 1): founder_info})
+#
+#     founders_dict = {}
+#     for founder in founders_list:
+#       founders_dict.update(founder)
+#     print(founders_dict)
+
+# def extract_value_from_id(id):
+#   entry_count = len(wikidata["entities"][id_of_company]["claims"][id])
+#   #print(str(id) + " = count: "+ str(entry_count))
+#   list = []
+#   for i in range(entry_count):
+#     list.append(wikidata["entities"][id_of_company]["claims"][id][i]["mainsnak"]["datavalue"]["value"])
+#   #print(list)
+#   if len(list) > 1:
+#     return list
+#   else:
+#     return list[0]
+#   #return wikidata["entities"][id_of_company]["claims"][id][0]["mainsnak"]["datavalue"]["value"]
+
 
