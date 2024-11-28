@@ -3,19 +3,19 @@ import json
 from stockdata2KG.wikidata import wikidata_wbsearchentities
 
 
-# copy template to template_with_ids.json
+# copy template to template_with_data.json
 def fill_template(id_of_company, wikidata):
 
-     # copies template.json to template_with_ids.json
+     # copies template.json to template_with_data.json
      with open("files/initial_graph_data/template.json", 'r') as f:
          data = json.load(f)
 
-     with open("files/initial_graph_data/template_with_ids.json", 'w') as f:
+     with open("files/initial_graph_data/template_with_data.json", 'w') as f:
          json.dump(data, f, indent=4)
 
 
      # replace the IDs such as "P946" with the correct value
-     with open('files/initial_graph_data/template_with_ids.json', 'r') as f:
+     with open('files/initial_graph_data/template_with_data.json', 'r') as f:
          template_json = json.load(f)
 
      for key, value in template_json.items():
@@ -48,6 +48,7 @@ def fill_template(id_of_company, wikidata):
                         except: pass
 
 
-     with open('files/initial_graph_data/template_with_ids.json', 'w') as f:
-     ### we copy the json back into template_with_ids.json
+     with open('files/initial_graph_data/template_with_data.json', 'w') as f:
+     ### we copy the json back into template_with_data.json
          json.dump(template_json, f, indent=4)
+         print("sucessfully wrote names into template_with_data.json")
