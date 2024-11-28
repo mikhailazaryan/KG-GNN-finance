@@ -19,7 +19,6 @@ def initialize_graph(json_path):
     with open(json_path, 'r') as f:
         data = json.load(f)
 
-    # this creates only the central company node
     print(f"Initializing graph from {json_path}")
     print(data.get("name"))
 
@@ -65,7 +64,7 @@ def create_relationship(session, source_label, source_properties, relationship):
     target_label = relationship["target_label"]
     rel_type = relationship["type"]
 
-    target_properties = {"name": f"Placeholder {target_label}"}
+    target_properties = {"name": f"{target_label}"}
 
     target_query = f"""
     MERGE (t:{target_label} {{name: $name}})

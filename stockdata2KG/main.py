@@ -10,9 +10,11 @@ from stockdata2KG.wikidata import wikidata_wbsearchentities, wikidata_wbgetentit
 
 def main():
      # just input a company, e.g. "Apple Inc" or "Allianz SE"
-     id_of_company = wikidata_wbsearchentities("Apple Inc", 'id')
+     id_of_company = wikidata_wbsearchentities("Microsoft", 'id')
      wikidata = wikidata_wbgetentities(id_of_company)
      fill_template(id_of_company, wikidata)
+     json_initial_graph_data_path = "files/initial_graph_data/template_with_data.json"
+     initialize_graph(json_initial_graph_data_path)
 
 
 if __name__ == "__main__":

@@ -2,8 +2,8 @@
     "company": {
         "label": "Company",
         "properties": {
-            "name": "Apple Inc.",
-            "isin": "US0378331005",
+            "name": "Microsoft",
+            "isin": "US5949181045",
             "founding_date": ""
         },
         "relationships": [
@@ -52,7 +52,7 @@
     "industry": {
         "label": "Industry",
         "properties": {
-            "name": "software industry"
+            "name": "tech industry"
         },
         "relationships": [
             {
@@ -64,7 +64,7 @@
     "founder": {
         "label": "Person",
         "properties": {
-            "name": "Steve Wozniak"
+            "name": "Bill Gates"
         },
         "relationships": [
             {
@@ -76,7 +76,7 @@
     "manager": {
         "label": "Person",
         "properties": {
-            "name": "Michael Scott"
+            "name": "Steve Ballmer"
         },
         "relationships": [
             {
@@ -88,7 +88,7 @@
     "board_member": {
         "label": "Person",
         "properties": {
-            "name": "Fred D. Anderson"
+            "name": "Reid Hoffman"
         },
         "relationships": [
             {
@@ -100,19 +100,19 @@
     "subsidiary": {
         "label": "Company",
         "properties": {
-            "name": "FileMaker, Inc."
+            "name": "Xbox Game Studios"
         }
     },
     "headquater": {
         "label": "city",
         "properties": {
-            "name": "Cupertino"
+            "name": "Redmond"
         }
     },
     "product": {
         "label": "Product",
         "properties": {
-            "name": "Apple TV"
+            "name": "Microsoft Windows"
         }
     }
 }
