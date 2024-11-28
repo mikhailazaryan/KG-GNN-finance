@@ -1,3 +1,5 @@
+import json
+
 import neo4j as neo
 from neo4j import GraphDatabase
 import csv
@@ -10,11 +12,12 @@ password = "neo4jtest"
 ## File Paths
 csv_file = './files/Unicorn_Companies.csv'
 
-def initialize_graph(list_of_intitial_dicts):
+def initialize_graph(json_path):
     driver = GraphDatabase.driver(neo4j_uri, auth=(username, password))
 
     # this creates only the central company node
-    create_company_node(list_of_intitial_dicts[0], driver)
+    data = json.load(json_path)
+    create_company_node(data, driver)
 
     # todo: create all other initial nodes defined in crawler
 
