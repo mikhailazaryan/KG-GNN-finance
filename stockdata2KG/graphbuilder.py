@@ -67,14 +67,12 @@ def create_relationship(session, source_label, source_properties, relationship):
 
     target_properties = {"name": f"Placeholder {target_label}"}
 
-    # Match or create target node
     target_query = f"""
     MERGE (t:{target_label} {{name: $name}})
     RETURN t
     """
     session.run(target_query, target_properties)
 
-    # Create relationship
     rel_query = f"""
     MATCH (s:{source_label} {{name: $source_name}})
     MATCH (t:{target_label} {{name: $target_name}})
@@ -85,4 +83,3 @@ def create_relationship(session, source_label, source_properties, relationship):
         "target_name": target_properties["name"]
     })
     print(f"Relationship created: {source_label} -[{rel_type}]-> {target_label}")
-
