@@ -10,18 +10,35 @@ password = "neo4jtest"
 ## File Paths
 csv_file = './files/Unicorn_Companies.csv'
 
-def initialize_graph():
+def initialize_graph(list_of_intitial_dicts):
     driver = GraphDatabase.driver(neo4j_uri, auth=(username, password))
+
+    # this creates only the central company node
+    create_company_node(list_of_intitial_dicts[0], driver)
+
+    # todo: create all other initial nodes defined in crawler
+
+
+
+def create_company_node(company_dict, driver):
+    print("test: " +str(company_dict))
     with driver.session() as session:
-        session.run("CREATE (n:Company {name: 'Apple'})")
-        print("success")
+        # intitally delete all existing nodes
+        session.run("MATCH(n) DETACH DELETE n")
 
-def build_graph():
-    driver = GraphDatabase.driver(neo4j_uri, auth=(username, password))
-    with driver.session() as session:
+        # create initial company node
+        query = "CREATE (c:Company {name: $name, isin: $isin, inception: $inception})"
+        params = {
+            "name": company_dict["node"],
+            "isin": company_dict["isin"],
+            "inception": company_dict["inception"]
+        }
+        session.run(query, params)
 
 
-        session.run('CREATE (database:Database {name:"Neo4j"})-[r:SAYSAgain]->(message:Message {name:"Hello World!"}) RETURN database, message, r')
-        session.run("MATCH (n) RETURN n")
 
-    driver.close()
+
+
+
+
+

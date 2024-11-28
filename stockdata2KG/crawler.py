@@ -1,8 +1,6 @@
-
+from stockdata2KG import wikidata
 from stockdata2KG.wikidata import wikidata_wbsearchentities, wikidata_wbgetentities
-
-id_of_company = None
-wikidata = None
+from neo4j import GraphDatabase
 
 def crawl_wikidata(search_string_or_id):
   global id_of_company
@@ -10,13 +8,32 @@ def crawl_wikidata(search_string_or_id):
   global wikidata
   wikidata = wikidata_wbgetentities(id_of_company)
 
+
   main_company_node()
-  #stock_market_index()
-  industry()
   founders()
 
-  list = [('stock_market_index', 'P361')]
-  create_dict(list[0][0], list[0][1])
+  list_of_dicts = []
+  list_of_querries = [('stock_market_index', 'P361'),
+          ('industry', 'P452')]
+
+  for tupple in list_of_querries:
+    list_of_dicts.append(create_dict(tupple[0], tupple[1]))
+
+
+
+## Node: The_Company_Name
+  # Label: Company
+  # Relationships:
+    # Part of Stock Market Index
+    # Active in Industry
+    # Founded by Founders
+    # Has Subsidiaries
+    # Headquartered in
+    # Offers Products/Services
+    # todo
+# Properties:
+    # Stock Ticker / ISIN
+    # Founding Date / Inception
 
 def main_company_node():
   company_dict = {
@@ -25,7 +42,7 @@ def main_company_node():
     "isin" : extract_value_from_id('P946'),
     "inception" : extract_value_from_id('P571')['time'].split('+')[1].split('-')[0],
   }
-  print (company_dict)
+  return company_dict
 
 def stock_market_index():
   stock_market_index_dict = {
@@ -47,9 +64,10 @@ def founders():
 
 def create_dict(dict_name, id):
   dict_name = {
-    "stock_market_index" : wikidata_wbsearchentities(extract_value_from_id(id)['id'], 'label') # only returns top index, not the others
+    dict_name : wikidata_wbsearchentities(extract_value_from_id(id)['id'], 'label') # only returns top index, not the others
   }
   print(dict_name)
+  return dict_name
 
 
 
@@ -161,5 +179,7 @@ def extract_value_from_id(id):
 #   else:
 #     return list[0]
 #   #return wikidata["entities"][id_of_company]["claims"][id][0]["mainsnak"]["datavalue"]["value"]
+
+
 
 
