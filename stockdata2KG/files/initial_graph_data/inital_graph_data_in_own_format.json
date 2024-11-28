@@ -2,9 +2,9 @@
   "company": {
     "label": "Company",
     "properties": {
-      "name": "",
-      "stock_ticker_isin": "",
-      "founding_date_inception": ""
+      "name": "Allianz SE",
+      "isin": "test",
+      "founding_date": "test2"
     },
     "relationships": [
       {"type": "PART_OF", "target_label": "StockMarketIndex"},
@@ -46,5 +46,47 @@
     "relationships": [
       {"type": "FOUNDED", "target_label": "Company"}
     ]
+  },
+  "manager": {
+    "label": "Person",
+    "properties": {
+      "name": "",
+      "title": ""
+    },
+    "relationships": [
+      {"type": "MANAGES", "target_label": "Company"}
+    ]
+  },
+  "board_member": {
+    "label": "Person",
+    "properties": {
+      "name": "",
+      "title": ""
+    },
+    "relationships": [
+      {"type": "PART_OF_BOARD", "target_label": "Company"}
+    ]
+  },
+  "subsidiary": {
+    "label": "Company",
+    "properties": {
+      "name": "",
+      "stock_ticker_isin": "",
+      "founding_date_inception": ""
+    }
+  },
+  "location": {
+    "label": "Location",
+    "properties": {
+      "city": "",
+      "country": ""
+    }
+  },
+  "product": {
+    "label": "Product",
+    "properties": {
+      "name": "",
+      "description": ""
+    }
   }
 }
