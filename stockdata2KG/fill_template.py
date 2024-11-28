@@ -41,7 +41,7 @@ def fill_template(id_of_company, wikidata):
                             ### if it's a string, we are done an just replace the current value with the new one
                                 template_json[key]["properties"][key2] = new_value
                             elif isinstance(new_value, dict):
-                            ### if its a dict, then we replace the current value with wikidata_websearchentity
+                            ### if i'ts a dict, then we replace the current value with wikidata_websearchentity
                             ### result of the 'id' of the dict
                                 new_value = wikidata_wbsearchentities(new_value['id'], 'label'),
                                 template_json[key]["properties"][key2] = new_value[0]
