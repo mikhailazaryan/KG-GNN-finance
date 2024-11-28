@@ -5,7 +5,7 @@ import json
 
 def wikidata_wbsearchentities(query_string, id_or_label):
     # Name of the File for the initial Websearch entities
-    filename = "files/initial_graph_data/wikidata_websearchentities.json"
+    filename = "files/initial_graph_data/websearchentities.json"
 
     # What text to search for
     query = query_string
@@ -30,7 +30,7 @@ def wikidata_wbsearchentities(query_string, id_or_label):
 
 def wikidata_wbgetentities(id):
     # Name of the File for the initial Websearch entities
-    filename = "files/initial_graph_data/wikidata_webgetentities.json"
+    filename = "files/initial_graph_data/webgetentities.json"
 
     # Which parameters to use
     params = {

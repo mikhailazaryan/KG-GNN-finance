@@ -2,9 +2,9 @@
   "company": {
     "label": "Company",
     "properties": {
-      "name": "Allianz SE",
-      "isin": "test",
-      "founding_date": "test2"
+      "name": "P373|1037",
+      "isin": "P946",
+      "founding_date": ""
     },
     "relationships": [
       {"type": "PART_OF", "target_label": "StockMarketIndex"},
@@ -19,9 +19,7 @@
   "stock_market_index": {
     "label": "StockMarketIndex",
     "properties": {
-      "name": "",
-      "country": "",
-      "currency": ""
+      "name": "P361"
     },
     "relationships": [
       {"type": "INCLUDES", "target_label": "Company"}
@@ -30,8 +28,7 @@
   "industry": {
     "label": "Industry",
     "properties": {
-      "name": "",
-      "description": ""
+      "name": "P452"
     },
     "relationships": [
       {"type": "HAS_COMPANY", "target_label": "Company"}
@@ -40,8 +37,7 @@
   "founder": {
     "label": "Person",
     "properties": {
-      "name": "",
-      "birthdate": ""
+      "name": "P112"
     },
     "relationships": [
       {"type": "FOUNDED", "target_label": "Company"}
@@ -50,8 +46,7 @@
   "manager": {
     "label": "Person",
     "properties": {
-      "name": "",
-      "title": ""
+      "name": "P169"
     },
     "relationships": [
       {"type": "MANAGES", "target_label": "Company"}
@@ -60,8 +55,7 @@
   "board_member": {
     "label": "Person",
     "properties": {
-      "name": "",
-      "title": ""
+      "name": "P3320"
     },
     "relationships": [
       {"type": "PART_OF_BOARD", "target_label": "Company"}
@@ -70,23 +64,19 @@
   "subsidiary": {
     "label": "Company",
     "properties": {
-      "name": "",
-      "stock_ticker_isin": "",
-      "founding_date_inception": ""
+      "name": "P355"
     }
   },
-  "location": {
-    "label": "Location",
+  "headquater": {
+    "label": "city",
     "properties": {
-      "city": "",
-      "country": ""
+      "name": "P159"
     }
   },
   "product": {
     "label": "Product",
     "properties": {
-      "name": "",
-      "description": ""
+      "name": "P1056"
     }
   }
 }

@@ -1,0 +1,118 @@
+{
+    "company": {
+        "label": "Company",
+        "properties": {
+            "name": "Apple Inc.",
+            "isin": "US0378331005",
+            "founding_date": ""
+        },
+        "relationships": [
+            {
+                "type": "PART_OF",
+                "target_label": "StockMarketIndex"
+            },
+            {
+                "type": "ACTIVE_IN",
+                "target_label": "Industry"
+            },
+            {
+                "type": "FOUNDED_BY",
+                "target_label": "Founder"
+            },
+            {
+                "type": "HAS_SUBSIDIARY",
+                "target_label": "Company"
+            },
+            {
+                "type": "HEADQUARTERED_IN",
+                "target_label": "Location"
+            },
+            {
+                "type": "OFFERS",
+                "target_label": "ProductOrService"
+            },
+            {
+                "type": "TODO",
+                "target_label": ""
+            }
+        ]
+    },
+    "stock_market_index": {
+        "label": "StockMarketIndex",
+        "properties": {
+            "name": "Nasdaq-100"
+        },
+        "relationships": [
+            {
+                "type": "INCLUDES",
+                "target_label": "Company"
+            }
+        ]
+    },
+    "industry": {
+        "label": "Industry",
+        "properties": {
+            "name": "software industry"
+        },
+        "relationships": [
+            {
+                "type": "HAS_COMPANY",
+                "target_label": "Company"
+            }
+        ]
+    },
+    "founder": {
+        "label": "Person",
+        "properties": {
+            "name": "Steve Wozniak"
+        },
+        "relationships": [
+            {
+                "type": "FOUNDED",
+                "target_label": "Company"
+            }
+        ]
+    },
+    "manager": {
+        "label": "Person",
+        "properties": {
+            "name": "Michael Scott"
+        },
+        "relationships": [
+            {
+                "type": "MANAGES",
+                "target_label": "Company"
+            }
+        ]
+    },
+    "board_member": {
+        "label": "Person",
+        "properties": {
+            "name": "Fred D. Anderson"
+        },
+        "relationships": [
+            {
+                "type": "PART_OF_BOARD",
+                "target_label": "Company"
+            }
+        ]
+    },
+    "subsidiary": {
+        "label": "Company",
+        "properties": {
+            "name": "FileMaker, Inc."
+        }
+    },
+    "headquater": {
+        "label": "city",
+        "properties": {
+            "name": "Cupertino"
+        }
+    },
+    "product": {
+        "label": "Product",
+        "properties": {
+            "name": "Apple TV"
+        }
+    }
+}

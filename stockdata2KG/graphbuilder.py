@@ -21,8 +21,6 @@ def initialize_graph(path):
 
     # this creates only the central company node
 
-    print(data.get("name"))
-
     create_company_node(data, driver)
 
 

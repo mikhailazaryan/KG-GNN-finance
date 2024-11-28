@@ -3,21 +3,19 @@ from stockdata2KG.wikidata import wikidata_wbsearchentities, wikidata_wbgetentit
 from neo4j import GraphDatabase
 
 def crawl_wikidata(search_string_or_id):
-  global id_of_company
   id_of_company = wikidata_wbsearchentities(search_string_or_id, 'id')
-  global wikidata
-  wikidata = wikidata_wbgetentities(id_of_company)
+  return id_of_company, wikidata_wbgetentities(id_of_company)
 
 
-  main_company_node()
-  founders()
-
-  list_of_dicts = []
-  list_of_querries = [('stock_market_index', 'P361'),
-          ('industry', 'P452')]
-
-  for tupple in list_of_querries:
-    list_of_dicts.append(create_dict(tupple[0], tupple[1]))
+  # main_company_node()
+  # founders()
+  #
+  # list_of_dicts = []
+  # list_of_querries = [('stock_market_index', 'P361'),
+  #         ('industry', 'P452')]
+  #
+  # for tupple in list_of_querries:
+  #   list_of_dicts.append(create_dict(tupple[0], tupple[1]))
 
 
 
