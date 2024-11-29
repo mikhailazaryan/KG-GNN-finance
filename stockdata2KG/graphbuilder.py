@@ -25,8 +25,6 @@ def initialize_graph(json_path):
     create_company_node(data, driver)
 
 
-    # todo: create all other initial nodes defined in crawler
-
 
 
 def create_company_node(data, driver):
@@ -56,29 +54,51 @@ def create_company_node(data, driver):
 
 
 def create_node(session, label, properties):
-    query = f"CREATE (n:{label} {{ {', '.join([f'{k}: ${k}' for k in properties.keys()])} }})"
+    #query = f"CREATE (n:{label} {{ {', '.join([f'{k}: ${k}' for k in properties.keys()])} }})"
+    query = f"MERGE (n:{label} {{ {', '.join([f'{k}: ${k}' for k in properties.keys()])} }})"
     session.run(query, properties)
     print(f"Node created: {label} with properties {properties}")
 
 def create_relationship(session, source_label, source_properties, relationship):
-    target_label = relationship["target_label"]
-    rel_type = relationship["type"]
+    try:
+        target_label = relationship.get("target_label")
+        rel_type = relationship.get("type")
 
-    target_properties = {"name": f"{target_label}"}
+        if not target_label:
+            print(f"Skipping relationship with type {rel_type} due to missing target_label.")
+            return
 
-    target_query = f"""
-    MERGE (t:{target_label} {{name: $name}})
-    RETURN t
-    """
-    session.run(target_query, target_properties)
+        target_name = relationship.get("properties", {}).get("name")
 
-    rel_query = f"""
-    MATCH (s:{source_label} {{name: $source_name}})
-    MATCH (t:{target_label} {{name: $target_name}})
-    CREATE (s)-[:{rel_type}]->(t)
-    """
-    session.run(rel_query, {
-        "source_name": source_properties["name"],
-        "target_name": target_properties["name"]
-    })
-    print(f"Relationship created: {source_label} -[{rel_type}]-> {target_label}")
+        if not target_name:
+            print(f"Skipping relationship with type {rel_type}: Target node properties missing 'name'.")
+            return
+
+        target_properties = {"name": target_name}
+
+        if target_name is None:
+            print(f"Skipping creation of {target_label} due to missing 'name' property.")
+            return
+
+        target_query = f"""
+            MERGE (t:{target_label} {{ {', '.join([f'{k}: ${k}' for k in target_properties.keys()])} }})
+            RETURN t
+        """
+        session.run(target_query, target_properties)
+
+        rel_query = f"""
+           MATCH (s:{source_label} {{name: $source_name}})
+           MATCH (t:{target_label} {{name: $target_name}})
+           MERGE (s)-[:{rel_type}]->(t)
+        """
+        session.run(rel_query, {
+            "source_name": source_properties["name"],
+            "target_name": target_properties["name"]
+        })
+        print(f"Relationship created: {source_label} -[{rel_type}]-> {target_label}")
+
+    except KeyError as e:
+        print(f"KeyError in create_relationship: {e}")
+    except Exception as e:
+        print(f"Unexpected error in create_relationship: {e}")
+
