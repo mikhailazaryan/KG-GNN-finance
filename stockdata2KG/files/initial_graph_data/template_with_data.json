@@ -2,113 +2,97 @@
     "company": {
         "label": "Company",
         "properties": {
-            "name": "Microsoft",
-            "isin": "US5949181045",
+            "name": "Allianz SE",
+            "isin": "DE0008404005",
             "founding_date": ""
         },
         "relationships": [
             {
                 "type": "PART_OF",
-                "target_label": "StockMarketIndex"
+                "target": "stockmarketindex"
             },
             {
                 "type": "ACTIVE_IN",
-                "target_label": "Industry"
-            },
-            {
-                "type": "FOUNDED_BY",
-                "target_label": "Founder"
+                "target": "industry"
             },
             {
                 "type": "HAS_SUBSIDIARY",
-                "target_label": "Subsidary"
+                "target": "subsidiary"
             },
             {
                 "type": "HEADQUARTERED_IN",
-                "target_label": "City"
+                "target": "headquarter"
             },
             {
                 "type": "OFFERS",
-                "target_label": "Product"
+                "target": "product"
             }
         ]
     },
-    "stock_market_index": {
+    "stockmarketindex": {
         "label": "StockMarketIndex",
         "properties": {
-            "name": "Nasdaq-100"
-        },
-        "relationships": [
-            {
-                "type": "INCLUDES",
-                "target_label": "Company"
-            }
-        ]
+            "name": "DAX"
+        }
     },
     "industry": {
         "label": "Industry",
         "properties": {
-            "name": "tech industry"
-        },
-        "relationships": [
-            {
-                "type": "HAS_COMPANY",
-                "target_label": "Company"
-            }
-        ]
+            "name": "insurance industry"
+        }
     },
     "founder": {
-        "label": "Founder",
+        "label": "Person",
         "properties": {
-            "name": "Bill Gates"
+            "name": "Carl von Thieme"
         },
         "relationships": [
             {
                 "type": "FOUNDED",
-                "target_label": "Company"
+                "target": "company"
             }
         ]
     },
     "manager": {
-        "label": "Manager",
+        "label": "Person",
         "properties": {
-            "name": "Steve Ballmer"
+            "name": "P169"
         },
         "relationships": [
             {
                 "type": "MANAGES",
-                "target_label": "Company"
+                "target": "company"
             }
         ]
     },
     "board_member": {
         "label": "Person",
         "properties": {
-            "name": "Reid Hoffman"
+            "name": "Eduard Hilgard"
         },
         "relationships": [
             {
                 "type": "PART_OF_BOARD",
-                "target_label": "Company"
+                "target": "company"
             }
         ]
     },
     "subsidiary": {
-        "label": "Subsidary",
+        "label": "Subsidiary",
         "properties": {
-            "name": "Xbox Game Studios"
+            "name": "Dresdner Bank"
         }
     },
     "headquarter": {
         "label": "City",
         "properties": {
-            "name": "Redmond"
+            "name": "Munich"
         }
     },
     "product": {
         "label": "Product",
         "properties": {
-            "name": "Microsoft Windows"
+            "name": "insurance"
         }
     }
 }
