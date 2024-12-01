@@ -17,11 +17,11 @@
             },
             {
                 "type": "FOUNDED_BY",
-                "target_label": "Person"
+                "target_label": "Founder"
             },
             {
                 "type": "HAS_SUBSIDIARY",
-                "target_label": "Company"
+                "target_label": "Subsidary"
             },
             {
                 "type": "HEADQUARTERED_IN",
@@ -58,7 +58,7 @@
         ]
     },
     "founder": {
-        "label": "Person",
+        "label": "Founder",
         "properties": {
             "name": "Bill Gates"
         },
@@ -70,7 +70,7 @@
         ]
     },
     "manager": {
-        "label": "Person",
+        "label": "Manager",
         "properties": {
             "name": "Steve Ballmer"
         },
@@ -94,12 +94,12 @@
         ]
     },
     "subsidiary": {
-        "label": "Company",
+        "label": "Subsidary",
         "properties": {
             "name": "Xbox Game Studios"
         }
     },
-    "headquater": {
+    "headquarter": {
         "label": "City",
         "properties": {
             "name": "Redmond"

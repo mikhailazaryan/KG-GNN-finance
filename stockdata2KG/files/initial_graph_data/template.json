@@ -9,8 +9,8 @@
     "relationships": [
       {"type": "PART_OF", "target_label": "StockMarketIndex"},
       {"type": "ACTIVE_IN", "target_label": "Industry"},
-      {"type": "FOUNDED_BY", "target_label": "Person"},
-      {"type": "HAS_SUBSIDIARY", "target_label": "Company"},
+      {"type": "FOUNDED_BY", "target_label": "Founder"},
+      {"type": "HAS_SUBSIDIARY", "target_label": "Subsidary"},
       {"type": "HEADQUARTERED_IN", "target_label": "City"},
       {"type": "OFFERS", "target_label": "Product"}
     ]
@@ -34,7 +34,7 @@
     ]
   },
   "founder": {
-    "label": "Person",
+    "label": "Founder",
     "properties": {
       "name": "P112"
     },
@@ -43,7 +43,7 @@
     ]
   },
   "manager": {
-    "label": "Person",
+    "label": "Manager",
     "properties": {
       "name": "P169"
     },
@@ -61,12 +61,12 @@
     ]
   },
   "subsidiary": {
-    "label": "Company",
+    "label": "Subsidary",
     "properties": {
       "name": "P355"
     }
   },
-  "headquater": {
+  "headquarter": {
     "label": "City",
     "properties": {
       "name": "P159"
