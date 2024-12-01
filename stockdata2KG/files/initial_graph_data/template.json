@@ -54,7 +54,7 @@
     ]
   },
   "subsidiary": {
-    "label": "Subsidiary",
+    "label": "Company",
     "properties": {
       "name": "P355"
     }
