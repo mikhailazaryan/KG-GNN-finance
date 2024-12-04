@@ -97,7 +97,7 @@ def fill_template(id_of_company, wikidata):
     #         template[list(template.keys())[0]]["additional_properties"].append({id: value})
     #         print(property)
 
-    # additional property does not work yet
+    # todo: make dditional property does not work yet
 
     with open('files/initial_graph_data/template_with_data.json', 'w') as f:
         ### we copy the json back into template_with_data.json
