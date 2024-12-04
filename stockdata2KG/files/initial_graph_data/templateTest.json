@@ -1,12 +1,9 @@
 {
   "company": {
     "node_id": "P373|1037",
+    "additional_properties" : [{"inception" : "P571"}],
+    "nodes" : [],
     "label": "Company",
-    "properties": {
-      "name": "P373|1037",
-      "isin": "P946",
-      "founding_date": ""
-    },
     "relationships": [
       {"type": "PART_OF", "target": "stockmarketindex"},
       {"type": "ACTIVE_IN", "target": "industry"},
@@ -17,74 +14,56 @@
   },
   "stockmarketindex": {
     "node_id" : "P361",
+    "nodes" : [],
     "label": "StockMarketIndex",
-    "properties": {
-      "name": "P361"
-    },
     "relationships": []
   },
   "industry": {
     "node_id" : "P452",
+    "nodes" : [],
     "label": "Industry",
-    "properties": {
-      "name": "P452"
-    },
     "relationships": []
   },
   "founder": {
     "node_id" : "P112",
+    "nodes" : [],
     "label": "Person",
-    "properties": {
-      "name": "P112"
-    },
     "relationships": [
       {"type": "FOUNDED", "target": "company"}
     ]
   },
   "manager": {
     "node_id" : "P169|P1037",
+    "nodes" : [],
     "label": "Person",
-    "properties": {
-      "name": "P169|P1037",
-      "valid_from": "P580",
-      "valid_until": ""
-    },
     "relationships": [
       {"type": "MANAGES", "target": "company"}
     ]
   },
   "board_member": {
     "node_id" : "P3320",
+    "nodes" : [],
     "label": "Person",
-    "properties": {
-      "name": "P3320"
-    },
     "relationships": [
       {"type": "PART_OF_BOARD", "target": "company"}
     ]
   },
   "subsidiary": {
     "node_id" : "P355",
+    "nodes" : [],
     "label": "Company",
-    "properties": {
-      "name": "P355"
-    },
     "relationships": []
   },
   "headquarter": {
     "node_id" : "P159",
+    "nodes" : [],
     "label": "City",
-    "properties": {
-      "name": "P159"
-    },
     "relationships": []
   },
   "product": {
     "node_id" : "P1056",
+    "nodes" : [],
     "label": "Product",
-    "properties": {
-      "name": "P1056"
-    },
     "relationships": []
   }
 }

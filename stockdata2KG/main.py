@@ -7,8 +7,8 @@ from stockdata2KG.wikidata import wikidata_wbsearchentities, wikidata_wbgetentit
 
 
 def main():
-     # just input a company, e.g. "Apple Inc" or "Allianz SE"
-     id_of_company = wikidata_wbsearchentities("Allianz SE", 'id')
+     #just input a company, e.g. "Apple Inc" or "Allianz SE"
+     id_of_company = wikidata_wbsearchentities("Munich RE", 'id')
      wikidata = wikidata_wbgetentities(id_of_company)
      fill_template(id_of_company, wikidata)
 

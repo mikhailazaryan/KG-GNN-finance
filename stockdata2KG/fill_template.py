@@ -61,15 +61,15 @@ def fill_template(id_of_company, wikidata):
     with open("files/initial_graph_data/templateTest.json", 'r') as f:
         template = json.load(f)
 
-
     for key, data in template.items():
-        template[key] = {"nodes" : [], "relationships": data["relationships"]}
         for sub_key in data["node_id"].split("|"):
             try:
                 for wikidata_node in wikidata["entities"][id_of_company]["claims"][sub_key]:
                     print(wikidata_node)
                     name = wikidata_node["mainsnak"]["datavalue"]["value"]
+                    id = id_of_company
                     if isinstance(name, dict):
+                        id = name["id"]
                         name = wikidata_wbsearchentities(name["id"], 'label')
                     try:
                         valid_from = wikidata_node["qualifiers"]["P580"][0]["datavalue"]["value"]["time"]
@@ -81,14 +81,23 @@ def fill_template(id_of_company, wikidata):
                     except:
                         valid_until = "+inf"
                         pass
+                    #todo: replace try with if statements
+
                     print(name, valid_from, valid_until)
-                    template[key]["nodes"].append({"name" : name, "valid_from" : valid_from, "valid_until": valid_until})
+                    template[key]["nodes"].append({"name" : name, "wikidata_id": id, "valid_from" : valid_from, "valid_until": valid_until})
 
             except KeyError:
-                print("KeyError with key: " + str(key) + "and subkey: " + str(sub_key))
+                print(f"KeyError with key: {key} and subkey: {sub_key}")
                 pass
 
+    # if "additional_properties" in template[list(template.keys())[0]].keys():
+    #     for d in template[list(template.keys())[0]]["additional_properties"]:
+    #         id = d[list(d.keys())[0]]
+    #         value = wikidata_node["entities"][id_of_company]["claims"][id][0]["mainsnak"]["datavalue"]["value"]["time"]
+    #         template[list(template.keys())[0]]["additional_properties"].append({id: value})
+    #         print(property)
 
+    # additional property does not work yet
 
     with open('files/initial_graph_data/template_with_data.json', 'w') as f:
         ### we copy the json back into template_with_data.json

@@ -1,12 +1,20 @@
 {
     "company": {
+        "node_id": "P373|1037",
+        "additional_properties": [
+            {
+                "inception": "P571"
+            }
+        ],
         "nodes": [
             {
-                "name": "Allianz SE",
+                "name": "Munich Re",
+                "wikidata_id": "Q166637",
                 "valid_from": "-inf",
                 "valid_until": "+inf"
             }
         ],
+        "label": "Company",
         "relationships": [
             {
                 "type": "PART_OF",
@@ -31,68 +39,96 @@
         ]
     },
     "stockmarketindex": {
+        "node_id": "P361",
         "nodes": [
             {
                 "name": "DAX",
-                "valid_from": "+1988-07-01T00:00:00Z",
+                "wikidata_id": "Q155718",
+                "valid_from": "+1996-09-23T00:00:00Z",
                 "valid_until": "+inf"
             },
             {
                 "name": "EURO STOXX 50",
+                "wikidata_id": "Q981010",
                 "valid_from": "-inf",
                 "valid_until": "+inf"
             },
             {
-                "name": "DivDAX",
-                "valid_from": "+2003-09-22T00:00:00Z",
-                "valid_until": "+2004-09-20T00:00:00Z"
+                "name": "MDAX",
+                "wikidata_id": "Q595622",
+                "valid_from": "+1994-09-19T00:00:00Z",
+                "valid_until": "+1996-09-23T00:00:00Z"
             },
             {
                 "name": "DivDAX",
-                "valid_from": "+2007-09-24T00:00:00Z",
+                "wikidata_id": "Q1230458",
+                "valid_from": "+1999-09-20T00:00:00Z",
+                "valid_until": "+2000-09-18T00:00:00Z"
+            },
+            {
+                "name": "DivDAX",
+                "wikidata_id": "Q1230458",
+                "valid_from": "+2005-09-19T00:00:00Z",
                 "valid_until": "+inf"
             },
             {
                 "name": "CDAX",
+                "wikidata_id": "Q874430",
                 "valid_from": "-inf",
                 "valid_until": "+inf"
             }
         ],
+        "label": "StockMarketIndex",
         "relationships": []
     },
     "industry": {
+        "node_id": "P452",
         "nodes": [
             {
                 "name": "insurance industry",
+                "wikidata_id": "Q2518196",
                 "valid_from": "-inf",
                 "valid_until": "+inf"
             },
             {
                 "name": "financial services",
+                "wikidata_id": "Q837171",
+                "valid_from": "-inf",
+                "valid_until": "+inf"
+            },
+            {
+                "name": "reinsurance",
+                "wikidata_id": "Q476118",
                 "valid_from": "-inf",
                 "valid_until": "+inf"
             },
             {
                 "name": "insurance",
+                "wikidata_id": "Q43183",
                 "valid_from": "-inf",
                 "valid_until": "+inf"
             }
         ],
+        "label": "Industry",
         "relationships": []
     },
     "founder": {
+        "node_id": "P112",
         "nodes": [
             {
-                "name": "Carl von Thieme",
+                "name": "Wilhelm von Finck",
+                "wikidata_id": "Q2575870",
                 "valid_from": "-inf",
                 "valid_until": "+inf"
             },
             {
-                "name": "Wilhelm von Finck",
+                "name": "Carl von Thieme",
+                "wikidata_id": "Q105389",
                 "valid_from": "-inf",
                 "valid_until": "+inf"
             }
         ],
+        "label": "Person",
         "relationships": [
             {
                 "type": "FOUNDED",
@@ -101,63 +137,70 @@
         ]
     },
     "manager": {
+        "node_id": "P169|P1037",
         "nodes": [
             {
-                "name": "Oliver B\u00e4te",
-                "valid_from": "+2015-05-00T00:00:00Z",
+                "name": "Joachim Wenning",
+                "wikidata_id": "Q23566423",
+                "valid_from": "+2017-00-00T00:00:00Z",
                 "valid_until": "+inf"
             },
             {
-                "name": "Michael Diekmann",
+                "name": "Bernd Pischetsrieder",
+                "wikidata_id": "Q68648",
                 "valid_from": "-inf",
                 "valid_until": "+inf"
             },
             {
-                "name": "Michael Diekmann",
-                "valid_from": "+2003-00-00T00:00:00Z",
-                "valid_until": "+2015-00-00T00:00:00Z"
+                "name": "Nikolaus von Bomhard",
+                "wikidata_id": "Q18084619",
+                "valid_from": "+2004-00-00T00:00:00Z",
+                "valid_until": "+2017-00-00T00:00:00Z"
             },
             {
-                "name": "Henning Schulte-Noelle",
-                "valid_from": "+1991-00-00T00:00:00Z",
-                "valid_until": "+2003-00-00T00:00:00Z"
+                "name": "Hans-J\u00fcrgen Schinzler",
+                "wikidata_id": "Q1306235",
+                "valid_from": "+1993-00-00T00:00:00Z",
+                "valid_until": "+2004-00-00T00:00:00Z"
             },
             {
-                "name": "Wolfgang Schieren",
-                "valid_from": "+1971-00-00T00:00:00Z",
-                "valid_until": "+1991-00-00T00:00:00Z"
+                "name": "Horst K. Jannott",
+                "wikidata_id": "Q18412481",
+                "valid_from": "+1969-00-00T00:00:00Z",
+                "valid_until": "+1993-00-00T00:00:00Z"
             },
             {
-                "name": "Alfred Haase",
-                "valid_from": "+1962-00-00T00:00:00Z",
-                "valid_until": "+1971-00-00T00:00:00Z"
+                "name": "Alois Alzheimer",
+                "wikidata_id": "Q18410156",
+                "valid_from": "+1950-00-00T00:00:00Z",
+                "valid_until": "+1969-00-00T00:00:00Z"
             },
             {
-                "name": "Hans Goudefroy",
-                "valid_from": "+1948-00-00T00:00:00Z",
-                "valid_until": "+1961-00-00T00:00:00Z"
-            },
-            {
-                "name": "Hans He\u00df",
-                "valid_from": "+1933-00-00T00:00:00Z",
-                "valid_until": "+1948-00-00T00:00:00Z"
+                "name": "Eberhard von Reininghaus",
+                "wikidata_id": "Q1279291",
+                "valid_from": "+1945-00-00T00:00:00Z",
+                "valid_until": "+1950-00-00T00:00:00Z"
             },
             {
                 "name": "Kurt Schmitt",
-                "valid_from": "+1921-00-00T00:00:00Z",
-                "valid_until": "+1933-00-00T00:00:00Z"
+                "wikidata_id": "Q62911",
+                "valid_from": "+1938-00-00T00:00:00Z",
+                "valid_until": "+1945-00-00T00:00:00Z"
             },
             {
-                "name": "Paul von der Nahmer",
-                "valid_from": "+1904-00-00T00:00:00Z",
-                "valid_until": "+1921-00-00T00:00:00Z"
+                "name": "Wilhelm Kisskalt",
+                "wikidata_id": "Q15431285",
+                "valid_from": "+1922-00-00T00:00:00Z",
+                "valid_until": "+1938-00-00T00:00:00Z"
             },
             {
                 "name": "Carl von Thieme",
+                "wikidata_id": "Q105389",
                 "valid_from": "-inf",
-                "valid_until": "+1904-00-00T00:00:00Z"
+                "valid_until": "+1922-00-00T00:00:00Z"
             }
         ],
+        "label": "Person",
         "relationships": [
             {
                 "type": "MANAGES",
@@ -166,18 +209,16 @@
         ]
     },
     "board_member": {
+        "node_id": "P3320",
         "nodes": [
             {
-                "name": "Eduard Hilgard",
-                "valid_from": "+1921-01-01T00:00:00Z",
-                "valid_until": "+1944-01-01T00:00:00Z"
-            },
-            {
                 "name": "Kurt Schmitt",
-                "valid_from": "+1921-01-01T00:00:00Z",
-                "valid_until": "+1933-01-01T00:00:00Z"
+                "wikidata_id": "Q62911",
+                "valid_from": "+1938-01-01T00:00:00Z",
+                "valid_until": "+1945-01-01T00:00:00Z"
             }
         ],
+        "label": "Person",
         "relationships": [
             {
                 "type": "PART_OF_BOARD",
@@ -186,98 +227,60 @@
         ]
     },
     "subsidiary": {
+        "node_id": "P355",
         "nodes": [
             {
-                "name": "Dresdner Bank",
-                "valid_from": "+2001-00-00T00:00:00Z",
-                "valid_until": "+inf"
-            },
-            {
-                "name": "Allianz Trade",
+                "name": "American Modern Insurance Group, Inc.",
+                "wikidata_id": "Q4744450",
                 "valid_from": "-inf",
                 "valid_until": "+inf"
             },
             {
-                "name": "Fireman's Fund Insurance Company",
+                "name": "Munich Reinsurance America",
+                "wikidata_id": "Q6936103",
                 "valid_from": "-inf",
                 "valid_until": "+inf"
             },
             {
-                "name": "Allianz Life",
+                "name": "Ergo Group",
+                "wikidata_id": "Q541909",
                 "valid_from": "-inf",
                 "valid_until": "+inf"
             },
             {
-                "name": "PIMCO",
-                "valid_from": "-inf",
-                "valid_until": "+inf"
-            },
-            {
-                "name": "Allianz poji\u0161\u0165ovna",
-                "valid_from": "-inf",
-                "valid_until": "+inf"
-            },
-            {
-                "name": "Allianz Infrastructure Czech Holdco I",
-                "valid_from": "-inf",
-                "valid_until": "+inf"
-            },
-            {
-                "name": "Allianz Infrastructure Czech HoldCo II",
-                "valid_from": "-inf",
-                "valid_until": "+inf"
-            },
-            {
-                "name": "Kraft Versicherungs-AG",
-                "valid_from": "-inf",
-                "valid_until": "+inf"
-            },
-            {
-                "name": "Stuttgarter Verein",
-                "valid_from": "-inf",
-                "valid_until": "+inf"
-            },
-            {
-                "name": "Union Allgemeine Deutsche Hagel-Versicherungsgesellschaft",
-                "valid_from": "-inf",
-                "valid_until": "+inf"
-            },
-            {
-                "name": "Allianz New Europe Holding",
-                "valid_from": "-inf",
-                "valid_until": "+inf"
-            },
-            {
-                "name": "Allianz Holding eins",
-                "valid_from": "-inf",
-                "valid_until": "+inf"
-            },
-            {
-                "name": "Allianz Deutschland",
+                "name": "Gisela, Deutsche Lebens- und Aussteuer-Versicherungs-Aktiengesellschaft",
+                "wikidata_id": "Q107103088",
                 "valid_from": "-inf",
                 "valid_until": "+inf"
             }
         ],
+        "label": "Company",
         "relationships": []
     },
     "headquarter": {
+        "node_id": "P159",
         "nodes": [
             {
                 "name": "Munich",
+                "wikidata_id": "Q1726",
                 "valid_from": "-inf",
                 "valid_until": "+inf"
             }
         ],
+        "label": "City",
         "relationships": []
     },
     "product": {
+        "node_id": "P1056",
         "nodes": [
             {
-                "name": "insurance",
+                "name": "reinsurance",
+                "wikidata_id": "Q476118",
                 "valid_from": "-inf",
                 "valid_until": "+inf"
             }
         ],
+        "label": "Product",
         "relationships": []
     }
 }
