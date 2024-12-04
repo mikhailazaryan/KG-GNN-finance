@@ -4,7 +4,7 @@ from stockdata2KG.wikidata import wikidata_wbsearchentities
 
 
 # copy template to template_with_data.json
-def fill_template(id_of_company, wikidata):
+def fill_templateOld(id_of_company, wikidata):
 
      # copies template.json to template_with_data.json
      with open("files/initial_graph_data/template.json", 'r') as f:
@@ -45,10 +45,52 @@ def fill_template(id_of_company, wikidata):
                             ### result of the 'id' of the dict
                                 new_value = wikidata_wbsearchentities(new_value['id'], 'label'),
                                 template_json[key]["properties"][key2] = new_value[0]
-                        except: pass
+                        except:
+                            print("error filling template with: " + str(id))
+                            pass
 
 
      with open('files/initial_graph_data/template_with_data.json', 'w') as f:
      ### we copy the json back into template_with_data.json
          json.dump(template_json, f, indent=4)
          print("sucessfully wrote names into template_with_data.json")
+
+
+def fill_template(id_of_company, wikidata):
+    # copies template.json to template_with_data.json
+    with open("files/initial_graph_data/templateTest.json", 'r') as f:
+        template = json.load(f)
+
+
+    for key, data in template.items():
+        template[key] = {"nodes" : [], "relationships": data["relationships"]}
+        for sub_key in data["node_id"].split("|"):
+            try:
+                for wikidata_node in wikidata["entities"][id_of_company]["claims"][sub_key]:
+                    print(wikidata_node)
+                    name = wikidata_node["mainsnak"]["datavalue"]["value"]
+                    if isinstance(name, dict):
+                        name = wikidata_wbsearchentities(name["id"], 'label')
+                    try:
+                        valid_from = wikidata_node["qualifiers"]["P580"][0]["datavalue"]["value"]["time"]
+                    except:
+                        valid_from = "-inf"
+                        pass
+                    try:
+                        valid_until = wikidata_node["qualifiers"]["P582"][0]["datavalue"]["value"]["time"]
+                    except:
+                        valid_until = "+inf"
+                        pass
+                    print(name, valid_from, valid_until)
+                    template[key]["nodes"].append({"name" : name, "valid_from" : valid_from, "valid_until": valid_until})
+
+            except KeyError:
+                print("KeyError with key: " + str(key) + "and subkey: " + str(sub_key))
+                pass
+
+
+
+    with open('files/initial_graph_data/template_with_data.json', 'w') as f:
+        ### we copy the json back into template_with_data.json
+        json.dump(template, f, indent=4)
+        print("sucessfully wrote names into template_with_data.json")

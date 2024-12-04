@@ -2,7 +2,7 @@ from neo4j import GraphDatabase
 
 from stockdata2KG.fill_template import fill_template
 from stockdata2KG.graphbuilder import initialize_graph
-from stockdata2KG.llm import test
+from stockdata2KG.llm import process_news_and_update_KG
 from stockdata2KG.wikidata import wikidata_wbsearchentities, wikidata_wbgetentities
 
 
@@ -19,16 +19,16 @@ def main():
 
      driver = GraphDatabase.driver(neo4j_uri, auth=(username, password))
 
-     #json_initial_graph_data_path = "files/initial_graph_data/template_with_data.json"
-     #initialize_graph(json_initial_graph_data_path, driver)
+     json_initial_graph_data_path = "files/initial_graph_data/template_with_data.json"
+     initialize_graph(json_initial_graph_data_path, driver)
 
-     # Example article text
+     # News article text (synthetic example, not crawled)
      article_text = """
          Allianz SE moved their headquarter from Munich to Berlin 
          """
 
      #Process the article and update the graph
-     test(article_text, driver)
+     #process_news_and_update_KG(article_text, driver)
 
 
 if __name__ == "__main__":

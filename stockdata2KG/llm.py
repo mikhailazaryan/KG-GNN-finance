@@ -4,16 +4,18 @@ model = genai.GenerativeModel("gemini-pro")  # Choose the desired model
 genai.configure(api_key="AIzaSyCArmUNcsj4EX-SjeU0XlF0hMY_Oet4CCI")
 
 
-def test(article, driver):
+def process_news_and_update_KG(article, driver):
      #node_name = findKeyword(article, driver)
      #data = query_graph(driver, node_name)
      data = query_graph(driver, "Munich")
-     print("data: " + str(data))
-     suggestion = analyze_with_llm(article, data)
-     print ("suggestion: " + str(suggestion))
-     cyper_code = suggestion_to_cypher(driver, data, suggestion)
-     print("cypher code: " + str(cyper_code))
+     print("Data retrieved from KG: " + str(data))
+     suggestion = compare_and_suggest_with_llm(article, data)
+     print ("Gemini-Pro 1.5: " + str(suggestion))
+     cypher_code = suggestion_to_cypher(driver, data, suggestion)
+
+     print("Cyper code\n: " + str(cypher_code))
      #extractRelevantNodes(driver)
+     update_KG(cypher_code, driver)
 
 
 def findKeyword(article, driver):
@@ -34,6 +36,7 @@ def findKeyword(article, driver):
     {list}
     
     Please only list a single word!"""
+
     print(prompt)
     response = model.generate_content(prompt)
     print("Gemini says: " + response.text)
@@ -59,7 +62,7 @@ def query_graph(driver, node_name):
             })
         return graph_data
 
-def analyze_with_llm(news_article, graph_data):
+def compare_and_suggest_with_llm(news_article, graph_data):
     # Prepare the prompt for the LLM
     prompt = f"""
     Here is the information from a knowledge graph:
@@ -71,12 +74,11 @@ def analyze_with_llm(news_article, graph_data):
     Identify any discrepancies between the knowledge graph and the news article. 
     Suggest the most important update that need to be made to the knowledge graph.
     
-    Please only suggest a single update and start your answer with "Update:", "Add new node:" or "Delete node:"
+    Please only suggest a single update and start your answer with "Update:", "Insert:" or "Delete:"
     """
 
     # Call the LLM API
     response = model.generate_content(prompt)
-
     # Extract LLM response
     return response.text
 
@@ -99,3 +101,8 @@ def suggestion_to_cypher(driver, data, suggestion):
 
     # Extract LLM response
     return response.text
+
+def update_KG(query, driver):
+    with driver.session() as session:
+        session.run(query)
+

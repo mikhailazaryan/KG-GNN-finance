@@ -1,5 +1,6 @@
 {
   "company": {
+    "node_id": "P373|1037",
     "label": "Company",
     "properties": {
       "name": "P373|1037",
@@ -15,18 +16,23 @@
     ]
   },
   "stockmarketindex": {
+    "node_id" : "P361",
     "label": "StockMarketIndex",
     "properties": {
       "name": "P361"
-    }
+    },
+    "relationships": []
   },
   "industry": {
+    "node_id" : "P452",
     "label": "Industry",
     "properties": {
       "name": "P452"
-    }
+    },
+    "relationships": []
   },
   "founder": {
+    "node_id" : "P112",
     "label": "Person",
     "properties": {
       "name": "P112"
@@ -36,6 +42,7 @@
     ]
   },
   "manager": {
+    "node_id" : "P169|P1037",
     "label": "Person",
     "properties": {
       "name": "P169|P1037",
@@ -47,6 +54,7 @@
     ]
   },
   "board_member": {
+    "node_id" : "P3320",
     "label": "Person",
     "properties": {
       "name": "P3320"
@@ -56,21 +64,27 @@
     ]
   },
   "subsidiary": {
+    "node_id" : "P355",
     "label": "Company",
     "properties": {
       "name": "P355"
-    }
+    },
+    "relationships": []
   },
   "headquarter": {
+    "node_id" : "P159",
     "label": "City",
     "properties": {
       "name": "P159"
-    }
+    },
+    "relationships": []
   },
   "product": {
+    "node_id" : "P1056",
     "label": "Product",
     "properties": {
       "name": "P1056"
-    }
+    },
+    "relationships": []
   }
 }
