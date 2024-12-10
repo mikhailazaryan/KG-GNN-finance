@@ -109,7 +109,7 @@ def get_properties_dict(wikidata_id, label):
                     }
     #todo bring name to property dict here
     try:
-        if label in ("Company", "Subsidiary"):
+        if label =="Company":
              properties_dict.update({
                     "name": data["entities"][wikidata_id]["claims"]["P373"][0]["mainsnak"]["datavalue"]["value"],
                     "inception": data["entities"][wikidata_id]["claims"]["P571"][0]["mainsnak"]["datavalue"]["value"]["time"],
@@ -141,7 +141,7 @@ def get_properties_dict(wikidata_id, label):
                 "placeholder": False,
                 "has_relationships": False,
             })
-        elif label in ("Founder", "Manager", "Board_Member"):
+        elif label =="Person":
             properties_dict.update({
                 "name": data["entities"][wikidata_id]["claims"]["P373"][0]["mainsnak"]["datavalue"]["value"],
                 "gender": "",
@@ -208,9 +208,10 @@ def create_relationships_and_placeholder_nodes_for_node(org_wikidata_id, driver)
                 #todo: create new nodes with all property_ids as placeholder nodes (function for that exists) and add the relationship to each node
 
                 # Process each relationship type
-                for rel_label, rel_info in relationship_dict.items():
+                for rel_type, rel_info in relationship_dict.items():
                     rel_wikidata_ids = rel_info["wikidata_ids"]
                     rel_type = rel_info["relationship_type"]
+                    rel_label = rel_info["label"]
                     rel_direction = rel_info["relationship_direction"]
 
                     # Create placeholder nodes and relationships for each property_id
@@ -270,34 +271,59 @@ def get_all_wikidata_ids_as_list(data, wikidata_id, property_id):
 def get_relationship_dict(org_wikidata_id, label):
     data = wikidata_wbgetentities(org_wikidata_id)
     try:
-        if label in ("Company", "Subsidiary"):
+        if label == "Company":
             wikidata_wbgetentities(org_wikidata_id, True)
             relationship_dict = {
                         "StockMarketIndex": {
                             "wikidata_ids": get_all_wikidata_ids_as_list(data, org_wikidata_id, "P361"),
+                            "label": "StockMarketIndex",
                             "relationship_type": "LISTED_IN",
                             "relationship_direction": "OUTBOUND",
                         },
                         "Industry": {
                             "wikidata_ids": get_all_wikidata_ids_as_list(data, org_wikidata_id, "P452"),
+                            "label": "Industry",
                             "relationship_type": "ACTIVE_IN",
                             "relationship_direction": "OUTBOUND"
                         },
                         "Subsidiary": {
                             "wikidata_ids": get_all_wikidata_ids_as_list(data, org_wikidata_id, "P355"),
+                            "label": "Company",
                             "relationship_type": "OWNS",
                             "relationship_direction": "OUTBOUND"
                         },
                         "City": {
                             "wikidata_ids": get_all_wikidata_ids_as_list(data, org_wikidata_id, "P159"),
+                            "label": "City",
                             "relationship_type": "HAS_HEADQUARTER_IN",
                             "relationship_direction": "OUTBOUND"
                         },
                         "Product_or_Service": {
                             "wikidata_ids": get_all_wikidata_ids_as_list(data, org_wikidata_id, "P1056"),
+                            "label": "Product_or_Service",
                             "relationship_type": "OFFERS",
                             "relationship_direction": "OUTBOUND"
-                        }
+                        },
+                        "Founder": { #todo make person
+                            "wikidata_ids": get_all_wikidata_ids_as_list(data, org_wikidata_id, "P112"),
+                            "label": "Person",
+                            "relationship_type": "FOUNDED",
+                            "relationship_direction": "INBOUND"
+                        },
+                        "Manager": { #todo make person
+                            "wikidata_ids": get_all_wikidata_ids_as_list(data, org_wikidata_id, "P169"),
+                            #todo  "P169|P1037" both link to founder or ceo
+                            "label": "Person",
+                            "relationship_type": "MANAGES",
+                            "relationship_direction": "INBOUND"
+                        },
+                        "Board_Member": { #todo make person
+                            "wikidata_ids": get_all_wikidata_ids_as_list(data, org_wikidata_id, "P3320"),
+                            "label": "Person",
+                            "relationship_type": "IS_PART_OF_BOARD",
+                            "relationship_direction": "INBOUND"
+                        },
+
 
             }
             return relationship_dict
@@ -308,6 +334,8 @@ def get_relationship_dict(org_wikidata_id, label):
         elif label == "City":
             relationship_dict = {} #todo
         elif label == "Product_or_Service":
+            relationship_dict = {} #todo
+        elif label == "Person":
             relationship_dict = {} #todo
         else:
             raise Exception(f"Label {label} is not supported")

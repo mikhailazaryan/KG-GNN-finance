@@ -1,38 +1,38 @@
+from typing import Dict, Any
+
 import requests
 import json
+import warnings
+
+from stockdata2KG.files.wikidataCache import wikidata_cache
 
 ## Code partially from https://www.jcchouinard.com/wikidata-api-python/
 
-def wikidata_wbsearchentities(query_string, id_or_label = 'id'):
-    # Name of the File for the initial Websearch entities
-    filename = "files/initial_graph_data/websearchentities.json"
-
-    # What text to search for
-    query = query_string
-
-    # Which parameters to use
+def wikidata_wbsearchentities(query_string: str, id_or_label: str = 'id') -> str:
     params = {
         'action': 'wbsearchentities',
         'format': 'json',
-        'search': query,
+        'search': query_string,
         'language': 'en',
-        'profile' : 'language'
+        'profile': 'language'
     }
-    data = retrieve_from_wikidata(params)
 
-    # Return only the ID of the wikidata entity
-    if id_or_label == 'id':
-        return data['search'][0]['id']
-    if id_or_label == 'name':
-        return data['search'][0]['label']
-    else:
-        return 'Please indicate if you would like to return id or label'
+    # Use cache to get data
+    data = wikidata_cache.get_data('wbsearchentities', query_string, params)
 
-def wikidata_wbgetentities(id, print_output = False):
-    # Name of the File for the initial Websearch entities
-    filename = "files/initial_graph_data/webgetentities.json"
+    try:
+        if id_or_label == 'id':
+            return data['search'][0]['id']
+        if id_or_label == 'name':
+            return data['search'][0]['label']
+        else:
+            return 'Please indicate if you would like to return id or label'
+    except KeyError as e:
+        warnings.warn(
+            f"KeyError: {e} while retrieving data from wikidata for query: {query_string}, id_or_label: {id_or_label}, returning \"No label defined by Wikidata\"")
+        return "No label defined by Wikidata"
 
-    # Which parameters to use
+def wikidata_wbgetentities(id: str, print_output: bool = False) -> Dict[str, Any]:
     params = {
         'action': 'wbgetentities',
         'ids': id,
@@ -40,24 +40,14 @@ def wikidata_wbgetentities(id, print_output = False):
         'languages': 'en',
         'props': 'claims'
     }
-    data = retrieve_from_wikidata(params)
 
-    if print_output:
+    # Use cache to get data
+    data = wikidata_cache.get_data('wbgetentities', id, params)
+
+    if print_output and data:
+        filename = "files/initial_graph_data/webgetentities.json"
         with open(filename, 'w') as f:
             json.dump(data, f, indent=4)
-
         print(f"JSON data written to {filename}")
 
     return data
-
-def retrieve_from_wikidata(params):
-    data = None,
-
-    # Fetch API
-    url = 'https://www.wikidata.org/w/api.php'
-    try:
-        data = requests.get(url, params=params).json()
-    except:
-        print('There was and error')
-    return data
-
