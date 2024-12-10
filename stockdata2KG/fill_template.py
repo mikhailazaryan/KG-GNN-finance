@@ -6,8 +6,8 @@ from stockdata2KG.wikidata import wikidata_wbsearchentities
 # copy template to template_with_data.json
 def fill_templateOld(id_of_company, wikidata):
 
-     # copies template.json to template_with_data.json
-     with open("files/initial_graph_data/template.json", 'r') as f:
+     # copies template_Outdated.json to template_with_data.json
+     with open("files/initial_graph_data/template_Outdated.json", 'r') as f:
          data = json.load(f)
 
      with open("files/initial_graph_data/template_with_data.json", 'w') as f:
@@ -57,8 +57,8 @@ def fill_templateOld(id_of_company, wikidata):
 
 
 def fill_template(id_of_company, wikidata):
-    # copies template.json to template_with_data.json
-    with open("files/initial_graph_data/templateTest.json", 'r') as f:
+    # copies template_Outdated.json to template_with_data.json
+    with open("files/initial_graph_data/template_company.json", 'r') as f:
         template = json.load(f)
 
     for key, data in template.items():

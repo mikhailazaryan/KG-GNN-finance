@@ -3,7 +3,7 @@ import json
 
 ## Code partially from https://www.jcchouinard.com/wikidata-api-python/
 
-def wikidata_wbsearchentities(query_string, id_or_label):
+def wikidata_wbsearchentities(query_string, id_or_label = 'id'):
     # Name of the File for the initial Websearch entities
     filename = "files/initial_graph_data/websearchentities.json"
 
@@ -23,12 +23,12 @@ def wikidata_wbsearchentities(query_string, id_or_label):
     # Return only the ID of the wikidata entity
     if id_or_label == 'id':
         return data['search'][0]['id']
-    if id_or_label == 'label':
+    if id_or_label == 'name':
         return data['search'][0]['label']
     else:
         return 'Please indicate if you would like to return id or label'
 
-def wikidata_wbgetentities(id):
+def wikidata_wbgetentities(id, print_output = False):
     # Name of the File for the initial Websearch entities
     filename = "files/initial_graph_data/webgetentities.json"
 
@@ -42,10 +42,11 @@ def wikidata_wbgetentities(id):
     }
     data = retrieve_from_wikidata(params)
 
-    with open(filename, 'w') as f:
-        json.dump(data, f, indent=4)
+    if print_output:
+        with open(filename, 'w') as f:
+            json.dump(data, f, indent=4)
 
-    print(f"JSON data written to {filename}")
+        print(f"JSON data written to {filename}")
 
     return data
 
