@@ -7,15 +7,15 @@ from typing import Dict
 # party of this code are custom to adapt it to the wikidata api
 
 class WikidataCache:
-    def __init__(self, cache_file='files/cache/wikidata_cache.json'):
+    def __init__(self, cache_file='files/wikidata_cache/wikidata_cache.json'):
         self.cache_file = cache_file
         self._ensure_cache_directory()
         self.cache = self._load_cache()
-        # Initialize cache structure if empty
+        # Initialize wikidata_cache structure if empty
         self._init_cache_structure()
 
     def _init_cache_structure(self):
-        """Ensure cache has the required structure"""
+        """Ensure wikidata_cache has the required structure"""
         if not isinstance(self.cache, dict):
             self.cache = {}
         if 'wbgetentities' not in self.cache:
@@ -47,17 +47,17 @@ class WikidataCache:
         cache_dict = self.cache[action]
 
         if key in cache_dict:
-            print(f"Retrieved from cache: {action} - {key}")
+            if print_update: print(f"Retrieved from wikidata_cache: {action} - {key}")
             return cache_dict[key]
 
         # Make actual request
         result = _make_request(params)
-        print(f"Retrieved data from wikidata {action} - {key}")
+        if print_update: print(f"Retrieved data from wikidata {action} - {key}")
 
-        # Store in cache
+        # Store in wikidata_cache
         cache_dict[key] = result
         self._save_cache()
-        print(f"Cached new result: {action} - {key}")
+        if print_update: print(f"Cached new result: {action} - {key}")
         return result
 
 def _make_request(params: Dict) -> Dict:
@@ -67,7 +67,8 @@ def _make_request(params: Dict) -> Dict:
     except Exception as e:
         raise Exception(f'Error making request: {e}')
 
-# Initialize cache globally
+# Initialize wikidata_cache globally
 wikidata_cache = WikidataCache()
+print_update = False
 
 

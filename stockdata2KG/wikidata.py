@@ -1,10 +1,9 @@
 from typing import Dict, Any
 
-import requests
 import json
 import warnings
 
-from stockdata2KG.files.wikidataCache import wikidata_cache
+from stockdata2KG.files.wikidata_cache.wikidataCache import wikidata_cache
 
 ## Code partially from https://www.jcchouinard.com/wikidata-api-python/
 
@@ -17,7 +16,7 @@ def wikidata_wbsearchentities(query_string: str, id_or_label: str = 'id') -> str
         'profile': 'language'
     }
 
-    # Use cache to get data
+    # Use wikidata_cache to get data
     data = wikidata_cache.get_data('wbsearchentities', query_string, params)
 
     try:
@@ -41,7 +40,7 @@ def wikidata_wbgetentities(id: str, print_output: bool = False) -> Dict[str, Any
         'props': 'claims'
     }
 
-    # Use cache to get data
+    # Use wikidata_cache to get data
     data = wikidata_cache.get_data('wbgetentities', id, params)
 
     if print_output and data:
