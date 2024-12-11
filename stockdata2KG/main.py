@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 
 from neo4j import GraphDatabase
 
-from stockdata2KG.files.wikidata_cache.wikidataCache import WikidataCache, CacheStats
+from stockdata2KG.files.wikidata_cache.wikidataCache import WikidataCache
 from stockdata2KG.graphbuilder import (create_placeholder_node_in_neo4j, populate_placeholder_node_in_neo4j,
                                        create_relationships_and_placeholder_nodes_for_node_in_neo4j, \
                                        return_all_wikidata_ids_of_nodes_without_relationships,
@@ -11,6 +11,8 @@ from stockdata2KG.wikidata import wikidata_wbsearchentities, wikidata_wbgetentit
 
 
 def main():
+     wikidata_wbgetentities("Q116170621", True) #just for inspecting the wggetentities.json
+
      ## Setup connection to Neo4j
      neo4j_uri = "neo4j://localhost:7687"
      username = "neo4j"
@@ -19,11 +21,9 @@ def main():
      driver = GraphDatabase.driver(neo4j_uri, auth=(username, password))
      reset_graph(driver)
 
-     wikidata_wbgetentities("Q116170621", True)
-
      # this builds the initial graph from wikidata
-     company_name = ["Munich RE", "Allianz SE"]
-     date_from = datetime(1998, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+     company_name = ["Munich RE", "Allianz SE", "Commerzbank AG"]
+     date_from = datetime(2004, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
      date_until = datetime(2024, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
      nodes_to_include = ["InitialCompany", "Company", "Industry", "Person", "City", "Country"]
      search_depth = 3
@@ -31,7 +31,7 @@ def main():
      for company_name in company_name:
           build_initial_graph(company_name, date_from, date_until, nodes_to_include, search_depth, driver)
 
-     CacheStats.print_current_stats()
+     WikidataCache.print_current_stats()
 
      # News article text (synthetic example, not crawled)
      article_text = """
@@ -57,7 +57,7 @@ def build_initial_graph(company_name, date_from, date_until, nodes_to_includel, 
           for wikidata_id in return_wikidata_id_of_all_placeholder_nodes(driver):
                populate_placeholder_node_in_neo4j(wikidata_id, driver)
 
-     print(f" ---- sucessfully finised initializing neo4j graph for company {company_name} with a depth of {search_depth} ----")
+     print(f"\n ---- sucessfully finised initializing neo4j graph for company {company_name} with a depth of {search_depth} ----")
 
 def reset_graph(driver):
      ## Setup connection to Neo4j

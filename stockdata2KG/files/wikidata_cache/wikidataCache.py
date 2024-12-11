@@ -112,7 +112,6 @@ class WikidataCache:
             'cache_hit_ratio': cache_hit_ratio
         }
 
-class CacheStats:
     @staticmethod
     def print_current_stats():
         print(f"\n--- Cache Statistics ---")
