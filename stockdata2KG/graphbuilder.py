@@ -1,11 +1,12 @@
 import json
+import warnings
+from datetime import datetime, timezone
+from typing import List, Dict, Union, Any
 
+import pytz
 from numpy.f2py.auxfuncs import throw_error
 
 from stockdata2KG.wikidata import wikidata_wbgetentities, wikidata_wbsearchentities
-
-earliest_date = "-inf"
-latest_date = "+inf"
 
 def create_placeholder_node_in_neo4j(wikidata_id, label, driver):
     # Check if node exists using wikidata_id
@@ -42,6 +43,44 @@ def create_placeholder_node_in_neo4j(wikidata_id, label, driver):
         else:
             print(
                 f"Placeholder node with wikidata_id: {wikidata_id} already exists in neo4j graph and has therefore not been added")
+
+def create_relationship_in_neo4j(rel_direction: str, rel_type: str, org_label: str, rel_label: str, org_wikidata_id: str, rel_wikidata_id: str, rel_wikidata_start_time: str,  rel_wikidata_end_time: str, driver):
+    if rel_direction == "OUTBOUND":
+        source_label = org_label
+        target_label = rel_label
+
+        source_id = org_wikidata_id
+        target_id = rel_wikidata_id
+    elif rel_direction == "INBOUND":
+        source_label = rel_label
+        target_label = org_label
+
+        source_id = rel_wikidata_id
+        target_id = org_wikidata_id
+    else:
+        raise Exception(f"Relation direction {rel_direction} is not supported")
+
+    # Create relationship
+    create_relationship_query = f"""
+                    MATCH (source:{source_label} {{wikidata_id: $source_id}})
+                    MATCH (target:{target_label} {{wikidata_id: $target_id}})
+                        CREATE (source)-[r:{rel_type} {{
+                            start_time: $start_time,
+                            end_time: $end_time
+                            }}]->(target)
+                    RETURN source, target, r
+                    """
+    # Then update your parameters dictionary to include the new properties
+    params = {
+        "source_id": source_id,
+        "target_id": target_id,
+        "start_time": rel_wikidata_start_time,
+        "end_time": rel_wikidata_end_time
+    }
+
+    # Execute the query with parameters
+    with driver.session() as session:
+        session.run(create_relationship_query, params)
 
 
 def return_wikidata_id_of_all_placeholder_nodes(driver):
@@ -109,7 +148,7 @@ def get_properties_dict(wikidata_id, label):
 
     #todo bring name to property dict here
     try:
-        if label =="Company":
+        if label =="Company" or label == "InitialCompany":
              properties_dict ={
                     "name": data["entities"][wikidata_id]["claims"]["P373"][0]["mainsnak"]["datavalue"]["value"],
                     "inception": data["entities"][wikidata_id]["claims"]["P571"][0]["mainsnak"]["datavalue"]["value"]["time"],
@@ -195,7 +234,7 @@ def get_properties_dict(wikidata_id, label):
         return properties_dict
 
 
-def create_relationships_and_placeholder_nodes_for_node_in_neo4j(org_wikidata_id, driver):
+def create_relationships_and_placeholder_nodes_for_node_in_neo4j(org_wikidata_id: str, from_date_of_interest: datetime, until_date_of_interest: datetime, nodes_to_include: list ,driver):
     check_query = f"""
         MATCH (n {{wikidata_id: $wikidata_id}})
         RETURN n, labels(n) as org_labels,
@@ -222,59 +261,26 @@ def create_relationships_and_placeholder_nodes_for_node_in_neo4j(org_wikidata_id
                     rel_label = rel_info["label"]
                     rel_direction = rel_info["relationship_direction"]
 
-                    # Create placeholder nodes and relationships for each property_id
-                    for rel_wikidata_entry in rel_wikidata_entries:
-                        rel_wikidata_id = rel_wikidata_entry["id"] #extract only id here
-                        rel_wikidata_start_time = rel_wikidata_entry["start_time"]
-                        rel_wikidata_end_time = rel_wikidata_entry["end_time"]
-                        create_placeholder_node_in_neo4j(rel_wikidata_id, rel_label, driver)
+                    if rel_label in nodes_to_include:
 
-                        if rel_direction == "OUTBOUND":
-                            source_label = org_label
-                            target_label = rel_label
-
-                            source_id = org_wikidata_id
-                            target_id = rel_wikidata_id
-                        elif rel_direction == "INBOUND":
-                            source_label = rel_label
-                            target_label = org_label
-
-                            source_id = rel_wikidata_id
-                            target_id = org_wikidata_id
-                        else:
-                            raise Exception(f"Relation direction {rel_direction} is not supported")
-
-                        # Create relationship
-                        create_relationship_query = f"""
-                                        MATCH (source:{source_label} {{wikidata_id: $source_id}})
-                                        MATCH (target:{target_label} {{wikidata_id: $target_id}})
-                                            CREATE (source)-[r:{rel_type} {{
-                                                start_time: $start_time,
-                                                end_time: $end_time
-                                                }}]->(target)
-                                        RETURN source, target, r
-                                        """
-                        # Then update your parameters dictionary to include the new properties
-                        params = {
-                            "source_id": source_id,
-                            "target_id": target_id,
-                            "start_time": rel_wikidata_start_time,
-                            "end_time": rel_wikidata_end_time
-                        }
-
-                        # Execute the query with parameters
-                        session.run(create_relationship_query, params)
+                        # Create placeholder nodes and relationships for each property_id
+                        for rel_wikidata_entry in rel_wikidata_entries:
+                            rel_wikidata_id = rel_wikidata_entry["id"] #extract only id here
+                            rel_wikidata_start_time = rel_wikidata_entry["start_time"]
+                            rel_wikidata_end_time = rel_wikidata_entry["end_time"]
+                            try:
+                                if is_date_in_range(rel_wikidata_start_time, rel_wikidata_end_time, from_date_of_interest, until_date_of_interest):
+                                    create_placeholder_node_in_neo4j(rel_wikidata_id, rel_label, driver)
+                                    create_relationship_in_neo4j(rel_direction, rel_type, org_label, rel_label, org_wikidata_id, rel_wikidata_id, rel_wikidata_start_time, rel_wikidata_end_time, driver)
+                            except ValueError as e:
+                                raise ValueError(f"{e}")
 
                 # After creating relationships, update the original node's has_relationships property
-                #after relationships are added, also change the has_relationship property
                 update_query = """
                                 MATCH (n {wikidata_id: $org_wikidata_id})
                                 SET n.has_relationships = true
                               """
                 session.run(update_query, org_wikidata_id=org_wikidata_id)
-
-                        # creates double relationships when entry is duplicated (e.g. happens when company is added
-                        # and removed to indices multiple times
 
             else:
                 print(f"Creating Relationships and placeholder node for wikidata_id: {org_wikidata_id} failed because isPlaceholder == True")
@@ -282,7 +288,7 @@ def create_relationships_and_placeholder_nodes_for_node_in_neo4j(org_wikidata_id
 def get_relationship_dict(org_wikidata_id, label):
     data = wikidata_wbgetentities(org_wikidata_id)
     try:
-        if label == "Company":
+        if label == "Company" or label == "InitialCompany":
             #wikidata_wbgetentities(org_wikidata_id, True)
             relationship_dict = {
                         "StockMarketIndex": {
@@ -361,28 +367,62 @@ def get_relationship_dict(org_wikidata_id, label):
         raise KeyError(f"KeyError Could not access key {e}")
 
 
-
-def get_all_wikidata_entries_as_list_of_dict(data, wikidata_id, property_ids):
+def get_all_wikidata_entries_as_list_of_dict(data: dict, wikidata_id: str, property_ids: str) -> list[dict[str, datetime, datetime]]:
     result = []
     for property_id in property_ids.split("|"):
-        print("property_ids: " + property_ids + ", property_id: " + property_id)
         try:
-            for entry in data["entities"][wikidata_id]["claims"][property_id]:
+            for i, entry in enumerate(data["entities"][wikidata_id]["claims"][property_id]):
                 try:
                     start_time = entry["qualifiers"]["P580"][0]["datavalue"]["value"]["time"] #start time
-                except:
-                    start_time = earliest_date
+                    try:
+                        start_time = parse_datetime_to_iso(start_time)
+                    except:
+                        warnings.warn(f"start_time unable to parse start_time: ({start_time}), so defaulting to datetime.min. Exception: {e}")
+                except Exception as e:
+                    print(f"Wikidata has no start_time for wikidata_id: {wikidata_id}, property_id: {property_id} and at list[{i}], so defaulting to datetime.min")
+                    start_time = datetime.min.replace(tzinfo=timezone.utc)
                 try:
                     end_time = entry["qualifiers"]["P582"][0]["datavalue"]["value"]["time"]
+                    try:
+                        end_time = parse_datetime_to_iso(end_time)
+                    except Exception as e:
+                        warnings.warn(f"start_time unable to parse end_time: ({end_time}), so defaulting to datetime.min. Exception: {e}")
                 except:
-                    end_time = latest_date
+                    print(f"Wikidata has no end_time for wikidata_id: {wikidata_id}, property_id: {property_id} and at list[{i}], so defaulting to datetime.max")
+                    end_time = datetime.max.replace(tzinfo=timezone.utc)
+                if start_time == None or end_time == None:
+                    raise Exception(f"Wikidata has no start_time {start_time} or end_time {end_time} for wikidata_id: {wikidata_id}, property_id: {property_id}, list[{i}]")
                 result.append({"id" :entry["mainsnak"]["datavalue"]["value"]["id"], "start_time" : start_time, "end_time": end_time})
         except KeyError as e:
             print(f"Key Error {e} for wikidata_id {wikidata_id}, skipping this key")
     return result
 
 
+from datetime import datetime, timezone
 
+
+def parse_datetime_to_iso(date_string: str) -> datetime:
+    try:
+        if date_string.startswith('+'):
+            dt = datetime.strptime(date_string.lstrip('+').rstrip('Z'),"%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc)
+        else:
+            dt = datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S%z").replace(tzinfo=timezone.utc)
+        return dt
+    except ValueError as e:
+        try:
+            if "-00" in date_string:
+                fixed_date = date_string.replace("-00", "-01")
+                print(f"date_string: {date_string} contained invalid month or day information, changed to: {fixed_date}")
+                return parse_datetime_to_iso(fixed_date)
+        except:
+            raise ValueError(f"coult not parse date string {date_string} to datetime format. ValueError: {e}")
+
+
+def is_date_in_range(rel_wikidata_start_time: datetime, rel_wikidata_end_time: datetime, from_date_of_interest: datetime, until_date_of_interest: datetime) -> bool:
+        if rel_wikidata_end_time < from_date_of_interest or rel_wikidata_start_time > until_date_of_interest:
+            return False
+        else:
+            return True
 
 
 
