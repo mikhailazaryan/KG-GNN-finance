@@ -85,40 +85,32 @@ class WikidataCache:
         if key in cache_dict:
             if print_update:
                 print(f"Retrieved from wikidata_cache: {action} - {key}")
-                WikidataCache.cache_hits += 1
+            WikidataCache.cache_hits += 1
             return cache_dict[key]
 
         # Make actual request
         result = _make_request(params)
         if print_update:
             print(f"Retrieved data from wikidata {action} - {key}")
-            WikidataCache.internet_retrievals += 1
+        WikidataCache.internet_retrievals += 1
 
         # Store in wikidata_cache
         cache_dict[key] = result
         self._save_cache()
-        if print_update: print(f"Cached new result: {action} - {key}")
+        if print_update:
+            print(f"Cached new result: {action} - {key}")
         return result
-
-    def get_stats(self):
-        """Return current cache statistics"""
-        total_requests = self.cache_hits + self.internet_retrievals
-        cache_hit_ratio = self.cache_hits / total_requests if total_requests > 0 else 0
-
-        return {
-            'cache_hits': self.cache_hits,
-            'internet_retrievals': self.internet_retrievals,
-            'total_requests': total_requests,
-            'cache_hit_ratio': cache_hit_ratio
-        }
 
     @staticmethod
     def print_current_stats():
         print(f"\n--- Cache Statistics ---")
         print(f"Cache Hits: {WikidataCache.cache_hits}")
         print(f"Internet Retrievals: {WikidataCache.internet_retrievals}")
-        percentage = (WikidataCache.cache_hits / (WikidataCache.cache_hits + WikidataCache.internet_retrievals) * 100).__round__(3)
-        print(f"Which makes {percentage}% cache_hits")
+        total_requests = WikidataCache.cache_hits + WikidataCache.internet_retrievals
+        print(f"Total requests: {total_requests}")
+        if WikidataCache.cache_hits > 0 or WikidataCache.internet_retrievals > 0:
+            cache_hit_ratio = (WikidataCache.cache_hits / (WikidataCache.cache_hits + WikidataCache.internet_retrievals) * 100).__round__(3)
+            print(f"Which is a cache hit ratio of {cache_hit_ratio}%")
 
 def _make_request(params: Dict) -> Dict:
     url = 'https://www.wikidata.org/w/api.php'
@@ -129,6 +121,6 @@ def _make_request(params: Dict) -> Dict:
 
 # Initialize wikidata_cache globally
 wikidata_cache = WikidataCache()
-print_update = True
+print_update = False
 
 
