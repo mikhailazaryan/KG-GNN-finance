@@ -1,4 +1,6 @@
 from typing import Dict, Any
+from colorama import init, Fore, Back, Style
+
 
 import json
 import warnings
@@ -27,8 +29,7 @@ def wikidata_wbsearchentities(query_string: str, id_or_label: str = 'id') -> str
         else:
             return 'Please indicate if you would like to return id or label'
     except KeyError as e:
-        warnings.warn(
-            f"KeyError: {e} while retrieving data from wikidata for query: {query_string}, id_or_label: {id_or_label}, returning \"No label defined by Wikidata\"")
+        print(Fore.LIGHTYELLOW_EX + f"KeyError: {e} while retrieving data from wikidata for query: {query_string}, id_or_label: {id_or_label}, returning \"No label defined by Wikidata\"" + Style.RESET_ALL)
         return "No label defined by Wikidata"
 
 def wikidata_wbgetentities(id: str, print_output: bool = False) -> Dict[str, Any]:

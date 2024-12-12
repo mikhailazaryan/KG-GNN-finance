@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
-
 from neo4j import GraphDatabase
+from colorama import init, Fore, Back, Style
+
 
 from stockdata2KG.files.wikidata_cache.wikidataCache import WikidataCache
 from stockdata2KG.graphbuilder import (create_placeholder_node_in_neo4j, populate_placeholder_node_in_neo4j,
@@ -14,6 +15,8 @@ import google.generativeai as genai
 
 
 def main():
+     init() # for colorama
+
      wikidata_wbgetentities("Q116170621", True) #just for inspecting the wggetentities.json
 
      ## Setup connection to Neo4j
@@ -25,14 +28,20 @@ def main():
      reset_graph(driver)
 
      # this builds the initial graph from wikidata
-     company_name = ["Allianz SE", "Commerzbank AG", "BASF SE"]
+     company_names = ["Allianz SE", "Commerzbank AG", "BASF SE"]
      date_from = datetime(1995, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
      date_until = datetime(2024, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
      nodes_to_include = ["InitialCompany", "Company", "Industry", "Person", "City", "Country", "StockMarketIndex"]
      search_depth = 5
 
-     for company_name in company_name:
+     for company_name in company_names:
+          print(Fore.GREEN + f"\n---Started building graph for {company_name}---\n" + Style.RESET_ALL)
           build_initial_graph(company_name, date_from, date_until, nodes_to_include, search_depth, driver)
+          print(Fore.GREEN + f"\n--- Finished building graph for {company_name}---\n" + Style.RESET_ALL)
+
+     print(f"\n--- Successfully finished building neo4j graph for company {company_names} with a depth of {search_depth} ---\n")
+
+
 
      WikidataCache.print_current_stats()
 
@@ -61,6 +70,7 @@ def build_initial_graph(company_name, date_from, date_until, nodes_to_includel, 
 
      # iteratively adding nodes and relationships
      for i in range(search_depth):
+          print(Fore.BLUE + f"\n---Started building graph for {company_name} on depth {i}---\n"+ Style.RESET_ALL)
           for wikidata_id in return_all_wikidata_ids_of_nodes_without_relationships(driver):
                create_relationships_and_placeholder_nodes_for_node_in_neo4j(org_wikidata_id=wikidata_id,
                                                                             from_date_of_interest= date_from,
@@ -70,8 +80,7 @@ def build_initial_graph(company_name, date_from, date_until, nodes_to_includel, 
 
           for wikidata_id in return_wikidata_id_of_all_placeholder_nodes(driver):
                populate_placeholder_node_in_neo4j(wikidata_id, driver)
-
-     print(f"\n--- Successfully finished initializing neo4j graph for company {company_name} with a depth of {search_depth} ---")
+          print(Fore.BLUE + f"\n---Finished building graph for {company_name} on depth {i}---\n" + Style.RESET_ALL)
 
 def reset_graph(driver):
      ## Setup connection to Neo4j

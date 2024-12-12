@@ -2,6 +2,7 @@ import json
 import warnings
 from datetime import datetime, timezone
 from typing import List, Dict, Union, Any
+from colorama import init, Fore, Back, Style
 
 import pytz
 from numpy.f2py.auxfuncs import throw_error
@@ -36,13 +37,12 @@ def create_placeholder_node_in_neo4j(wikidata_id, label, driver):
             result = session.run(create_query, properties=properties_dict).single()
 
             if result and result.get("n"):
-                print(f"Placeholder Node with wikidata_id: {wikidata_id} has been added to neo4j graph")
+                print(Fore.GREEN + f"Placeholder Node with wikidata_id: {wikidata_id} has been added to neo4j graph" + Style.RESET_ALL)
                 return result
             else:
-                print(f"Error while adding placeholder node with wikidata_id: {wikidata_id} to neo4j graph")
+                raise Exception(f"Error while adding placeholder node with wikidata_id: {wikidata_id} to neo4j graph")
         else:
-            print(
-                f"Placeholder node with wikidata_id: {wikidata_id} already exists in neo4j graph and has therefore not been added")
+            print(Fore.GREEN + f"Placeholder node with wikidata_id: {wikidata_id} already exists in neo4j graph and has therefore not been added" + Style.RESET_ALL)
 
 def create_relationship_in_neo4j(rel_direction: str, rel_type: str, org_label: str, rel_label: str, org_wikidata_id: str, rel_wikidata_id: str, rel_wikidata_start_time: str,  rel_wikidata_end_time: str, driver):
     if rel_direction == "OUTBOUND":
@@ -136,11 +136,11 @@ def populate_placeholder_node_in_neo4j(wikidata_id, driver):
                                 """
                 result = session.run(update_query, wikidata_id=wikidata_id, properties=properties_dict).single()
                 if result and result.get("n"):
-                    print(f"Placeholder Node with wikidata_id: {wikidata_id} has been populated with data in neo4j graph")
+                    print(Fore.GREEN + f"Placeholder Node with wikidata_id: {wikidata_id} has been populated with data in neo4j graph" + Style.RESET_ALL)
                 else:
-                    print(f"Error while populating placeholder node with wikidata_id: {wikidata_id} to neo4j graph")
+                    raise Exception(f"Error while populating placeholder node with wikidata_id: {wikidata_id} to neo4j graph")
             else:
-                print(f"Populating placeholder node with wikidata_id: {wikidata_id} failed because isPlaceholder == False")
+                print(Fore.RED + f"Populating placeholder node with wikidata_id: {wikidata_id} failed because isPlaceholder == False" + Style.RESET_ALL)
 
 def get_properties_dict(wikidata_id, label):
     data = wikidata_wbgetentities(wikidata_id)
@@ -229,7 +229,7 @@ def get_properties_dict(wikidata_id, label):
             "has_relationships": False,
         }
         name = properties_dict["name"]
-        print(f"KeyError: {e} for wikidata_id {wikidata_id}, so defaulting to only name = {name} and wikidata_id property_dict")
+        print(Fore.LIGHTYELLOW_EX + f"KeyError: {e} for wikidata_id {wikidata_id}, so defaulting to only name = {name} and wikidata_id property_dict" + Style.RESET_ALL)
 
         return properties_dict
 
@@ -283,7 +283,7 @@ def create_relationships_and_placeholder_nodes_for_node_in_neo4j(org_wikidata_id
                 session.run(update_query, org_wikidata_id=org_wikidata_id)
 
             else:
-                print(f"Creating Relationships and placeholder node for wikidata_id: {org_wikidata_id} failed because isPlaceholder == True")
+                print(Fore.RED + f"Creating Relationships and placeholder node for wikidata_id: {org_wikidata_id} failed because isPlaceholder == True" + Style.RESET_ALL)
 
 def get_relationship_dict(org_wikidata_id, label):
     data = wikidata_wbgetentities(org_wikidata_id)
@@ -379,7 +379,7 @@ def get_all_wikidata_entries_as_list_of_dict(data: dict, wikidata_id: str, prope
                     except:
                         warnings.warn(f"start_time unable to parse start_time: ({start_time}), so defaulting to datetime.min. Exception: {e}")
                 except Exception as e:
-                    print(f"Wikidata has no start_time for wikidata_id: {wikidata_id}, property_id: {property_id} and at list[{i}], so defaulting to datetime.min")
+                    print(Fore.LIGHTYELLOW_EX + f"Wikidata has no start_time for wikidata_id: {wikidata_id}, property_id: {property_id} and at list[{i}], so defaulting to datetime.min" + Style.RESET_ALL)
                     start_time = datetime.min.replace(tzinfo=timezone.utc)
                 try:
                     end_time = entry["qualifiers"]["P582"][0]["datavalue"]["value"]["time"]
@@ -388,13 +388,13 @@ def get_all_wikidata_entries_as_list_of_dict(data: dict, wikidata_id: str, prope
                     except Exception as e:
                         warnings.warn(f"start_time unable to parse end_time: ({end_time}), so defaulting to datetime.min. Exception: {e}")
                 except:
-                    print(f"Wikidata has no end_time for wikidata_id: {wikidata_id}, property_id: {property_id} and at list[{i}], so defaulting to datetime.max")
+                    print(Fore.LIGHTYELLOW_EX + f"Wikidata has no end_time for wikidata_id: {wikidata_id}, property_id: {property_id} and at list[{i}], so defaulting to datetime.max" + Style.RESET_ALL)
                     end_time = datetime.max.replace(tzinfo=timezone.utc)
                 if start_time == None or end_time == None:
                     raise Exception(f"Wikidata has no start_time {start_time} or end_time {end_time} for wikidata_id: {wikidata_id}, property_id: {property_id}, list[{i}]")
                 result.append({"id" :entry["mainsnak"]["datavalue"]["value"]["id"], "start_time" : start_time, "end_time": end_time})
         except KeyError as e:
-            print(f"Key Error {e} for wikidata_id {wikidata_id}, skipping this key")
+            print(Fore.LIGHTYELLOW_EX + f"Key Error {e} for wikidata_id {wikidata_id}, skipping this key" + Style.RESET_ALL)
     return result
 
 
@@ -405,6 +405,8 @@ def parse_datetime_to_iso(date_string: str) -> datetime:
     try:
         if date_string.startswith('+'):
             dt = datetime.strptime(date_string.lstrip('+').rstrip('Z'),"%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc)
+        elif date_string.startswith('-'):
+            dt = datetime.min.replace(tzinfo=timezone.utc) # in case there are datetimes from before Christ
         else:
             dt = datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S%z").replace(tzinfo=timezone.utc)
         return dt
@@ -412,10 +414,10 @@ def parse_datetime_to_iso(date_string: str) -> datetime:
         try:
             if "-00" in date_string:
                 fixed_date = date_string.replace("-00", "-01")
-                print(f"date_string: {date_string} contained invalid month or day information, changed to: {fixed_date}")
+                print(Fore.LIGHTYELLOW_EX + f"date_string: {date_string} contained invalid month or day information, changed to: {fixed_date}" + Style.RESET_ALL)
                 return parse_datetime_to_iso(fixed_date)
         except:
-            raise ValueError(f"coult not parse date string {date_string} to datetime format. ValueError: {e}")
+            raise ValueError(f"Could not parse date string {date_string} to datetime format. ValueError: {e}")
 
 
 def is_date_in_range(rel_wikidata_start_time: datetime, rel_wikidata_end_time: datetime, from_date_of_interest: datetime, until_date_of_interest: datetime) -> bool:
