@@ -265,7 +265,7 @@ def create_relationships_and_placeholder_nodes_for_node_in_neo4j(org_wikidata_id
 
                         # Create placeholder nodes and relationships for each property_id
                         for rel_wikidata_entry in rel_wikidata_entries:
-                            rel_wikidata_id = rel_wikidata_entry["id"] #extract only id here
+                            rel_wikidata_id = rel_wikidata_entry["id"]
                             rel_wikidata_start_time = rel_wikidata_entry["start_time"]
                             rel_wikidata_end_time = rel_wikidata_entry["end_time"]
                             try:
@@ -423,6 +423,86 @@ def is_date_in_range(rel_wikidata_start_time: datetime, rel_wikidata_end_time: d
             return False
         else:
             return True
+
+
+def create_demo_graph(driver):
+    company_query = """
+       CREATE (c:Company {
+           name: $company_name,
+           wikidata_id: $wikidata_id,
+           inception: datetime($inception),
+           isin: $isin,
+           total_assets: $total_assets,
+           operating_income: $operating_income,
+           assets_under_management: $assets_under_management,
+           legal_form: $legal_form,
+           market_cap: $market_cap,
+           total_equity: $total_equity,
+           total_revenue: $total_revenue,
+           employee_number: $employee_number,
+           net_profit: $net_profit,
+           has_relationships: $has_relationships,
+           placeholder: $placeholder
+       })
+       """
+
+    company_params = {
+        "company_name": "Allianz SE",
+        "wikidata_id": "Q487292",
+        "inception": "1890-02-05T00:00:00Z",
+        "isin": "DE0008404005",
+        "total_assets": "",
+        "operating_income": "",
+        "assets_under_management": "",
+        "legal_form": "",
+        "market_cap": "",
+        "total_equity": "",
+        "total_revenue": "",
+        "employee_number": "",
+        "net_profit": "",
+        "has_relationships": True,
+        "placeholder": False
+    }
+
+    # Create city node
+    city_query = """
+       CREATE (city:City {
+           name: $city_name,
+           wikidata_id: $wikidata_id,
+           has_relationships: $has_relationships,
+           placeholder: $placeholder
+       })
+       """
+
+    city_params = {
+        "city_name": "Munich",
+        "wikidata_id": "Q1726",
+        "has_relationships": False,
+        "placeholder": False
+    }
+
+    # Create relationship
+    relationship_query = """
+       MATCH (n:Company {name: $company_name})
+       MATCH (c:City {name: $city_name})
+       CREATE (n)-[r:HAS_HEADQUARTER_IN {
+           start_time: datetime($start_time),
+           end_time: datetime($end_time)
+       }]->(c)
+       """
+
+    relationship_params = {
+        "company_name": "Allianz SE",
+        "city_name": "Munich",
+        "start_time": "0001-01-01T00:00:00Z",
+        "end_time": "9999-12-31T23:59:59.999999000Z"
+    }
+
+    # Execute queries
+    with driver.session() as session:
+        session.run(company_query, **company_params)
+        session.run(city_query, **city_params)
+        session.run(relationship_query, **relationship_params)
 
 
 
