@@ -28,7 +28,7 @@ def main():
      reset_graph(driver)
 
      # this builds the initial graph from wikidata
-     company_names = ["Allianz SE", "Commerzbank AG", "BASF SE"]
+     company_names = ["Allianz SE", "Commerzbank AG", "BASF SE", "Microsoft"]
      date_from = datetime(1995, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
      date_until = datetime(2024, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
      nodes_to_include = ["InitialCompany", "Company", "Industry", "Person", "City", "Country", "StockMarketIndex"]
@@ -54,6 +54,13 @@ def main():
      article_text = """
          Allianz SE moved their headquarter from Munich to Berlin 
          """
+
+     #todo: (1) Mehr syntetische und echte News nachrichten, ggf. mit preprocessing/cleaning (which are allowed to be crawled)
+     #todo (2) News Keyword extraction and graph retrieval and updatating
+     #todo:         - veränderliche schwierigkeiten
+     #todo:         -
+     #todo (3) More detailed Nodes Information from Wikidata
+
 
 
 
