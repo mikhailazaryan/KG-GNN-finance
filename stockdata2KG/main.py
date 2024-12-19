@@ -12,6 +12,124 @@ from stockdata2KG.wikidata import wikidata_wbsearchentities, wikidata_wbgetentit
 
 import google.generativeai as genai
 
+model = genai.GenerativeModel("gemini-pro")
+
+genai.configure(api_key="AIzaSyDelNHiE50S_HsupCznAy9Zrphz_6d9dTY")
+
+
+
+
+def compare_and_suggest_with_llm(news_article, graph_data):
+     # Prepare the prompt for the LLM
+     prompt = f"""
+    Here is the information from a knowledge graph:
+    {graph_data}
+
+    And here is a news article:
+    {news_article}
+
+    Identify any discrepancies between the knowledge graph and the news article. 
+    Suggest the most important update that need to be made to the knowledge graph.
+
+    Please only suggest a single update and start your answer with "Update:", "Insert:" or "Delete:"
+    """
+
+     # Call the LLM API
+     response = model.generate_content(prompt)
+     # Extract LLM response
+     return response.text
+
+
+def update_KG(query, driver):
+     with driver.session() as session:
+          session.run(query)
+def process_news_and_update_KG(article, driver):
+     # node_name = findKeyword(article, driver)
+     # data = query_graph(driver, node_name)
+     data = query_graph(driver, "Munich")
+     print("Data retrieved from KG: " + str(data))
+     suggestion = compare_and_suggest_with_llm(article, data)
+     print("Gemini-Pro 1.5: " + str(suggestion))
+     cypher_code = suggestion_to_cypher(driver, data, suggestion)
+     cypher_code1 = '\n'.join(cypher_code.split('\n')[1:]) # remove first and last lines: "```cypher" and "```"
+     cypher_code2 = '\n'.join(cypher_code1.split('\n')[:-1]) #
+     print("Cypher code:\n " + str(cypher_code2))
+     # extractRelevantNodes(driver)
+     update_KG(cypher_code2, driver)
+
+
+
+
+def findKeyword(article, driver):
+     with driver.session() as session:
+          query = """MATCH (n) RETURN n"""
+          result = session.run(query)
+          list = []
+          for record in result:
+               list.append(dict(record["n"])["name"])
+
+     prompt = f"""
+    Read this newspaper article:
+
+    {article}
+
+    Which single keyword of the following keywords ist most relevant in the article?: 
+
+    {list}
+
+    Please only list a single word!"""
+
+     print(prompt)
+     response = model.generate_content(prompt)
+     print("Gemini says: " + response.text)
+     response = response.text.split(" ")
+     if response in list:
+          print("Gemini Keyword is: " + response)
+          return response
+
+
+def query_graph(driver, node_name):
+     with driver.session() as session:
+          query = """
+        MATCH (n {name: $node_name})-[r]-(m)
+        RETURN n, type(r) AS relationship_type, m
+        """
+          result = session.run(query, {"node_name": node_name})
+          graph_data = []
+          for record in result:
+               graph_data.append({
+                    "node": dict(record["n"]),
+                    "relationship_type": record["relationship_type"],
+                    # "relationship_properties": record["relationship_properties"],
+                    "connected_node": dict(record["m"])
+               })
+          return graph_data
+
+
+
+
+
+def suggestion_to_cypher(driver, data, suggestion):
+     # Prepare the prompt for the LLM
+     prompt = f"""
+      given this neo4j knowledge graph entry: 
+
+      {data}
+
+      and this update request:
+
+      {suggestion}
+
+      Please write a single cypher query to make this update.
+      """
+
+     # Call the LLM API
+     response = model.generate_content(prompt)
+
+     # Extract LLM response
+     return response.text
+
+
 
 
 def main():
@@ -22,13 +140,13 @@ def main():
      ## Setup connection to Neo4j
      neo4j_uri = "neo4j://localhost:7687"
      username = "neo4j"
-     password = "neo4jtest"
+     password = "neo4j"
 
      driver = GraphDatabase.driver(neo4j_uri, auth=(username, password))
      reset_graph(driver)
 
      # this builds the initial graph from wikidata
-     company_names = ["Allianz SE", "Commerzbank AG", "BASF SE", "Microsoft"]
+     company_names = ["Allianz SE", "Microsoft", "BlaBlaCar"]
      date_from = datetime(1995, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
      date_until = datetime(2024, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
      nodes_to_include = ["InitialCompany", "Company", "Industry", "Person", "City", "Country", "StockMarketIndex"]
@@ -55,9 +173,12 @@ def main():
          Allianz SE moved their headquarter from Munich to Berlin 
          """
 
-     #todo: (1) Mehr syntetische und echte News nachrichten, ggf. mit preprocessing/cleaning (which are allowed to be crawled)
-     #todo (2) News Keyword extraction and graph retrieval and updatating
-     #todo:         - veränderliche schwierigkeiten
+     news1 = ["Allianz SE moved their headquarter from Munich to Berlin","Allianz SE bought SportGear AG","Allianz SE","Allianz SE is no longer active in insurance","Allianz SE sold PIMCO", "Allianz SE is not listed in EURO STOXX 50 anymore"]
+     news2 = ["Allianz SE bought SportGear AG headquartered in Cologne", "Allianz SE moved their headquarter from Munich to Berlin", "Allianz SE moved their headquarter from Berlin to Frankfurt", "Allianz SE is no longer active in insurance, woodworking is a new business field of Allianz SE", "Allianz SE was renamed to Algorithm GmbH"]
+
+     #todiscuss: #todo: (1) Mehr syntetische und echte News nachrichten, ggf. mit preprocessing/cleaning (which are allowed to be crawled)
+     #todiscuss: #todo (2) News Keyword extraction and graph retrieval and updating
+     #DONE #todo:         - veränderliche schwierigkeiten
      #todo:         -
      #todo (3) More detailed Nodes Information from Wikidata
 
@@ -65,7 +186,7 @@ def main():
 
 
      #Process the article and update the graph
-     #process_news_and_update_KG(article_text, driver)
+     process_news_and_update_KG(article_text, driver)
 
 
 def build_initial_graph(company_name, date_from, date_until, nodes_to_includel, search_depth, driver):
