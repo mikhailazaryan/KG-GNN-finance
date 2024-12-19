@@ -18,7 +18,6 @@ genai.configure(api_key="AIzaSyDelNHiE50S_HsupCznAy9Zrphz_6d9dTY")
 
 
 
-
 def compare_and_suggest_with_llm(news_article, graph_data):
      # Prepare the prompt for the LLM
      prompt = f"""
