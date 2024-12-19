@@ -149,7 +149,7 @@ def main():
      date_from = datetime(1995, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
      date_until = datetime(2024, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
      nodes_to_include = ["InitialCompany", "Company", "Industry", "Person", "City", "Country", "StockMarketIndex"]
-     search_depth = 5
+     search_depth = 2
 
      for company_name in company_names:
           print(Fore.GREEN + f"\n---Started building graph for {company_name}---\n" + Style.RESET_ALL)
@@ -180,8 +180,6 @@ def main():
      #DONE #todo:         - veränderliche schwierigkeiten
      #todo:         -
      #todo (3) More detailed Nodes Information from Wikidata
-
-
 
 
      #Process the article and update the graph
