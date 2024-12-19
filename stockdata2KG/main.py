@@ -134,7 +134,7 @@ def suggestion_to_cypher(driver, data, suggestion):
 def main():
      init() # for colorama
 
-     wikidata_wbgetentities("Q116170621", True) #just for inspecting the wggetentities.json
+     wikidata_wbgetentities("Q116170621", True) # just for inspecting the wggetentities.json
 
      ## Setup connection to Neo4j
      neo4j_uri = "neo4j://localhost:7687"
@@ -145,7 +145,7 @@ def main():
      reset_graph(driver)
 
      # this builds the initial graph from wikidata
-     company_names = ["Allianz SE", "Microsoft", "BlaBlaCar"]
+     company_names = ["Allianz SE"]
      date_from = datetime(1995, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
      date_until = datetime(2024, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
      nodes_to_include = ["InitialCompany", "Company", "Industry", "Person", "City", "Country", "StockMarketIndex"]
