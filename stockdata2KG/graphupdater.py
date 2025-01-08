@@ -1,7 +1,12 @@
+import configparser
 import google.generativeai as genai
 
+
 model = genai.GenerativeModel("gemini-1.5-pro-latest")  # Choose the desired model
-genai.configure(api_key="AIzaSyCArmUNcsj4EX-SjeU0XlF0hMY_Oet4CCI")
+
+config = configparser.ConfigParser()
+config.read('config.ini')
+genai.configure(api_key=config['gemini']['api_key'])
 
 def findKeyword(article, driver):
     with driver.session() as session:

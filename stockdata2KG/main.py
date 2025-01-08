@@ -1,3 +1,4 @@
+import configparser
 from datetime import datetime, timezone
 from neo4j import GraphDatabase
 from colorama import init, Fore, Style
@@ -14,9 +15,11 @@ def main():
      #wikidata_wbgetentities("Q116170621", True) # just for inspecting the wggetentities.json
 
      ## Setup connection to Neo4j
-     neo4j_uri = "neo4j://localhost:7687"
-     username = "neo4j"
-     password = "neo4jtest" #todo change password
+     config = configparser.ConfigParser()
+     config.read('config.ini')
+     neo4j_uri = config['neo4j']['uri']
+     username = config['neo4j']['username']
+     password = config['neo4j']['password']
      driver = GraphDatabase.driver(neo4j_uri, auth=(username, password))
 
      try:
