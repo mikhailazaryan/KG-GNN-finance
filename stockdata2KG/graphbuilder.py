@@ -5,6 +5,7 @@ from typing import List, Dict, Union, Any
 from colorama import init, Fore, Back, Style
 
 import pytz
+from neo4j import GraphDatabase
 from numpy.f2py.auxfuncs import throw_error
 
 from stockdata2KG.wikidata import wikidata_wbgetentities, wikidata_wbsearchentities
@@ -173,7 +174,7 @@ def get_properties_dict(wikidata_id, label):
                 "placeholder": False,
                 "has_relationships": False,
             }
-        elif label == "Industry":
+        elif label == "Industry_Field":
             properties_dict ={
                 "name": data["entities"][wikidata_id]["claims"]["P373"][0]["mainsnak"]["datavalue"]["value"],
                 "wikidata_id": wikidata_id,
@@ -288,7 +289,7 @@ def create_relationships_and_placeholder_nodes_for_node_in_neo4j(org_wikidata_id
 def get_relationship_dict(org_wikidata_id, label):
     data = wikidata_wbgetentities(org_wikidata_id)
     try:
-        if label == "Company" or label == "InitialCompany":
+        if label == "Subsidiary" or label == "Company":
             #wikidata_wbgetentities(org_wikidata_id, True)
             relationship_dict = {
                         "StockMarketIndex": {
@@ -297,9 +298,9 @@ def get_relationship_dict(org_wikidata_id, label):
                             "relationship_type": "LISTED_IN",
                             "relationship_direction": "OUTBOUND",
                         },
-                        "Industry": {
+                        "Industry_Field": {
                             "wikidata_entries": get_all_wikidata_entries_as_list_of_dict(data, org_wikidata_id, "P452"),
-                            "label": "Industry",
+                            "label": "Industry_Field",
                             "relationship_type": "ACTIVE_IN",
                             "relationship_direction": "OUTBOUND"
                         },
@@ -343,7 +344,7 @@ def get_relationship_dict(org_wikidata_id, label):
             return relationship_dict
         elif label == "StockMarketIndex":
             relationship_dict = {} #todo
-        elif label == "Industry":
+        elif label == "Industry_Field":
             relationship_dict = {} #todo
         elif label == "City":
             relationship_dict = {
@@ -427,7 +428,92 @@ def is_date_in_range(rel_wikidata_start_time: datetime, rel_wikidata_end_time: d
             return True
 
 
-def create_demo_graph(driver):
+
+
+def build_initial_graph(company_name, date_from, date_until, nodes_to_include, search_depth, driver):
+    # initialize first placeholder node of company name
+    wikidata_id_of_company = wikidata_wbsearchentities(company_name)
+    create_placeholder_node_in_neo4j(wikidata_id_of_company, "Company", driver)
+    populate_placeholder_node_in_neo4j(wikidata_id_of_company, driver)
+
+    # iteratively adding nodes and relationships
+    for i in range(search_depth):
+        print(Fore.BLUE + f"\n---Started building graph for {company_name} on depth {i}---\n" + Style.RESET_ALL)
+        for wikidata_id in return_all_wikidata_ids_of_nodes_without_relationships(driver):
+            create_relationships_and_placeholder_nodes_for_node_in_neo4j(org_wikidata_id=wikidata_id,
+                                                                         from_date_of_interest=date_from,
+                                                                         until_date_of_interest=date_until,
+                                                                         nodes_to_include=nodes_to_include,
+                                                                         driver=driver)
+
+        for wikidata_id in return_wikidata_id_of_all_placeholder_nodes(driver):
+            populate_placeholder_node_in_neo4j(wikidata_id, driver)
+        print(Fore.BLUE + f"\n---Finished building graph for {company_name} on depth {i}---\n" + Style.RESET_ALL)
+
+
+def reset_graph(driver):
+    ## Setup connection to Neo4j
+    neo4j_uri = "neo4j://localhost:7687"
+    username = "neo4j"
+    password = "neo4jtest"
+
+    driver = GraphDatabase.driver(neo4j_uri, auth=(username, password))
+
+    with driver.session() as session:
+        session.run("MATCH(n) DETACH DELETE n")
+
+
+def initialize_graph(json_path, driver):
+    with open(json_path, 'r') as f:
+        data = json.load(f)
+
+    print(f"Initializing graph from {json_path}")
+    print(data.get("name"))
+
+
+    with driver.session() as session:
+        session.run("MATCH(n) DETACH DELETE n")
+        create_nodes_and_relationships(session, data)
+
+def create_nodes_and_relationships(session, data):
+    # Create the nodes
+    for key, value in data.items():
+        label = value["label"]
+        for properties in value["nodes"]:
+        #properties = value["nodes"][0]
+
+            # Use MERGE to create or match the node
+            node_query = f"""
+                MERGE (n:{label} {{name: $name}})
+                SET n += $properties
+                RETURN n
+            """
+            session.run(node_query, {"name": properties["name"], "properties": properties})
+
+    # Create relationships
+    for key, value in data.items():
+        source_label = value["label"]
+        for source_name in value["nodes"]:
+            source_name = source_name["name"]
+
+            for relationship in value.get("relationships", []):
+                rel_type = relationship["type"]
+                target_key = relationship["target"]
+                target_label = data[target_key]["label"]
+                #target_name = data[target_key]["nodes"][0]["name"]
+                for target_node in data[target_key]["nodes"]:
+                    target_name = target_node["name"]  # Extract the target node's name
+
+                    rel_query = f"""
+                        MATCH (source:{source_label} {{name: $source_name}})
+                        MATCH (target:{target_label} {{name: $target_name}})
+                        MERGE (source)-[:{rel_type}]->(target)
+                    """
+                    session.run(rel_query, {"source_name": source_name, "target_name": target_name})
+
+
+
+def build_demo_graph(driver):
     company_query = """
        CREATE (c:Company {
            name: $company_name,
@@ -505,57 +591,6 @@ def create_demo_graph(driver):
         session.run(company_query, **company_params)
         session.run(city_query, **city_params)
         session.run(relationship_query, **relationship_params)
-
-
-
-
-def initialize_graph(json_path, driver):
-    with open(json_path, 'r') as f:
-        data = json.load(f)
-
-    print(f"Initializing graph from {json_path}")
-    print(data.get("name"))
-
-
-    with driver.session() as session:
-        session.run("MATCH(n) DETACH DELETE n")
-        create_nodes_and_relationships(session, data)
-
-def create_nodes_and_relationships(session, data):
-    # Create the nodes
-    for key, value in data.items():
-        label = value["label"]
-        for properties in value["nodes"]:
-        #properties = value["nodes"][0]
-
-            # Use MERGE to create or match the node
-            node_query = f"""
-                MERGE (n:{label} {{name: $name}})
-                SET n += $properties
-                RETURN n
-            """
-            session.run(node_query, {"name": properties["name"], "properties": properties})
-
-    # Create relationships
-    for key, value in data.items():
-        source_label = value["label"]
-        for source_name in value["nodes"]:
-            source_name = source_name["name"]
-
-            for relationship in value.get("relationships", []):
-                rel_type = relationship["type"]
-                target_key = relationship["target"]
-                target_label = data[target_key]["label"]
-                #target_name = data[target_key]["nodes"][0]["name"]
-                for target_node in data[target_key]["nodes"]:
-                    target_name = target_node["name"]  # Extract the target node's name
-
-                    rel_query = f"""
-                        MATCH (source:{source_label} {{name: $source_name}})
-                        MATCH (target:{target_label} {{name: $target_name}})
-                        MERGE (source)-[:{rel_type}]->(target)
-                    """
-                    session.run(rel_query, {"source_name": source_name, "target_name": target_name})
 
 
 

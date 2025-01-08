@@ -110,7 +110,7 @@ class WikidataCache:
         print(f"Total requests: {total_requests}")
         if WikidataCache.cache_hits > 0 or WikidataCache.internet_retrievals > 0:
             cache_hit_ratio = (WikidataCache.cache_hits / (WikidataCache.cache_hits + WikidataCache.internet_retrievals) * 100).__round__(3)
-            print(f"Which is a cache hit ratio of {cache_hit_ratio}%")
+            print(f"Which is a cache hit ratio of {cache_hit_ratio}%\n\n")
 
 def _make_request(params: Dict) -> Dict:
     url = 'https://www.wikidata.org/w/api.php'
