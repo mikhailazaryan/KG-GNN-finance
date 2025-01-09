@@ -33,8 +33,8 @@ def wikidata_wbsearchentities(query_string: str, id_or_label: str = 'id') -> str
         else:
             return 'Please indicate if you would like to return id or label'
     except KeyError as e:
-        print(Fore.LIGHTYELLOW_EX + f"KeyError: {e} while retrieving data from wikidata for query: {query_string}, id_or_label: {id_or_label}, returning \"No id or label defined by Wikidata\"" + Style.RESET_ALL)
-        return "No id or label defined by Wikidata"
+        print(Fore.LIGHTYELLOW_EX + f"KeyError: {e} while retrieving data from wikidata for query: {query_string}, id_or_label: {id_or_label}, returning 'None'" + Style.RESET_ALL)
+        return None
 
 def wikidata_wbgetentities(id: str, print_output: bool = False) -> Dict[str, Any]:
     params = {

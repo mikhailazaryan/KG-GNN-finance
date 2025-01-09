@@ -1,11 +1,10 @@
 import configparser
 import google.generativeai as genai
-from colorama import init, Fore, Back, Style
 from datetime import datetime, timezone
 
-from stockdata2KG.graphbuilder import get_properties_dict, \
-    populate_placeholder_node_in_neo4j, _create_new_node, build_graph_from_initial_node, create_relationship_in_neo4j, \
-    check_if_node_exists_in_graph
+from stockdata2KG.graphbuilder import \
+    create_new_node, build_graph_from_initial_node, create_relationship_in_graph, \
+    check_if_node_exists_in_graph, delete_node
 from stockdata2KG.wikidata import wikidata_wbsearchentities
 
 model = genai.GenerativeModel("gemini-1.5-pro-latest")  # Choose the desired model
@@ -151,12 +150,32 @@ def update_neo4j_graph(article, companies, node_types, date_from, date_until, no
     node_type = find_node_type(article, node_types)
     most_relevant_node = find_most_relevant_node(article, company, node_type, driver)
     type_of_change = find_type_of_change(article, company, most_relevant_node)
-
     if type_of_change == "add node":
-        _add_new_node(article, company, node_type, most_relevant_node, date_from, date_until, nodes_to_include, search_depth, driver)
+        name_of_node_to_add = find_node_name_to_change(article, node_type)
+        _add_new_node(name_of_node_to_add, company, node_type, date_from, date_until, nodes_to_include, search_depth, driver)
     #todo: now determine the type of change (add new node, delete existing node, modify existing node, modify relationship between two existing nodes) using an llm
     # then make the change using 4 different json templates as structured output (see here https://ai.google.dev/gemini-api/docs/structured-output?lang=python)
     # issues: secondary connections are not taken into account (e.g. Allianz SE subsiary company1 bought company 2), maybe I can iteratively increase the scope? This should happen in the find company field
+    elif type_of_change == "remove node":
+        _remove_node(most_relevant_node)
+        return
+    elif type_of_change == "replace node":
+        # options to replace node:
+        # better
+        #   (1) copy node_type and relationship type of old node
+        _replace_node(most_relevant_node)
+        #   (2) create new node with relationship type
+        #   (3) create new relationship with same relationship type (both can use the add function)
+        #   (4) check if old node has remaining relationships and delete if not
+
+        return
+    elif type_of_change == "modify node information":
+        # how to modify node information?
+        # (1) get node id
+        # (2) get node information as a properties dict of changable propertiers
+        # (3) ask the LLM to change the property dict based on the news article
+        # (4) run the new property dict
+        return
 
 def find_company(article, companies):
     prompt = f"""
@@ -266,7 +285,7 @@ def find_most_relevant_node(article, company, node_type, driver):
     return result
 
 def find_type_of_change(article, company, most_relevant_node):
-    types_of_change_enum = ["add node", "delete node", "modify node information", "replace node", "no change required"]
+    types_of_change_enum = ["add node", "remove node", "modify node information", "replace node", "no change required"]
 
     prompt = f"""
                 You are a classification assistant to keep an existing Knowledge Graph of company data up-to-date. 
@@ -315,34 +334,26 @@ def find_type_of_change(article, company, most_relevant_node):
     print(f"Found type of change '{result}' to be most fitting for article '{article}' and node '{most_relevant_node}")
     return result
 
-def generate_change_query(article, company, node_type, most_relevant_node, type_of_change_to_graph):
-    if type_of_change_to_graph == "add node":
-        return
-        # todo add placeholder node
-        #   (1) get wikidata properties
-        #   (2) check if node is already in graph
-        #   (3) if not, add node to graph
-        #   (4) add relationship to graph
-
-def _add_new_node(article, company, node_type, most_relevant_node, date_from, date_until, nodes_to_include, search_depth, driver):
+def find_node_name_to_change(article, node_type):
+    #todo: find out if this is acutally needed
     prompt = f"""
-               You are a knowledge graph node identification assistant. Your task is to identify the name of a new node that should be added to the Knowledge Graph based on the article content.
+                   You are a knowledge graph node identification assistant. Your task is to identify the name of a new node that should be added, removed or modified in the Knowledge Graph based on the article.
 
-               Instructions:
-               1. Read the provided news article.
-               2. Consider the specified node type.
-               3. Return ONLY a single string containing the name of the new node that should be added.
-               4. Do not provide any explanations, reasoning, or additional text.
+                   Instructions:
+                   1. Read the provided news article.
+                   2. Consider the specified node type.
+                   3. Return ONLY a single string containing the name of the new node that should be added.
+                   4. Do not provide any explanations, reasoning, or additional text.
 
-               Example input:
-               Article: "Microsoft acquires Activision Blizzard for $69 billion"
-               Node type: Company
-               Output: Activision Blizzard
+                   Example input:
+                   Article: "Microsoft acquires Activision Blizzard for $69 billion"
+                   Node type: Company
+                   Output: Activision Blizzard
 
-               Please analyze the following:
-               Article: "{article}"
-               Node type: {node_type}
-               """
+                   Please analyze the following:
+                   Article: "{article}"
+                   Node type: {node_type}
+                   """
 
     result = model.generate_content(
         prompt,
@@ -355,17 +366,19 @@ def _add_new_node(article, company, node_type, most_relevant_node, date_from, da
 
     name_new_node = result.text.strip()
     print(f"Found name '{name_new_node}' to be the most fitting name for the new node for article '{article}'")
+    return name_new_node
 
+def _add_new_node(name_new_node, company, node_type, date_from, date_until, nodes_to_include, search_depth, driver):
     wikidata_id = wikidata_wbsearchentities(name_new_node, id_or_label = 'id')
 
     if wikidata_id == "No wikidata entry found":
         wikidata_id = _get_and_increment_customID()
         print(f"Created custom ID '{wikidata_id}' for node '{name_new_node}' because no wikidata ID was found")
-        _create_new_node(wikidata_id, name_new_node, node_type, placeholder=False, has_relationships=False, driver=driver)
+        create_new_node(wikidata_id, name_new_node, node_type, has_wikidata_entry=False, driver=driver)
     else:
         build_graph_from_initial_node(name_new_node, node_type, date_from, date_until, nodes_to_include, search_depth, driver=driver)
 
-    rel_wikidata_start_time = str(datetime.now().replace(tzinfo=timezone.utc))
+    rel_wikidata_start_time = str(datetime.now().replace(tzinfo=timezone.utc)) #todo: check if there is a date information available in the news article
     rel_wikidata_end_time = str(datetime.max.replace(tzinfo=timezone.utc))
 
     if node_type == "Company":
@@ -381,7 +394,21 @@ def _add_new_node(article, company, node_type, most_relevant_node, date_from, da
     org_label = check_if_node_exists_in_graph(name=company, driver=driver).get("label")
     org_wikidata_id = check_if_node_exists_in_graph(name=company, driver=driver).get("wikidata_id")
     #print(rel_direction, rel_type, org_label, node_type, org_wikidata_id, wikidata_id, rel_wikidata_start_time, rel_wikidata_end_time)
-    create_relationship_in_neo4j(rel_direction, rel_type, org_label, node_type, org_wikidata_id, wikidata_id, rel_wikidata_start_time, rel_wikidata_end_time, driver)
+    create_relationship_in_graph(rel_direction, rel_type, org_label, node_type, org_wikidata_id, wikidata_id, rel_wikidata_start_time, rel_wikidata_end_time, driver)
+    return
+
+def _remove_node(most_relevant_node):
+    wikidata_id = wikidata_wbsearchentities(most_relevant_node, id_or_label = 'id')
+    if wikidata_id == "No wikidata entry found":
+        raise KeyError(f"No wikidata_if for '{most_relevant_node}' found")
+    if not delete_node(wikidata_id):
+        raise Exception(f"Deletion of node '{most_relevant_node}' failed")
+
+def _replace_node(most_relevant_node):
+    #   (1) copy node_type and relationship type of old node
+    #   (2) create new node with relationship type
+    #   (3) create new relationship with same relationship type (both can use the add function)
+    #   (4) check if old node has remaining relationships and delete if not
     return
 
 def _get_and_increment_customID():

@@ -37,7 +37,7 @@ def main():
      date_from = datetime(1995, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
      date_until = datetime(2024, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
      nodes_to_include = ["Company", "Industry_Field", "Person", "City", "Country", "StockMarketIndex"]
-     search_depth = 1
+     search_depth = 3
 
      if build_actual_graph_bool:
          reset_graph(driver)

@@ -1,11 +1,9 @@
-import json
 import warnings
 from datetime import datetime, timezone
-from colorama import init, Fore, Back, Style
-from neo4j import GraphDatabase
+from colorama import Fore, Style
 from stockdata2KG.wikidata import wikidata_wbgetentities, wikidata_wbsearchentities
 
-def _create_new_node(wikidata_id, name, label, placeholder, has_relationships, driver,):
+def create_new_node(wikidata_id, name, label, has_wikidata_entry, driver,):
     # Check if node exists using wikidata_id
     check_query = """
              MATCH (n {wikidata_id: $wikidata_id})
@@ -17,33 +15,35 @@ def _create_new_node(wikidata_id, name, label, placeholder, has_relationships, d
 
         # If node doesn't exist (result is None), create it
         if result is None:
-            properties_dict = {
-                "name" : name,
-                "label": label,
-                "wikidata_id": wikidata_id,
-                "placeholder": placeholder,
-                "has_relationships": has_relationships  # standard is false
-                # other properties...
-            }
+            #new
+            if has_wikidata_entry:
+                properties_dict = get_properties_dict(wikidata_id, label, name)
+            else:
+                properties_dict = {
+                    "name": name,
+                    "label": label,
+                    "wikidata_id": wikidata_id,
+                    "placeholder": False,
+                    "has_relationships": False,
+                }
 
             create_query = f"""
                     CREATE (n:{label})
                     SET n = $properties
-                    RETURN n
+                    RETURN n, n.wikidata_id as wikidata_id 
                     """
             result = session.run(create_query, properties=properties_dict).single()
 
-            if result and result.get("n"):
-                print(
-                    Fore.GREEN + f"Node with placeholder = {placeholder} and wikidata_id: '{wikidata_id}' has been added to neo4j graph" + Style.RESET_ALL)
-                return result
+            if result and result.get("wikidata_id") is not None:
+                print(Fore.GREEN + f"Node with and wikidata_id: '{wikidata_id}' has been added to neo4j graph" + Style.RESET_ALL)
+                return result.get("wikidata_id")
             else:
                 raise Exception(f"Error while adding node with wikidata_id: {wikidata_id} to neo4j graph")
         else:
             print(
                 Fore.GREEN + f"Node with wikidata_id: {wikidata_id} already exists in neo4j graph and has therefore not been added" + Style.RESET_ALL)
 
-def create_relationship_in_neo4j(rel_direction: str, rel_type: str, org_label: str, rel_label: str, org_wikidata_id: str, rel_wikidata_id: str, rel_wikidata_start_time: str,  rel_wikidata_end_time: str, driver):
+def create_relationship_in_graph(rel_direction: str, rel_type: str, org_label: str, rel_label: str, org_wikidata_id: str, rel_wikidata_id: str, rel_wikidata_start_time: str, rel_wikidata_end_time: str, driver):
     if rel_direction == "OUTBOUND":
         source_label = org_label
         target_label = rel_label
@@ -88,69 +88,9 @@ def create_relationship_in_neo4j(rel_direction: str, rel_type: str, org_label: s
         else:
             print("No relationship created for params: '{params}'. Source or target node might not exist.")
 
-def return_wikidata_id_of_all_placeholder_nodes(driver):
-    match_placeholders_query = """
-        MATCH (n)
-        WHERE n.placeholder = true
-        RETURN n.wikidata_id as wikidata_id
-        """
-
-    # Execute the query
-    with driver.session() as session:
-        results = session.run(match_placeholders_query)
-        return [record.get("wikidata_id") for record in results if record.get("wikidata_id")]
-
-def return_all_wikidata_ids_of_nodes_without_relationships(driver):
-    match_without_rel_query = """
-        MATCH (n)
-        WHERE n.has_relationships = false
-        RETURN n.wikidata_id as wikidata_id
-        """
-
-    # Execute the query
-    with driver.session() as session:
-        results = session.run(match_without_rel_query)
-        return [record.get("wikidata_id") for record in results if record.get("wikidata_id")]
-
-def populate_placeholder_node_in_neo4j(wikidata_id, driver):
-    # Check if node exists using wikidata_id
-    check_query = f"""
-        MATCH (n {{wikidata_id: $wikidata_id}})
-        RETURN n,  labels(n) as labels,
-           CASE 
-               WHEN n.placeholder IS NOT NULL THEN n.placeholder 
-               ELSE false 
-           END as isPlaceholder
-        """
-
-    with (driver.session() as session):
-        result = session.run(check_query, wikidata_id=wikidata_id).single()
-
-        if result is None:
-            raise Exception(f"Could not find placeholder node with wikidata_id {wikidata_id} in graph")
-        else:
-            if result.get("isPlaceholder"):
-                label = result.get("labels")[0] #could lead to errors if there are multiple with the same id
-                properties_dict = get_properties_dict(wikidata_id, label)
-                # Create node using properties from dictionary
-                update_query = f"""
-                                MATCH (n {{wikidata_id: $wikidata_id}})
-                                SET n:{label}
-                                SET n = $properties
-                                RETURN n
-                                """
-                result = session.run(update_query, wikidata_id=wikidata_id, properties=properties_dict).single()
-                if result and result.get("n"):
-                    print(Fore.GREEN + f"Placeholder Node with wikidata_id: {wikidata_id} has been populated with data in neo4j graph" + Style.RESET_ALL)
-                else:
-                    raise Exception(f"Error while populating placeholder node with wikidata_id: {wikidata_id} to neo4j graph")
-            else:
-                print(Fore.RED + f"Populating placeholder node with wikidata_id: {wikidata_id} failed because isPlaceholder == False" + Style.RESET_ALL)
-
-def get_properties_dict(wikidata_id, label,):
+def get_properties_dict(wikidata_id, label, name):
     data = wikidata_wbgetentities(wikidata_id)
 
-    #todo bring name to property dict here
     try:
         if label =="Company" or label == "InitialCompany":
              properties_dict ={
@@ -233,7 +173,7 @@ def get_properties_dict(wikidata_id, label,):
             "has_relationships": False,
         }
         name = properties_dict["name"]
-        print(Fore.LIGHTYELLOW_EX + f"KeyError: {e} for wikidata_id {wikidata_id}, so defaulting to only name = {name} and wikidata_id property_dict" + Style.RESET_ALL)
+        print(Fore.LIGHTYELLOW_EX + f"KeyError: {e} for wikidata_id {wikidata_id}, so limited properties available for {name}" + Style.RESET_ALL)
         return properties_dict
 
 def check_if_node_exists_in_graph(wikidata_id = None, name = None, driver=None):
@@ -267,46 +207,44 @@ def check_if_node_exists_in_graph(wikidata_id = None, name = None, driver=None):
         raise Exception("Please specify at least one of name or wikidata_id")
     return False
 
-def create_relationships_and_placeholder_nodes_for_node_in_neo4j(org_wikidata_id: str, from_date_of_interest: datetime, until_date_of_interest: datetime, nodes_to_include: list ,driver):
+def create_nodes_and_relationships_for_node(org_wikidata_id: str, from_date_of_interest: datetime, until_date_of_interest: datetime, nodes_to_include: list, driver):
     result = check_if_node_exists_in_graph(wikidata_id=org_wikidata_id, driver=driver)
-
+    temp = []
     if result is False:
-        raise Exception(f"Could not find node with wikidata_id {org_wikidata_id} in graph")
+         raise Exception(f"Could not find node with wikidata_id {org_wikidata_id} in graph")
     else:
-        if not result.get("isPlaceholder"): #todo maybe I dont need to check this if its checked before in main
-            org_label = result.get("label")
-            relationship_dict = get_relationship_dict(org_wikidata_id, org_label)
+        org_label = result.get("label")
+        relationship_dict = get_relationship_dict(org_wikidata_id, org_label)
 
-            # Process each relationship type
-            for rel_type, rel_info in relationship_dict.items():
-                rel_wikidata_entries = rel_info["wikidata_entries"]
-                rel_type = rel_info["relationship_type"]
-                rel_label = rel_info["label"]
-                rel_direction = rel_info["relationship_direction"]
+        # Process each relationship type
+        for rel_type, rel_info in relationship_dict.items():
+            rel_wikidata_entries = rel_info["wikidata_entries"]
+            rel_type = rel_info["relationship_type"]
+            rel_label = rel_info["label"]
+            rel_direction = rel_info["relationship_direction"]
 
-                if rel_label in nodes_to_include:
+            if rel_label in nodes_to_include:
 
-                    # Create placeholder nodes and relationships for each property_id
-                    for rel_wikidata_entry in rel_wikidata_entries:
-                        rel_wikidata_id = rel_wikidata_entry["id"]
-                        rel_wikidata_start_time = rel_wikidata_entry["start_time"]
-                        rel_wikidata_end_time = rel_wikidata_entry["end_time"]
-                        try:
-                            if is_date_in_range(rel_wikidata_start_time, rel_wikidata_end_time, from_date_of_interest, until_date_of_interest):
-                                _create_new_node(rel_wikidata_id, "", label=rel_label, placeholder=True, has_relationships=False, driver=driver)
-                                create_relationship_in_neo4j(rel_direction, rel_type, org_label, rel_label, org_wikidata_id, rel_wikidata_id, rel_wikidata_start_time, rel_wikidata_end_time, driver)
-                        except ValueError as e:
-                            raise ValueError(f"{e}")
+                # Create placeholder nodes and relationships for each property_id
+                for rel_wikidata_entry in rel_wikidata_entries:
+                    rel_wikidata_id = rel_wikidata_entry["id"]
+                    rel_wikidata_start_time = rel_wikidata_entry["start_time"]
+                    rel_wikidata_end_time = rel_wikidata_entry["end_time"]
+                    try:
+                        if is_date_in_range(rel_wikidata_start_time, rel_wikidata_end_time, from_date_of_interest, until_date_of_interest):
+                            temp.append(create_new_node(rel_wikidata_id, "", label=rel_label,has_wikidata_entry=True, driver=driver))
+                            create_relationship_in_graph(rel_direction, rel_type, org_label, rel_label, org_wikidata_id, rel_wikidata_id, rel_wikidata_start_time, rel_wikidata_end_time, driver)
+                    except ValueError as e:
+                        raise ValueError(f"{e}")
 
-            # After creating relationships, update the original node's has_relationships property
-            update_query = """
-                            MATCH (n {wikidata_id: $org_wikidata_id})
-                            SET n.has_relationships = true
-                          """
-            with (driver.session() as session):
-                session.run(update_query, org_wikidata_id=org_wikidata_id)
-        else:
-            print(Fore.RED + f"Creating Relationships and placeholder node for wikidata_id: {org_wikidata_id} failed because isPlaceholder == True" + Style.RESET_ALL)
+                # After creating relationships, update the original node's has_relationships property
+                update_query = """
+                                MATCH (n {wikidata_id: $org_wikidata_id})
+                                SET n.has_relationships = true
+                              """
+                with (driver.session() as session):
+                    session.run(update_query, org_wikidata_id=org_wikidata_id)
+    return temp
 
 def get_relationship_dict(org_wikidata_id, label):
     data = wikidata_wbgetentities(org_wikidata_id)
@@ -446,81 +384,59 @@ def is_date_in_range(rel_wikidata_start_time: datetime, rel_wikidata_end_time: d
 def build_graph_from_initial_node(node_name, label, date_from, date_until, nodes_to_include, search_depth, driver):
     # initialize first placeholder node of company name
     wikidata_id_of_company = wikidata_wbsearchentities(node_name)
-    _create_new_node(wikidata_id_of_company, node_name, label, placeholder=True, has_relationships=False,driver=driver)
-    populate_placeholder_node_in_neo4j(wikidata_id_of_company, driver)
-
+    queue = [create_new_node(wikidata_id_of_company, node_name, label, has_wikidata_entry=True, driver=driver)]
     # iteratively adding nodes and relationships
     for i in range(search_depth):
         print(Fore.BLUE + f"\n---Started building graph for {node_name} on depth {i}---\n" + Style.RESET_ALL)
-        for wikidata_id in return_all_wikidata_ids_of_nodes_without_relationships(driver):
-            create_relationships_and_placeholder_nodes_for_node_in_neo4j(org_wikidata_id=wikidata_id,
+        queue_copy = queue.copy()
+        queue = []
+        for wikidata_id in queue_copy:
+            if wikidata_id is not None:
+                queue.extend(create_nodes_and_relationships_for_node(org_wikidata_id=wikidata_id,
                                                                          from_date_of_interest=date_from,
                                                                          until_date_of_interest=date_until,
                                                                          nodes_to_include=nodes_to_include,
-                                                                         driver=driver)
+                                                                         driver=driver))
 
-        for wikidata_id in return_wikidata_id_of_all_placeholder_nodes(driver):
-            populate_placeholder_node_in_neo4j(wikidata_id, driver)
         print(Fore.BLUE + f"\n---Finished building graph for {node_name} on depth {i}---\n" + Style.RESET_ALL)
 
 def reset_graph(driver):
-    ## Setup connection to Neo4j
-    neo4j_uri = "neo4j://localhost:7687"
-    username = "neo4j"
-    password = "neo4jtest"
-
-    driver = GraphDatabase.driver(neo4j_uri, auth=(username, password))
-
     with driver.session() as session:
         session.run("MATCH(n) DETACH DELETE n")
 
-def initialize_graph(json_path, driver):
-    with open(json_path, 'r') as f:
-        data = json.load(f)
-
-    print(f"Initializing graph from {json_path}")
-    print(data.get("name"))
-
-
-    with driver.session() as session:
-        session.run("MATCH(n) DETACH DELETE n")
-        create_nodes_and_relationships(session, data)
-
-def create_nodes_and_relationships(session, data):
-    # Create the nodes
-    for key, value in data.items():
-        label = value["label"]
-        for properties in value["nodes"]:
-        #properties = value["nodes"][0]
-
-            # Use MERGE to create or match the node
-            node_query = f"""
-                MERGE (n:{label} {{name: $name}})
-                SET n += $properties
-                RETURN n
-            """
-            session.run(node_query, {"name": properties["name"], "properties": properties})
-
-    # Create relationships
-    for key, value in data.items():
-        source_label = value["label"]
-        for source_name in value["nodes"]:
-            source_name = source_name["name"]
-
-            for relationship in value.get("relationships", []):
-                rel_type = relationship["type"]
-                target_key = relationship["target"]
-                target_label = data[target_key]["label"]
-                #target_name = data[target_key]["nodes"][0]["name"]
-                for target_node in data[target_key]["nodes"]:
-                    target_name = target_node["name"]  # Extract the target node's name
-
-                    rel_query = f"""
-                        MATCH (source:{source_label} {{name: $source_name}})
-                        MATCH (target:{target_label} {{name: $target_name}})
-                        MERGE (source)-[:{rel_type}]->(target)
+def delete_node(wikidata_id = None, name = None, driver = None) -> bool:
+    if name:
+        identifier = name
+        by_name = True
+        delete_query = """
+                    MATCH (n {name: $identifier})
+                    DELETE n
+                    RETURN count(n) as deleted_count
                     """
-                    session.run(rel_query, {"source_name": source_name, "target_name": target_name})
+    elif wikidata_id:
+        identifier = wikidata_id
+        by_name = False
+    else:
+        raise ValueError(f"Deletion failed. Please specify name or wikidata_id")
+
+    delete_query = """
+            MATCH (n {wikidata_id: $identifier})
+            DELETE n
+            RETURN count(n) as deleted_count
+            """
+    try:
+        with driver.session() as session:
+            result = session.run(delete_query, identifier=identifier).single()
+            if result and result["deleted_count"] > 0:
+                print(
+                    Fore.GREEN + f"Node with {'name' if by_name else 'wikidata_id'}: '{identifier}' has been deleted" + Style.RESET_ALL)
+                return True
+            print(
+                Fore.YELLOW + f"No node found with {'name' if by_name else 'wikidata_id'}: {identifier}" + Style.RESET_ALL)
+            return False
+    except Exception as e:
+        print(Fore.RED + f"Error deleting node: {str(e)}" + Style.RESET_ALL)
+        return False
 
 def build_demo_graph(driver):
     company_query = """
@@ -601,6 +517,6 @@ def build_demo_graph(driver):
         session.run(city_query, **city_params)
         session.run(relationship_query, **relationship_params)
 
-
+#todo: remove all placeholder references as this is no longer needed
 
 
