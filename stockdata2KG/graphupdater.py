@@ -1,12 +1,21 @@
 import configparser
 import google.generativeai as genai
+from colorama import init, Fore, Back, Style
+from datetime import datetime, timezone
 
+from stockdata2KG.graphbuilder import get_properties_dict, \
+    populate_placeholder_node_in_neo4j, _create_new_node, build_graph_from_initial_node, create_relationship_in_neo4j, \
+    check_if_node_exists_in_graph
+from stockdata2KG.wikidata import wikidata_wbsearchentities
 
 model = genai.GenerativeModel("gemini-1.5-pro-latest")  # Choose the desired model
 
 config = configparser.ConfigParser()
 config.read('config.ini')
 genai.configure(api_key=config['gemini']['api_key'])
+
+global custom_id
+custom_id = 0
 
 def findKeyword(article, driver):
     with driver.session() as session:
@@ -137,10 +146,14 @@ def suggestion_to_cypher(driver, data, suggestion):
      # Extract LLM response
      return response.text
 
-def update_neo4j_graph(article, companies, node_types, driver):
+def update_neo4j_graph(article, companies, node_types, date_from, date_until, nodes_to_include, search_depth, driver):
     company = find_company(article, companies)
     node_type = find_node_type(article, node_types)
     most_relevant_node = find_most_relevant_node(article, company, node_type, driver)
+    type_of_change = find_type_of_change(article, company, most_relevant_node)
+
+    if type_of_change == "add node":
+        _add_new_node(article, company, node_type, most_relevant_node, date_from, date_until, nodes_to_include, search_depth, driver)
     #todo: now determine the type of change (add new node, delete existing node, modify existing node, modify relationship between two existing nodes) using an llm
     # then make the change using 4 different json templates as structured output (see here https://ai.google.dev/gemini-api/docs/structured-output?lang=python)
     # issues: secondary connections are not taken into account (e.g. Allianz SE subsiary company1 bought company 2), maybe I can iteratively increase the scope? This should happen in the find company field
@@ -169,18 +182,9 @@ def find_company(article, companies):
                 Available node_types: {str(companies).replace("'", "")}        
                 """
 
-    result = model.generate_content(
-        [prompt, article],
-        generation_config=genai.GenerationConfig(
-            response_mime_type="text/x.enum",
-            response_schema={
-                "type": "STRING",
-                "enum": companies,
-            },
-        ),
-    )
-    print(f"Found company '{result.text}' for article '{article}' and companies '{companies}'.")
-    return result.text
+    result = _generate_result_with_enum(prompt, companies)
+    print(f"Found company '{result}' for article '{article}' and companies '{companies}'.")
+    return result
 
 def find_node_type(article, node_types):
     prompt = f"""
@@ -211,18 +215,9 @@ def find_node_type(article, node_types):
             Available node_types: {str(node_types).replace("'", "")}        
             """
 
-    result = model.generate_content(
-        [prompt, article],
-        generation_config=genai.GenerationConfig(
-            response_mime_type="text/x.enum",
-            response_schema={
-                "type": "STRING",
-                "enum": node_types,
-            },
-        ),
-    )
-    print(f"Found node_type of '{result.text}' for article '{article}' and node_types '{node_types}")
-    return result.text
+    result = _generate_result_with_enum(prompt, node_types)
+    print(f"Found node_type of '{result}' for article '{article}' and node_types '{node_types}")
+    return result
 
 def find_most_relevant_node(article, company, node_type, driver):
     query = f"""
@@ -240,7 +235,7 @@ def find_most_relevant_node(article, company, node_type, driver):
 
     relevant_nodes = result
     relevant_nodes.append('None of these nodes are relevant')
-    if node_type == ("Company"):
+    if node_type == "Company":
         relevant_nodes.append(company) #If e.g. a company is buying another company, it makes sense to include it in the list of relevant nodes, mostly used if new nodes need to be created
 
     prompt = f"""
@@ -266,16 +261,143 @@ def find_most_relevant_node(article, company, node_type, driver):
             Available node_types: {str(relevant_nodes).replace("'", "")}        
             """
 
+    result = _generate_result_with_enum(prompt, relevant_nodes)
+    print(f"Found node '{result}' to be most relevant for article '{article}' and relevant nodes '{relevant_nodes}")
+    return result
+
+def find_type_of_change(article, company, most_relevant_node):
+    types_of_change_enum = ["add node", "delete node", "modify node information", "replace node", "no change required"]
+
+    prompt = f"""
+                You are a classification assistant to keep an existing Knowledge Graph of company data up-to-date. 
+                Your task is to analyze a news article and select the SINGLE most relevant type of change required to keep the Knowledge Graph up-to-date.
+                The Knowledge Graph currently exists of a company, it's subsidiary companies, Industry Fields, Persons, Cities, Countries, and StockMarketIndices with respective relationships to the company
+
+                Instructions:
+                1. Read the provided news article carefully
+                2. Review the information stored in the node which is most relevant for the change.
+                2. Review the list of available types of changes which are: {types_of_change_enum}
+                3. Select the ONE type of change that best captures the primary subject of the article. If no node change is required, please select "no change required"
+
+                Example input:
+
+                Article: "Allianz SE sold PIMCO"
+                Most Relevant Node: "PIMCO"
+                Available types of change: {types_of_change_enum}
+                Output: "delete node"
+                Reasoning: The Knowledge Graph most probably has a node "PIMCO" which is no longer required if "PIMCO" is sold.
+
+                Article: "Allianz SE bought SportGear AG"
+                Most Relevant Node: "Allianz SE"
+                Available types of change: {types_of_change_enum}
+                Output: "add node"
+                Reasoning: A new company is being acquired, so a new node needs to be added to the Knowledge Graph.
+                
+                Article: "Allianz SE moved their headquarter from Munich to Berlin"
+                Most Relevant Node: "Munich"
+                Available types of change: {types_of_change_enum}
+                Output: "replace node"
+                Reasoning: The node 'Munich' has to be replaced by a new node 'Berlin'
+                
+                Article: "Allianz SE was renamed to Algorithm GmbH' and companies"
+                Most Relevant Node: "Allianz SE"
+                Available types of change: {types_of_change_enum}
+                Output: "modify node information"
+                Reasoning: The node 'Allianz SE' already exists and it's name or other information have to be modified.
+                
+
+                Please analyze the following:
+                Article: "{article}"
+                Most Relevant Node: {most_relevant_node}
+                """
+
+    result = _generate_result_with_enum(prompt, types_of_change_enum)
+    print(f"Found type of change '{result}' to be most fitting for article '{article}' and node '{most_relevant_node}")
+    return result
+
+def generate_change_query(article, company, node_type, most_relevant_node, type_of_change_to_graph):
+    if type_of_change_to_graph == "add node":
+        return
+        # todo add placeholder node
+        #   (1) get wikidata properties
+        #   (2) check if node is already in graph
+        #   (3) if not, add node to graph
+        #   (4) add relationship to graph
+
+def _add_new_node(article, company, node_type, most_relevant_node, date_from, date_until, nodes_to_include, search_depth, driver):
+    prompt = f"""
+               You are a knowledge graph node identification assistant. Your task is to identify the name of a new node that should be added to the Knowledge Graph based on the article content.
+
+               Instructions:
+               1. Read the provided news article.
+               2. Consider the specified node type.
+               3. Return ONLY a single string containing the name of the new node that should be added.
+               4. Do not provide any explanations, reasoning, or additional text.
+
+               Example input:
+               Article: "Microsoft acquires Activision Blizzard for $69 billion"
+               Node type: Company
+               Output: Activision Blizzard
+
+               Please analyze the following:
+               Article: "{article}"
+               Node type: {node_type}
+               """
+
     result = model.generate_content(
-        [prompt, article],
+        prompt,
+        generation_config=genai.GenerationConfig(
+            temperature=0.1,  # Lower temperature for more focused responses
+            max_output_tokens=70,  # Limit output length
+            response_mime_type="text/plain",
+        ),
+    )
+
+    name_new_node = result.text.strip()
+    print(f"Found name '{name_new_node}' to be the most fitting name for the new node for article '{article}'")
+
+    wikidata_id = wikidata_wbsearchentities(name_new_node, id_or_label = 'id')
+
+    if wikidata_id == "No wikidata entry found":
+        wikidata_id = _get_and_increment_customID()
+        print(f"Created custom ID '{wikidata_id}' for node '{name_new_node}' because no wikidata ID was found")
+        _create_new_node(wikidata_id, name_new_node, node_type, placeholder=False, has_relationships=False, driver=driver)
+    else:
+        build_graph_from_initial_node(name_new_node, node_type, date_from, date_until, nodes_to_include, search_depth, driver=driver)
+
+    rel_wikidata_start_time = str(datetime.now().replace(tzinfo=timezone.utc))
+    rel_wikidata_end_time = str(datetime.max.replace(tzinfo=timezone.utc))
+
+    if node_type == "Company":
+        rel_direction = "OUTBOUND"
+        rel_type = "OWNS"
+    elif node_type == "Industry_Field":
+        rel_direction = "OUTBOUND"
+        rel_type = "ACTIVE_IN"
+    #todo: add all other options ["Company", "Industry_Field", "Person", "City", "Country", "StockMarketIndex"]
+    else:
+        raise ValueError(f"Unknown node type '{node_type}'")
+
+    org_label = check_if_node_exists_in_graph(name=company, driver=driver).get("label")
+    org_wikidata_id = check_if_node_exists_in_graph(name=company, driver=driver).get("wikidata_id")
+    #print(rel_direction, rel_type, org_label, node_type, org_wikidata_id, wikidata_id, rel_wikidata_start_time, rel_wikidata_end_time)
+    create_relationship_in_neo4j(rel_direction, rel_type, org_label, node_type, org_wikidata_id, wikidata_id, rel_wikidata_start_time, rel_wikidata_end_time, driver)
+    return
+
+def _get_and_increment_customID():
+    global custom_id
+    custom_id += 1
+    custom_node_id = "CustomID" + str(custom_id)
+    return custom_node_id
+
+def _generate_result_with_enum(prompt, enum):
+    result = model.generate_content(prompt,
         generation_config=genai.GenerationConfig(
             response_mime_type="text/x.enum",
             response_schema={
-                    "type": "STRING",
-                    "enum": relevant_nodes,
-                },
-            ),
-        )
-    print(f"Found node '{result.text}' to be most relevant for article '{article}' and relevant nodes '{relevant_nodes}")
+                "type": "STRING",
+                "enum": enum,
+            },
+        ),
+    )
     return result.text
-

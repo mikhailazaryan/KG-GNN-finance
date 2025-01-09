@@ -1,6 +1,7 @@
 import json
 import os
 import warnings
+import time
 
 import requests
 from typing import Dict
@@ -89,6 +90,7 @@ class WikidataCache:
             return cache_dict[key]
 
         # Make actual request
+        time.sleep(0.3)
         result = _make_request(params)
         if print_update:
             print(f"Retrieved data from wikidata {action} - {key}")
