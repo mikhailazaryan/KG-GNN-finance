@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from colorama import Fore, Style
 from stockdata2KG.wikidata import wikidata_wbgetentities, wikidata_wbsearchentities
 
-def create_new_node(wikidata_id, name, label, has_wikidata_entry, driver,):
+def create_new_node(wikidata_id, name, label, driver,):
     # Check if node exists using wikidata_id
     check_query = """
              MATCH (n {wikidata_id: $wikidata_id})
@@ -15,10 +15,9 @@ def create_new_node(wikidata_id, name, label, has_wikidata_entry, driver,):
 
         # If node doesn't exist (result is None), create it
         if result is None:
-            #new
-            if has_wikidata_entry:
-                properties_dict = get_properties_dict(wikidata_id, label, name)
-            else:
+            if wikidata_id[0:7] != "CustomID":
+                properties_dict = get_properties_dict(wikidata_id, label)
+            elif name is not None:
                 properties_dict = {
                     "name": name,
                     "label": label,
@@ -26,6 +25,8 @@ def create_new_node(wikidata_id, name, label, has_wikidata_entry, driver,):
                     "placeholder": False,
                     "has_relationships": False,
                 }
+            else:
+                raise KeyError(f"Node with name: '{name}' and wikidata_id '{wikidata_id}' has no specified name nor a valid wikidata_id, returning 'None'")
 
             create_query = f"""
                     CREATE (n:{label})
@@ -35,25 +36,17 @@ def create_new_node(wikidata_id, name, label, has_wikidata_entry, driver,):
             result = session.run(create_query, properties=properties_dict).single()
 
             if result and result.get("wikidata_id") is not None:
-                print(Fore.GREEN + f"Node with and wikidata_id: '{wikidata_id}' has been added to neo4j graph" + Style.RESET_ALL)
                 return result.get("wikidata_id")
             else:
                 raise Exception(f"Error while adding node with wikidata_id: {wikidata_id} to neo4j graph")
         else:
-            print(
-                Fore.GREEN + f"Node with wikidata_id: {wikidata_id} already exists in neo4j graph and has therefore not been added" + Style.RESET_ALL)
+            print(Fore.YELLOW+ f"Node with wikidata_id: {wikidata_id} already exists in neo4j graph and has therefore not been added" + Style.RESET_ALL)
 
-def create_relationship_in_graph(rel_direction: str, rel_type: str, org_label: str, rel_label: str, org_wikidata_id: str, rel_wikidata_id: str, rel_wikidata_start_time: str, rel_wikidata_end_time: str, driver):
+def create_relationship_in_graph(rel_direction: str, rel_type: str, org_wikidata_id: str, rel_wikidata_id: str, rel_wikidata_start_time: str, rel_wikidata_end_time: str, driver):
     if rel_direction == "OUTBOUND":
-        source_label = org_label
-        target_label = rel_label
-
         source_id = org_wikidata_id
         target_id = rel_wikidata_id
     elif rel_direction == "INBOUND":
-        source_label = rel_label
-        target_label = org_label
-
         source_id = rel_wikidata_id
         target_id = org_wikidata_id
     else:
@@ -61,20 +54,22 @@ def create_relationship_in_graph(rel_direction: str, rel_type: str, org_label: s
 
     # Create relationship
     create_relationship_query = f"""
-                    MATCH (source:{source_label} {{wikidata_id: $source_id}})
-                    MATCH (target:{target_label} {{wikidata_id: $target_id}})
-                        CREATE (source)-[r:{rel_type} {{
-                            start_time: $start_time,
-                            end_time: $end_time
-                            }}]->(target)
-                    RETURN source, target, r
-                    """
+        MATCH (source {{wikidata_id: $source_id}})
+        MATCH (target {{wikidata_id: $target_id}})
+        CREATE (source)-[r:{rel_type} {{
+                                start_time: $start_time,
+                                end_time: $end_time
+                                }}]->(target)
+        RETURN source, target, r
+    """
+
     # Then update your parameters dictionary to include the new properties
     params = {
         "source_id": source_id,
         "target_id": target_id,
         "start_time": rel_wikidata_start_time,
-        "end_time": rel_wikidata_end_time
+        "end_time": rel_wikidata_end_time,
+        "rel_type": rel_type
     }
 
     # Execute the query with parameters
@@ -83,12 +78,12 @@ def create_relationship_in_graph(rel_direction: str, rel_type: str, org_label: s
         result = session.run(create_relationship_query, params)
         records = list(result)
         if records:
-            print(f"Successfully created relationship of type {rel_type}")
+            print(Fore.GREEN + f"Successfully created relationship between node '{org_wikidata_id}' and node '{rel_wikidata_id}' of type {rel_type}" + Style.RESET_ALL)
             return True
         else:
-            print("No relationship created for params: '{params}'. Source or target node might not exist.")
+            raise KeyError(f"No relationship created for params: '{params}'. Source or target node might not exist.")
 
-def get_properties_dict(wikidata_id, label, name):
+def get_properties_dict(wikidata_id, label):
     data = wikidata_wbgetentities(wikidata_id)
 
     try:
@@ -165,16 +160,27 @@ def get_properties_dict(wikidata_id, label, name):
     except KeyError as e:
         # defaulting to just searching for the name without additional information if there was a key error
         # needs to send a request to wikidata, therefore this can slow the programm down
-        properties_dict = {
-            "name": wikidata_wbsearchentities(wikidata_id, "name"),
-            "label": label,
-            "wikidata_id": wikidata_id,
-            "placeholder": False,
-            "has_relationships": False,
-        }
-        name = properties_dict["name"]
-        print(Fore.LIGHTYELLOW_EX + f"KeyError: {e} for wikidata_id {wikidata_id}, so limited properties available for {name}" + Style.RESET_ALL)
-        return properties_dict
+        try:
+            properties_dict = {
+                "name": wikidata_wbsearchentities(wikidata_id, id_or_name="name"),
+                "label": label,
+                "wikidata_id": wikidata_id,
+                "placeholder": False,
+                "has_relationships": False,
+            }
+            name = properties_dict["name"]
+            print(Fore.LIGHTYELLOW_EX + f"KeyError: {e} for wikidata_id {wikidata_id}, so limited properties available for {name}" + Style.RESET_ALL)
+            return properties_dict
+        except KeyError as e:
+            properties_dict = {
+                "name": "no name specified by wikidata",
+                "label": label,
+                "wikidata_id": wikidata_id,
+                "placeholder": False,
+                "has_relationships": False,
+            }
+            print(Fore.RED + f"KeyError: {e} for wikidata_id {wikidata_id}, because Wikidata Exists but no label/name defined by Wikidata" + Style.RESET_ALL)
+            return properties_dict
 
 def check_if_node_exists_in_graph(wikidata_id = None, name = None, driver=None):
     if wikidata_id is not None:
@@ -232,8 +238,8 @@ def create_nodes_and_relationships_for_node(org_wikidata_id: str, from_date_of_i
                     rel_wikidata_end_time = rel_wikidata_entry["end_time"]
                     try:
                         if is_date_in_range(rel_wikidata_start_time, rel_wikidata_end_time, from_date_of_interest, until_date_of_interest):
-                            temp.append(create_new_node(rel_wikidata_id, "", label=rel_label,has_wikidata_entry=True, driver=driver))
-                            create_relationship_in_graph(rel_direction, rel_type, org_label, rel_label, org_wikidata_id, rel_wikidata_id, rel_wikidata_start_time, rel_wikidata_end_time, driver)
+                            temp.append(create_new_node(rel_wikidata_id, None, label=rel_label, driver=driver)) #todo we dont know this if has wikidata entry
+                            create_relationship_in_graph(rel_direction, rel_type, org_wikidata_id, rel_wikidata_id, rel_wikidata_start_time, rel_wikidata_end_time, driver)
                     except ValueError as e:
                         raise ValueError(f"{e}")
 
@@ -384,7 +390,7 @@ def is_date_in_range(rel_wikidata_start_time: datetime, rel_wikidata_end_time: d
 def build_graph_from_initial_node(node_name, label, date_from, date_until, nodes_to_include, search_depth, driver):
     # initialize first placeholder node of company name
     wikidata_id_of_company = wikidata_wbsearchentities(node_name)
-    queue = [create_new_node(wikidata_id_of_company, node_name, label, has_wikidata_entry=True, driver=driver)]
+    queue = [create_new_node(wikidata_id_of_company, node_name, label, driver=driver)]
     # iteratively adding nodes and relationships
     for i in range(search_depth):
         print(Fore.BLUE + f"\n---Started building graph for {node_name} on depth {i}---\n" + Style.RESET_ALL)
@@ -399,44 +405,190 @@ def build_graph_from_initial_node(node_name, label, date_from, date_until, nodes
                                                                          driver=driver))
 
         print(Fore.BLUE + f"\n---Finished building graph for {node_name} on depth {i}---\n" + Style.RESET_ALL)
+    return wikidata_id_of_company
 
 def reset_graph(driver):
     with driver.session() as session:
         session.run("MATCH(n) DETACH DELETE n")
 
-def delete_node(wikidata_id = None, name = None, driver = None) -> bool:
-    if name:
-        identifier = name
-        by_name = True
+def delete_node(wikidata_id, driver) -> bool:
+    if wikidata_id is not None:
         delete_query = """
-                    MATCH (n {name: $identifier})
-                    DELETE n
-                    RETURN count(n) as deleted_count
+                   MATCH (n {wikidata_id: $wikidata_id})
+                   DETACH DELETE n
+                   RETURN count(n) as deleted_count
                     """
-    elif wikidata_id:
-        identifier = wikidata_id
-        by_name = False
     else:
-        raise ValueError(f"Deletion failed. Please specify name or wikidata_id")
-
-    delete_query = """
-            MATCH (n {wikidata_id: $identifier})
-            DELETE n
-            RETURN count(n) as deleted_count
-            """
+        print(Fore.RED + f"Error: Wikidata id '{wikidata_id}' is none, either because no wikidata id was specified or because no wikidata id was found" + Style.RESET_ALL)
+        return False
     try:
         with driver.session() as session:
-            result = session.run(delete_query, identifier=identifier).single()
+            result = session.run(delete_query, wikidata_id=wikidata_id).single()
             if result and result["deleted_count"] > 0:
-                print(
-                    Fore.GREEN + f"Node with {'name' if by_name else 'wikidata_id'}: '{identifier}' has been deleted" + Style.RESET_ALL)
-                return True
-            print(
-                Fore.YELLOW + f"No node found with {'name' if by_name else 'wikidata_id'}: {identifier}" + Style.RESET_ALL)
+                return wikidata_id
+            print(Fore.YELLOW + f"No node found with wikidata_id: '{wikidata_id}:'" + Style.RESET_ALL)
             return False
     except Exception as e:
-        print(Fore.RED + f"Error deleting node: {str(e)}" + Style.RESET_ALL)
-        return False
+        raise Exception(Fore.RED + f"Error deleting node: {str(e)} + Error: {e}" + Style.RESET_ALL)
+
+def delete_relationship_by_id(relationship_id: str, driver) -> bool:
+    """
+    Deletes a relationship using its Neo4j elementId
+    Returns: bool indicating success or failure
+    """
+    if not relationship_id:
+        raise KeyError(Fore.RED + "Error: relationship_id must be provided" + Style.RESET_ALL)
+
+    delete_query = """
+        MATCH ()-[r]-()
+        WHERE elementId(r) = $relationship_id
+        DELETE r
+        RETURN count(r) as deleted_count
+    """
+
+    try:
+        with driver.session() as session:
+            result = session.run(delete_query,
+                                 relationship_id=relationship_id).single()
+
+            if result and result["deleted_count"] > 0:
+                print(Fore.GREEN +f"Relationship with ID '{relationship_id}' has been deleted" +Style.RESET_ALL)
+                return True
+            raise Exception(Fore.YELLOW + f"No relationship found with ID '{relationship_id}'" + Style.RESET_ALL)
+    except Exception as e:
+        raise Exception(Fore.RED + f"Error deleting relationship: {str(e)} + Error: {e}" + Style.RESET_ALL)
+
+def get_node_relationships(source_wikidata_id: str = None, target_wikidata_id: str = None, driver=None) -> list:
+    """
+    Returns relationships between nodes. If only source_wikidata_id is provided, returns all its relationships.
+    If both IDs are provided, returns only relationships between those two nodes.
+    Returns: [{'rel_direction': 'OUTBOUND'|'INBOUND', 'rel_type': 'relationship_type'}, ...]
+    """
+    if driver is None:
+        print(Fore.RED + "Error: No driver provided" + Style.RESET_ALL)
+        return []
+    with driver.session() as session:
+        if source_wikidata_id and target_wikidata_id:
+            # Query relationships between two specific nodes
+            relationship_query = """
+                MATCH (source {wikidata_id: $source_id})
+                MATCH (target {wikidata_id: $target_id})
+                OPTIONAL MATCH (source)-[r1]->(target)
+                OPTIONAL MATCH (source)<-[r2]-(target)
+                RETURN 
+                    collect({direction: 'OUTBOUND', type: type(r1), id: elementId(r1)}) as outgoing,
+                    collect({direction: 'INBOUND', type: type(r2), id: elementId(r2)}) as incoming
+            """
+            result = session.run(relationship_query,
+                                 source_id=source_wikidata_id,
+                                 target_id=target_wikidata_id).single()
+
+        elif source_wikidata_id:
+            # Query all relationships for single node
+            relationship_query = """
+                MATCH (n {wikidata_id: $node_id})
+                OPTIONAL MATCH (n)-[r1]->(out)
+                WITH n, collect({direction: 'OUTBOUND', type: type(r1), id: elementId(r1)}) as outgoing
+                OPTIONAL MATCH (n)<-[r2]-(in)
+                RETURN outgoing, collect({direction: 'INBOUND', type: type(r2), id: elementId(r2)}) as incoming
+            """
+            result = session.run(relationship_query, node_id=source_wikidata_id).single()
+        else:
+            raise KeyError(Fore.RED + f"Error: No source wikidata_id provided, source_wikidata_id: '{source_wikidata_id}', target_wikidata_id: '{target_wikidata_id}'" + Style.RESET_ALL)
+        if not result:
+            #print(Fore.YELLOW + "No nodes or relationships found" + Style.RESET_ALL)
+            return []
+
+        # Combine and format relationships
+        relationships = result["outgoing"] + result["incoming"]
+        formatted_relationships = [
+            {
+                'rel_direction': rel['direction'],
+                'rel_type': rel['type'],
+                'rel_id': rel['id']
+            }
+            for rel in relationships
+            if rel['type'] is not None
+        ]
+
+        #if formatted_relationships:
+            #print(Fore.GREEN + f"Found {len(formatted_relationships)} relationships" + Style.RESET_ALL)
+        #else:
+        #print(Fore.YELLOW + "No relationships found" + Style.RESET_ALL)
+        return formatted_relationships
+
+
+def get_node_properties(wikidata_id: str, driver) -> dict:
+    """
+    Returns all properties of a node as a dictionary
+    Returns: {'property_name': property_value, ...}
+    """
+    if driver is None:
+        raise ValueError(Fore.RED + "Error: No driver provided" + Style.RESET_ALL)
+
+    try:
+        with driver.session() as session:
+            # Query all properties of the node
+            properties_query = """
+                MATCH (n {wikidata_id: $wikidata_id})
+                RETURN properties(n) as props,
+                       labels(n) as labels
+            """
+
+            result = session.run(properties_query,
+                                 wikidata_id=wikidata_id).single()
+
+            if not result:
+                raise KeyError(Fore.YELLOW + f"No node found with wikidata_id: {wikidata_id}" + Style.RESET_ALL)
+
+            # Get properties and labels
+            properties_dict = dict(result["props"])
+            node_labels = result["labels"]
+
+            # Add labels to properties dictionary
+            properties_dict['labels'] = node_labels
+
+            return properties_dict
+
+    except Exception as e:
+        raise ValueError(Fore.RED + f"Error getting node properties: {str(e)}" + Style.RESET_ALL)
+
+def set_node_properties(wikidata_id: str, properties_dict: dict, driver) -> str:
+    try:
+        with driver.session() as session:
+
+            update_query = """
+                   MATCH (n {wikidata_id: $wikidata_id})
+                   SET n = $properties
+                   RETURN n, n.wikidata_id as wikidata_id 
+               """
+
+            result = session.run(update_query, wikidata_id=wikidata_id, properties=properties_dict)
+            updated_node = result.single()
+            if updated_node:
+                print(Fore.GREEN + f"Successfully updated node with ID: {wikidata_id}" + Style.RESET_ALL)
+                return updated_node['wikidata_id']
+            else:
+                raise KeyError( f"No node found with ID: {wikidata_id}")
+    except Exception as e:
+        raise KeyError(Fore.RED + f"Error updating node with wikidata_id: '{wikidata_id}': {str(e)}" + Style.RESET_ALL)
+
+def get_wikidata_id_from_name(name: str, driver) -> str:
+    try:
+        with driver.session() as session:
+            # Query to find wikidata_id by name
+            query = """
+                MATCH (n {name: $name})
+                RETURN n.wikidata_id as wikidata_id
+            """
+            result = session.run(query, {"name": name}).single()
+            if result:
+                return result["wikidata_id"]
+            print(Fore.YELLOW + f"No node found with name: {name}" + Style.RESET_ALL)
+            return None
+    except Exception as e:
+        print(Fore.RED + f"Error finding wikidata_id: {str(e)}" + Style.RESET_ALL)
+        return None
 
 def build_demo_graph(driver):
     company_query = """

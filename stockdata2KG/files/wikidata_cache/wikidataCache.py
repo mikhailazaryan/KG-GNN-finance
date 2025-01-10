@@ -90,7 +90,7 @@ class WikidataCache:
             return cache_dict[key]
 
         # Make actual request
-        time.sleep(0.3)
+        time.sleep(0.1)
         result = _make_request(params)
         if print_update:
             print(f"Retrieved data from wikidata {action} - {key}")

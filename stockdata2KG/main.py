@@ -37,7 +37,7 @@ def main():
      date_from = datetime(1995, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
      date_until = datetime(2024, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
      nodes_to_include = ["Company", "Industry_Field", "Person", "City", "Country", "StockMarketIndex"]
-     search_depth = 3
+     search_depth = 2
 
      if build_actual_graph_bool:
          reset_graph(driver)
@@ -68,27 +68,27 @@ def main():
              "article_4" : "Allianz SE sold PIMCO",
              "article_5" : "Allianz SE is not listed in EURO STOXX 50 anymore",
              "article_6" : "Allianz SE bought SportGear AG headquartered in Cologne",
-             "article_7" : "Allianz SE moved their headquarter from Berlin to Frankfurt",
-             "article_8" : "Woodworking is a new business field of Allianz SE",
-             "article_9" : "Allianz SE was renamed to Algorithm GmbH"
+             "article_7" : "Allianz SE bought Jamo Data GmbH headquartered in Jena",
+             "article_8" : "Allianz SE moved their headquarter from Berlin to Frankfurt",
+             "article_9" : "Woodworking is a new business field of Allianz SE",
+             "article_10" : "Allianz SE was renamed to Algorithm GmbH",
+             "article_11" : "Dresdner Bank was renamed to Dresdner Privatbank"
          }
 
-         #todiscuss: #todo: (1) Mehr syntetische und echte article nachrichten, ggf. mit preprocessing/cleaning (which are allowed to be crawled)
-         #todiscuss: #todo (2) article Keyword extraction and graph retrieval and updating
-         #DONE #todo:         - veränderliche schwierigkeiten
-         #todo:         -
-         #todo (3) More detailed Nodes Information from Wikidata
 
-         #Process the article and update the graph
-         #process_article_and_update_KG(article_9 , driver)
+         #todo:
+         #  (1) Better and more realistic prompts,
+         #  (3) More detailed Nodes Information from Wikidata
+         #  (4) test on more prompts and extend the graphupdater function to also handle more changes, especially in _get_relationship_properties
+
+
 
          nodes_to_include = ["Company", "Industry_Field", "Person", "City", "Country", "StockMarketIndex"] # only temporatry, seems like it works best with industry field
          company_names = ["Allianz SE", "Volkswagen AG"] # temporary
          for article in articles.values():
-            #break
             print("\n")
             update_neo4j_graph(article, company_names, nodes_to_include, date_from, date_until, nodes_to_include, 1, driver)
-         #update_neo4j_graph(articles.get('article_6'), company_names, nodes_to_include, date_from, date_until, nodes_to_include, 1, driver)
+         #update_neo4j_graph(articles.get('article_11'), company_names, nodes_to_include, date_from, date_until, nodes_to_include, 1, driver)
 
      print(Fore.LIGHTMAGENTA_EX + f"\n--- Finished updating existing neo4j graph ---\n" + Style.RESET_ALL)
 

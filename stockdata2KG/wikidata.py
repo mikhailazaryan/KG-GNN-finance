@@ -9,32 +9,32 @@ from stockdata2KG.files.wikidata_cache.wikidataCache import wikidata_cache
 
 ## Code partially from https://www.jcchouinard.com/wikidata-api-python/
 
-def wikidata_wbsearchentities(query_string: str, id_or_label: str = 'id') -> str:
+def wikidata_wbsearchentities(query_string: str, id_or_name: str = 'id') -> str:
     params = {
         'action': 'wbsearchentities',
         'format': 'json',
         'search': query_string,
         'language': 'en',
-        'profile': 'language'
+        'profile': 'default',
+        'limit': 1,
     }
 
     # Use wikidata_cache to get data
     data = wikidata_cache.get_data('wbsearchentities', query_string, params)
 
+
     try:
         if not data['search']:
-            print(Fore.LIGHTYELLOW_EX + f"No entry found from wikidata for query: {query_string}, id_or_label: {id_or_label}, returning \"No wikidata entry found\"" + Style.RESET_ALL)
+            print(Fore.YELLOW + f"No entry found from wikidata for query: {query_string}, id_or_name: {id_or_name}, returning \"No wikidata entry found\"" + Style.RESET_ALL)
             return "No wikidata entry found"
-            #todo: find out which side effects this had
-        if id_or_label == 'id':
+        if id_or_name == 'id':
             return data['search'][0]['id']
-        elif id_or_label == 'name':
+        elif id_or_name == 'name':
             return data['search'][0]['label']
         else:
-            return 'Please indicate if you would like to return id or label'
+            raise KeyError(f"'Please indicate if you would like to return id or name")
     except KeyError as e:
-        print(Fore.LIGHTYELLOW_EX + f"KeyError: {e} while retrieving data from wikidata for query: {query_string}, id_or_label: {id_or_label}, returning 'None'" + Style.RESET_ALL)
-        return None
+        raise KeyError(Fore.RED + f"KeyError: {e} while retrieving data from wikidata for query: '{query_string}', id_or_name: '{id_or_name}'" + Style.RESET_ALL)
 
 def wikidata_wbgetentities(id: str, print_output: bool = False) -> Dict[str, Any]:
     params = {
