@@ -12,7 +12,7 @@ from typing import Dict
 from stockdata2KG.graphbuilder import \
     create_new_node, build_graph_from_initial_node, create_relationship_in_graph, \
     check_if_node_exists_in_graph, delete_node, get_node_relationships, get_wikidata_id_from_name, \
-    delete_relationship_by_id, get_node_properties, set_node_properties
+    delete_relationship_by_id, get_node_properties, set_node_properties, get_properties
 from stockdata2KG.wikidata import wikidata_wbsearchentities
 
 model = genai.GenerativeModel("gemini-1.5-pro-latest")  # Choose the desired model
@@ -447,7 +447,9 @@ def _add_node(name_org_node, node_type, article, date_from, date_until, nodes_to
         id_new_node = _get_and_increment_customID()
         print(
             Fore.YELLOW + f"Created custom ID '{id_new_node}' for node '{name_new_node}' because no wikidata ID was found" + Style.RESET_ALL)
-        id_new_node = create_new_node(id_new_node, name_new_node, node_type, driver=driver)
+
+        property_dict = get_properties(id_new_node, node_type, name_new_node)
+        id_new_node = create_new_node(id_new_node, node_type, properties_dict=property_dict, driver=driver)
         print(Fore.GREEN + f"Node with name '{name_new_node}' and wikidata_id: '{id_new_node}' has been added to neo4j graph" + Style.RESET_ALL)
 
     else:

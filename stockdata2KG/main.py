@@ -37,7 +37,7 @@ def main():
      update_graph_bool = True
 
      # this builds the initial graph from wikidata
-     company_names = ["Allianz SE"]
+     company_names = ["Allianz SE", "Commerzbank AG"]
      date_from = datetime(1995, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
      date_until = datetime(2024, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
      nodes_to_include = ["Company", "Industry_Field", "Person", "City", "Country", "Product_or_Service", "Employer"] #took out stock marked index

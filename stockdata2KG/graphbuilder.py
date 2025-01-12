@@ -14,11 +14,10 @@ def create_new_node(wikidata_id, label, properties_dict, driver,):
 
     with driver.session() as session:
         result = session.run(check_query, wikidata_id=wikidata_id).single()
-
         # If node doesn't exist (result is None), create it
         if result is None:
             create_query = f"""
-                    CREATE (n:{label})
+                    CREATE (n:`{label}`)
                     SET n = $properties
                     RETURN n, n.wikidata_id as wikidata_id 
                     """
@@ -118,7 +117,6 @@ def _get_wikidata_entry(key, wikidata_id, wikidata, name = False, time = False):
     try:
         if time:
             return str(parse_datetime_to_iso(wikidata.get("entities").get(wikidata_id).get("claims").get(key)[0].get("mainsnak").get("datavalue").get("value").get("time")))
-        print(wikidata.get("entities").get(wikidata_id).get("claims").get(key)[0].get("mainsnak").get("datavalue").get("value"))
         return wikidata.get("entities").get(wikidata_id).get("claims").get(key)[0].get("mainsnak").get("datavalue").get("value")
     except TypeError as e:
         if name:
@@ -165,8 +163,6 @@ def get_properties(wikidata_id, label, name):
     properties_dict["name"] = _get_wikidata_entry("P373", wikidata_id, data, name=True)
     properties_dict["wikidata_id"] = wikidata_id
 
-    print(properties_dict)
-
     return properties_dict
 
 def get_relationship_dict(wikidata_id, label):
@@ -193,6 +189,13 @@ def get_relationship_dict(wikidata_id, label):
                             "relationship_type": "OWNS",
                             "relationship_direction": "OUTBOUND"
                         },
+                        "Owner": {
+                            "wikidata_entries": _get_wikidata_rels(data, wikidata_id, ["127"]),
+                            "label": "Company",
+                            "relationship_type": "OWNS",
+                            "relationship_direction": "INBOUND"
+                        },
+
                         "City": {
                             "wikidata_entries": _get_wikidata_rels(data, wikidata_id, ["P159"]),
                             "label": "City",
