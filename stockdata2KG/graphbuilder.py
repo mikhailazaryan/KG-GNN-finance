@@ -127,13 +127,14 @@ def _get_wikidata_entry(key, wikidata_id, wikidata, name = False, time = False):
         return "NA"
 
 def get_properties(wikidata_id, label, name):
-    if wikidata_id[0:7] == "CustomID":
-        properties_dict4 = {
+
+    if wikidata_id[0:8] == "CustomID":
+        properties_dict = {
             "name": name,
             "label": label,
             "wikidata_id": wikidata_id
         }
-        return properties_dict4
+        return properties_dict
 
     data = wikidata_wbgetentities(wikidata_id)
 

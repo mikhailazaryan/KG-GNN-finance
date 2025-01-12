@@ -78,9 +78,6 @@ def main():
 
 
 
-         nodes_to_include = ["Company", "Industry_Field", "Person", "City", "Country", "StockMarketIndex"] # only temporatry, seems like it works best with industry field
-         company_names = ["Allianz SE", "Volkswagen AG"] # temporary
-
 
          for article in articles.values():
             print("\n")

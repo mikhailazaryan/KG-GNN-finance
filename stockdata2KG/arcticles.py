@@ -31,8 +31,8 @@ def get_articles(company):
         "article_7": "Allianz SE bought Jamo Data GmbH headquartered in Jena",
         "article_8": "Allianz SE moved their headquarter from Berlin to Frankfurt",
         "article_9": "Woodworking is a new business field of Allianz SE",
-        "article_10": "Allianz SE was renamed to Algorithm GmbH",
-        "article_11": "Westbank was renamed to Westbank Privatbank"
+        "article_10": "Westbank was renamed to Westbank Privatbank",
+        "article_11": "Allianz SE was renamed to Algorithm GmbH"
     }
 
     prompt = f"""

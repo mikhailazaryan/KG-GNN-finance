@@ -443,12 +443,15 @@ def _add_node(name_org_node, node_type, article, date_from, date_until, nodes_to
     id_new_node = wikidata_wbsearchentities(name_new_node, id_or_name='id')
     rel_props = _get_relationship_properties(node_type)
 
+    print(id_new_node)
+
     if id_new_node == "No wikidata entry found":
         id_new_node = _get_and_increment_customID()
         print(
             Fore.YELLOW + f"Created custom ID '{id_new_node}' for node '{name_new_node}' because no wikidata ID was found" + Style.RESET_ALL)
 
         property_dict = get_properties(id_new_node, node_type, name_new_node)
+        print(property_dict)
         id_new_node = create_new_node(id_new_node, node_type, properties_dict=property_dict, driver=driver)
         print(Fore.GREEN + f"Node with name '{name_new_node}' and wikidata_id: '{id_new_node}' has been added to neo4j graph" + Style.RESET_ALL)
 
