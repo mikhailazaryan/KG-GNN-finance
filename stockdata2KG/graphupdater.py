@@ -261,7 +261,6 @@ def find_node_requiring_change(article, company, node_type, search_depth, driver
                 MATCH (start:Company)-[*{path_length}]-(target:{node_type})
                 WHERE start.name = "{company}"
                 AND target.name IS NOT NULL
-                AND target.name <> "No wikidata entry found"
                 RETURN DISTINCT target.name
     
                 """
@@ -318,7 +317,6 @@ def find_node_requiring_change(article, company, node_type, search_depth, driver
             print(f"Found no node with path_length = {path_length} to be relevant for the article, therefore increasing path_length to {path_length+1}. Relevant Nodes to choose from were: '{relevant_nodes}")
     print(f"Found no node up to path_length = {path_length} to be relevant for the article, therefore returning None")
     return None
-
 
 def find_type_of_change(article, node_requiring_change):
     types_of_change_enum = ["add node", "delete relationship to node", "modify node information", "replace node", "no change required"]
@@ -409,15 +407,6 @@ def find_node_name_to_change(article, node_type):
     name_new_node = result.text.strip()
     print(f"Found name '{name_new_node}' to be the most fitting name for the new node for article '{article}'")
     return name_new_node
-
-def _replace_node(most_relevant_node, new_node_name, date_from, date_until, nodes_to_include, search_depth, driver):
-    #   (1) copy node_type and relationship type of old node
-    node_relationships = get_node_relationships()
-    #   (2) create new node with relationship type
-    #   (3) create new relationship with same relationship type (both can use the add function)
-        #_add_new_node(new_node_name, org_node=most_relevant_node, node_type, rel_properties, date_from, date_until, nodes_to_include, search_depth, driver)
-    #   (4) check if old node has remaining relationships and delete if not
-    return
 
 def _get_and_increment_customID():
     global custom_id
