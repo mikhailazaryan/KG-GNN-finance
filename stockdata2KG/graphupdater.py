@@ -153,30 +153,36 @@ def suggestion_to_cypher(driver, data, suggestion):
      # Extract LLM response
      return response.text
 
-def update_neo4j_graph(article, companies, node_types, date_from, date_until, nodes_to_include, search_depth, driver):
+def update_neo4j_graph(article, companies, node_types, date_from, date_until, nodes_to_include, search_depth_new_nodes, search_depth_for_changes, driver):
     name_org_node = find_company(article, companies)
     node_type = find_node_type(article, node_types)
-    name_selected_node = find_node_requiring_change(article, name_org_node, node_type, driver)  # todo issue: secondary connections are not taken into account (e.g. Allianz SE subsiary company1 bought company 2), maybe I can iteratively increase the scope? This should happen in the find company field
+    name_selected_node = find_node_requiring_change(article, name_org_node, node_type, search_depth_for_changes, driver)
     type_of_change = find_type_of_change(article, name_selected_node)
 
+
     if type_of_change == "add node":
-        id_new_node = _add_node(name_org_node, node_type, article, date_from, date_until, nodes_to_include, search_depth, driver)
-
-    elif type_of_change == "delete relationship to node":
-        id_node_deleted = _delete_rel_and_maybe_node(name_org_node, name_selected_node, driver)
-
-    elif type_of_change == "replace node":
-        id_new_node = _add_node(name_org_node, node_type, article, date_from, date_until, nodes_to_include, search_depth, driver)
-        id_node_deleted = _delete_rel_and_maybe_node(name_org_node, name_selected_node, driver)
-
+        id_new_node = _add_node(name_org_node, node_type, article, date_from, date_until, nodes_to_include, search_depth_new_nodes, driver)
         return
-    elif type_of_change == "modify node information":
-        id_of_selected_node = get_wikidata_id_from_name(name_selected_node, driver)
-        prop_dict = get_node_properties(id_of_selected_node, driver)
-        updated_node_properties_dict = _update_node_properties_dict(article, prop_dict, prop_dict)
-        id_of_updated_node = set_node_properties(id_of_selected_node, updated_node_properties_dict, driver)
+    elif name_selected_node is None:
+        raise ValueError("selected node is none")
+    else:
+        if type_of_change == "delete relationship to node":
+            id_node_deleted = _delete_rel_and_maybe_node(name_org_node, name_selected_node, driver)
+            return
+        elif type_of_change == "replace node":
+            id_new_node = _add_node(name_org_node, node_type, article, date_from, date_until, nodes_to_include, search_depth_new_nodes, driver)
+            id_node_deleted = _delete_rel_and_maybe_node(name_org_node, name_selected_node, driver)
 
-        return
+            return
+        elif type_of_change == "modify node information":
+            id_of_selected_node = get_wikidata_id_from_name(name_selected_node, driver)
+            prop_dict = get_node_properties(id_of_selected_node, driver)
+            updated_node_properties_dict = _update_node_properties_dict(article, prop_dict, prop_dict)
+            id_of_updated_node = set_node_properties(id_of_selected_node, updated_node_properties_dict, driver)
+
+            return
+        else:
+            raise KeyError(f"{type_of_change} not supported")
 
 def find_company(article, companies):
     prompt = f"""
@@ -239,59 +245,80 @@ def find_node_type(article, node_types):
     print(f"Found node_type of '{result}' for article '{article}' and node_types '{node_types}")
     return result
 
-def find_node_requiring_change(article, company, node_type, driver):
+def find_node_requiring_change(article, company, node_type, search_depth, driver):
+
+
     query = f"""
             MATCH (n:{node_type})-[]-(target {{name: "{company}"}})
             WHERE n.name IS NOT NULL
             RETURN DISTINCT n.name
             """
-    with driver.session() as session:
-        result = session.run(query)
-        result = [record["n.name"] for record in result]
-        if result is not None:
-            print(f"Found relevant nodes '{result}' for company '{company}' and node_type '{node_type}'")
+
+
+    for path_length in range(1, search_depth+1):
+
+        query = f"""
+                MATCH (start:Company)-[*{path_length}]-(target:{node_type})
+                WHERE start.name = "{company}"
+                AND target.name IS NOT NULL
+                AND target.name <> "No wikidata entry found"
+                RETURN DISTINCT target.name
+    
+                """
+
+        with driver.session() as session:
+            result = session.run(query)
+            result = [record["target.name"] for record in result]
+            if result is not None:
+                print(f"Found relevant nodes '{result}' for company '{company}' and node_type '{node_type}'")
+            else:
+                raise ValueError(f"Could not find relevant nodes for company '{company}' and node_type '{node_type}")
+
+        relevant_nodes = result
+        relevant_nodes.append("None")
+        if node_type == "Company":
+            relevant_nodes.append(company) #If e.g. a company is buying another company, it makes sense to include it in the list of relevant nodes, mostly used if new nodes need to be created
+
+        prompt = f"""
+                You are a classification assistant. Your task is to analyze a news article and select the SINGLE most relevant node which needs to be changed from a provided list of nodes.
+    
+                Instructions:
+                1. Read the provided news article carefully
+                2. Review the list of available nodes
+                3. Select ONE node that needs to be changed to keep the Knowledge Graph up-to-date in accordance with the article information . If no node seems to fit, please return "None"
+    
+                Example input:
+    
+                Article: "Allianz SE sold PIMCO"
+                Available nodes: [Allianz Deutschland, Allianz Holding eins, PIMCO, Allianz New Europe Holding, 'Kraft Versicherungs-AG', 'Allianz Infrastructure Czech HoldCo II']
+                Output: PIMCO
+                Reasoning: The PIMCO node needs to be changed, as it no longer has a reltionship to Allianz SE after being sold.
+    
+                Article: "Microsoft Inc bought CyberSystems INC"
+                Available nodes: [Allianz Deutschland, EthCyberSecurityCompany, PIMCO, Allianz New Europe Holding, 'Kraft Versicherungs-AG', 'Allianz Infrastructure Czech HoldCo II']
+                Output: None of these nodes are relevant
+                Reasoning: As none of the available nodes are mentioned in the article, None of these nodes are relevant
+                
+                Article: "Allianz SE moved their headquarter from Berlin to Frankfurt"
+                Available nodes: [Berlin, Munich, Frankfurt, New York]
+                Output: Berlin
+                Reasoning: The node Berlin is the existing node in the Knowledge Graph which requires a change. 
+    
+    
+                Please analyze the following:
+                Article: "{article}"
+                Available node_types: {str(relevant_nodes).replace("'", "")}        
+                """
+
+        result = _generate_result_with_enum(prompt, relevant_nodes)
+        if result != "None":
+            print(f"Found node '{result}' to be most relevant for article '{article}' and relevant nodes '{relevant_nodes}")
+            return result
         else:
-            raise ValueError(f"Could not find relevant nodes for company '{company}' and node_type '{node_type}")
+            print(f"Found no node with path_length = {path_length} to be relevant for the article, therefore increasing path_length to {path_length+1}. Relevant Nodes to choose from were: '{relevant_nodes}")
+    print(f"Found no node up to path_length = {path_length} to be relevant for the article, therefore returning None")
+    return None
 
-    relevant_nodes = result
-    relevant_nodes.append('None of these nodes are relevant')
-    if node_type == "Company":
-        relevant_nodes.append(company) #If e.g. a company is buying another company, it makes sense to include it in the list of relevant nodes, mostly used if new nodes need to be created
-
-    prompt = f"""
-            You are a classification assistant. Your task is to analyze a news article and select the SINGLE most relevant node which needs to be changed from a provided list of nodes.
-
-            Instructions:
-            1. Read the provided news article carefully
-            2. Review the list of available nodes
-            3. Select ONE node that needs to be changed to keep the Knowledge Graph up-to-date in accordance with the article information . If no node seems to fit, please return "None of these nodes are relevant"
-
-            Example input:
-
-            Article: "Allianz SE sold PIMCO"
-            Available nodes: [Allianz Deutschland, Allianz Holding eins, PIMCO, Allianz New Europe Holding, 'Kraft Versicherungs-AG', 'Allianz Infrastructure Czech HoldCo II']
-            Output: PIMCO
-            Reasoning: The PIMCO node needs to be changed, as it no longer has a reltionship to Allianz SE after being sold.
-
-            Article: "Microsoft Inc bought CyberSystems INC"
-            Available nodes: [Allianz Deutschland, EthCyberSecurityCompany, PIMCO, Allianz New Europe Holding, 'Kraft Versicherungs-AG', 'Allianz Infrastructure Czech HoldCo II']
-            Output: None of these nodes are relevant
-            Reasoning: As none of the available nodes are mentioned in the article, None of these nodes are relevant
-            
-            Article: "Allianz SE moved their headquarter from Berlin to Frankfurt"
-            Available nodes: [Berlin, Munich, Frankfurt, New York]
-            Output: Berlin
-            Reasoning: The node Berlin is the existing node in the Knowledge Graph which requires a change. 
-
-
-            Please analyze the following:
-            Article: "{article}"
-            Available node_types: {str(relevant_nodes).replace("'", "")}        
-            """
-
-    result = _generate_result_with_enum(prompt, relevant_nodes)
-    print(f"Found node '{result}' to be most relevant for article '{article}' and relevant nodes '{relevant_nodes}")
-    return result
 
 def find_type_of_change(article, node_requiring_change):
     types_of_change_enum = ["add node", "delete relationship to node", "modify node information", "replace node", "no change required"]

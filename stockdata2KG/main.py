@@ -6,7 +6,7 @@ from colorama import init, Fore, Style
 
 from stockdata2KG.files.wikidata_cache.wikidataCache import WikidataCache
 from stockdata2KG.graphbuilder import build_demo_graph, build_graph_from_initial_node, reset_graph
-from stockdata2KG.graphupdater import process_news_and_update_KG, update_neo4j_graph
+from stockdata2KG.graphupdater import process_news_and_update_KG, update_neo4j_graph, find_node_requiring_change
 
 
 def main():
@@ -37,7 +37,7 @@ def main():
      date_from = datetime(1995, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
      date_until = datetime(2024, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
      nodes_to_include = ["Company", "Industry_Field", "Person", "City", "Country", "StockMarketIndex"]
-     search_depth = 2
+     search_depth = 3
 
      if build_actual_graph_bool:
          reset_graph(driver)
@@ -72,7 +72,7 @@ def main():
              "article_8" : "Allianz SE moved their headquarter from Berlin to Frankfurt",
              "article_9" : "Woodworking is a new business field of Allianz SE",
              "article_10" : "Allianz SE was renamed to Algorithm GmbH",
-             "article_11" : "Dresdner Bank was renamed to Dresdner Privatbank"
+             "article_11" : "Westbank was renamed to Westbank Privatbank"
          }
 
 
@@ -85,9 +85,11 @@ def main():
 
          nodes_to_include = ["Company", "Industry_Field", "Person", "City", "Country", "StockMarketIndex"] # only temporatry, seems like it works best with industry field
          company_names = ["Allianz SE", "Volkswagen AG"] # temporary
+
+
          for article in articles.values():
             print("\n")
-            update_neo4j_graph(article, company_names, nodes_to_include, date_from, date_until, nodes_to_include, 1, driver)
+            update_neo4j_graph(article, company_names, nodes_to_include, date_from, date_until, nodes_to_include, search_depth_new_nodes=1, search_depth_for_changes=search_depth, driver=driver)
          #update_neo4j_graph(articles.get('article_11'), company_names, nodes_to_include, date_from, date_until, nodes_to_include, 1, driver)
 
      print(Fore.LIGHTMAGENTA_EX + f"\n--- Finished updating existing neo4j graph ---\n" + Style.RESET_ALL)
