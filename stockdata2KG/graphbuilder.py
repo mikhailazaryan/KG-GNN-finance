@@ -252,7 +252,7 @@ def get_relationship_dict(wikidata_id, label):
                     "wikidata_entries": _get_wikidata_rels(data, wikidata_id, ["P108"]),
                     "label": "Company",
                     "relationship_type": "EMPLOYED_BY",
-                    "relationship_direction": "INBOUND"
+                    "relationship_direction": "OUTBOUND"
                 }
             }
         else:

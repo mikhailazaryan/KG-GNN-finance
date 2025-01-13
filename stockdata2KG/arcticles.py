@@ -31,16 +31,12 @@ def get_articles(company):
         "article_7": "Allianz SE bought Jamo Data GmbH headquartered in Jena",
         "article_8": "Allianz SE moved their headquarter from Berlin to Frankfurt",
         "article_9": "Woodworking is a new business field of Allianz SE",
-        "article_10": "Westbank was renamed to Westbank Privatbank",
-        "article_11": "Allianz SE was renamed to Algorithm GmbH"
     }
 
     prompt = f"""
     Your task is to come up with 9 short articles that are similar to the ones provided for the companie Allianz AG, but now for the company: {company}.
     The articles should be about the Companies, their industry fields, change of Managers, Cities, Countries or Stock Market Indices.
-    
-    Be creative and unusual!
-    
+        
     Example Articles: {example_articles}
     Company for the articles: {company}
             """
@@ -70,4 +66,4 @@ def get_articles(company):
     for article in articles:
         print(str(article) + "\n")
 
-    return example_articles
+    return [example_articles]

@@ -6,7 +6,7 @@ from colorama import init, Fore, Style
 from stockdata2KG.arcticles import get_articles
 from stockdata2KG.files.wikidata_cache.wikidataCache import WikidataCache
 from stockdata2KG.graphbuilder import build_demo_graph, build_graph_from_initial_node, reset_graph
-from stockdata2KG.graphupdater import process_news_and_update_KG, update_neo4j_graph, find_node_requiring_change
+from stockdata2KG.graphupdater import update_neo4j_graph, find_node_requiring_change
 
 
 def main():
@@ -37,7 +37,7 @@ def main():
      update_graph_bool = True
 
      # this builds the initial graph from wikidata
-     company_names = ["Allianz SE", "Commerzbank AG"]
+     company_names = ["Allianz SE", "Commerzbank AG", "Boeing"]
      date_from = datetime(1995, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
      date_until = datetime(2024, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
      nodes_to_include = ["Company", "Industry_Field", "Person", "City", "Country", "Product_or_Service", "Employer"] #took out stock marked index
@@ -63,24 +63,17 @@ def main():
 
 
      if get_articles_bool:
-         articles = get_articles("The Boeing Company")
-
+         articles = get_articles("The Boeing Company")[0]
 
      if update_graph_bool:
          print(Fore.LIGHTMAGENTA_EX + f"\n--- Stated updating existing neo4j graph ---\n" + Style.RESET_ALL)
-
-
 
          #todo:
          #  (1) Better and more realistic prompts,
          #  (3) More detailed Nodes Information from Wikidata
          #  (4) test on more prompts and extend the graphupdater function to also handle more changes, especially in _get_relationship_properties
 
-
-
-
          for article in articles.values():
-            print("\n")
             update_neo4j_graph(article, company_names, nodes_to_include, date_from, date_until, nodes_to_include, search_depth_new_nodes=1, search_depth_for_changes=search_depth, driver=driver)
 
      print(Fore.LIGHTMAGENTA_EX + f"\n--- Finished updating existing neo4j graph ---\n" + Style.RESET_ALL)

@@ -24,141 +24,17 @@ genai.configure(api_key=config['gemini']['api_key'])
 global custom_id
 custom_id = 0
 
-def findKeyword(article, driver):
-    with driver.session() as session:
-        query = """MATCH (n) RETURN n"""
-        result = session.run(query)
-        list = []
-        for record in result:
-            list.append(dict(record["n"])["name"])
-
-    prompt = f"""
-    Read this newspaper article:
-
-    {article}
-
-    Which single keyword of the following keywords ist most relevant in the article?: 
-
-    {list}
-
-    Please only list a single word!"""
-
-    print(prompt)
-    response = model.generate_content(prompt)
-    print("Gemini says: " + response.text)
-    response = response.text.split(" ")
-    if response in list:
-        print("Gemini Keyword is: " + response)
-        return response
-
-def compare_and_suggest_with_llm(news_article, graph_data):
-     # Prepare the prompt for the LLM
-     prompt = f"""
-    Here is the information from a knowledge graph:
-    {graph_data}
-
-    And here is a news article:
-    {news_article}
-
-    Identify any discrepancies between the knowledge graph and the news article. 
-    Suggest the most important update that need to be made to the knowledge graph.
-
-    Please only suggest a single update and start your answer with "Update:", "Insert:" or "Delete:"
-    """
-
-     # Call the LLM API
-     response = model.generate_content(prompt)
-     # Extract LLM response
-     return response.text
-
-def update_KG(query, driver):
-     with driver.session() as session:
-          session.run(query)
-
-def process_news_and_update_KG(article, driver):
-     # node_name = findKeyword(article, driver)
-     # data = query_graph(driver, node_name)
-     data = query_graph(driver, "Munich")
-     print("Data retrieved from KG: " + str(data))
-     suggestion = compare_and_suggest_with_llm(article, data)
-     print("Gemini-Pro 1.5: " + str(suggestion))
-     cypher_code = suggestion_to_cypher(driver, data, suggestion)
-     cypher_code1 = '\n'.join(cypher_code.split('\n')[1:]) # remove first and last lines: "```cypher" and "```"
-     cypher_code2 = '\n'.join(cypher_code1.split('\n')[:-1]) #
-     print("Cypher code:\n " + str(cypher_code2))
-     # extractRelevantNodes(driver)
-     update_KG(cypher_code2, driver)
-
-def findKeyword(article, driver):
-     with driver.session() as session:
-          query = """MATCH (n) RETURN n"""
-          result = session.run(query)
-          list = []
-          for record in result:
-               list.append(dict(record["n"])["name"])
-
-     prompt = f"""
-    Read this newspaper article:
-
-    {article}
-
-    Which single keyword of the following keywords ist most relevant in the article?: 
-
-    {list}
-
-    Please only list a single word!"""
-
-     print(prompt)
-     response = model.generate_content(prompt)
-     print("Gemini says: " + response.text)
-     response = response.text.split(" ")
-     if response in list:
-          print("Gemini Keyword is: " + response)
-          return response
-
-def query_graph(driver, node_name):
-     with driver.session() as session:
-          query = """
-        MATCH (n {name: $node_name})-[r]-(m)
-        RETURN n, type(r) AS relationship_type, m
-        """
-          result = session.run(query, {"node_name": node_name})
-          graph_data = []
-          for record in result:
-               graph_data.append({
-                    "node": dict(record["n"]),
-                    "relationship_type": record["relationship_type"],
-                    # "relationship_properties": record["relationship_properties"],
-                    "connected_node": dict(record["m"])
-               })
-          return graph_data
-
-def suggestion_to_cypher(driver, data, suggestion):
-     # Prepare the prompt for the LLM
-     prompt = f"""
-      given this neo4j knowledge graph entry: 
-
-      {data}
-
-      and this update request:
-
-      {suggestion}
-
-      Please write a single cypher query to make this update.
-      """
-
-     # Call the LLM API
-     response = model.generate_content(prompt)
-
-     # Extract LLM response
-     return response.text
-
 def update_neo4j_graph(article, companies, node_types, date_from, date_until, nodes_to_include, search_depth_new_nodes, search_depth_for_changes, driver):
     name_org_node = find_company(article, companies)
     node_type = find_node_type(article, node_types)
     name_selected_node = find_node_requiring_change(article, name_org_node, node_type, search_depth_for_changes, driver)
     type_of_change = find_type_of_change(article, name_selected_node)
 
+    #if not _sanity_check(article, name_org_node, node_type, type_of_change, name_selected_node).get("is_valid"):
+        #print("Sanity Check returned false, skipping change \n")
+        #return
+    #else:
+        #print("Sanity Check found to be true, updating graph accordingly\n")
 
     if type_of_change == "add node":
         id_new_node = _add_node(name_org_node, node_type, article, date_from, date_until, nodes_to_include, search_depth_new_nodes, driver)
@@ -172,17 +48,42 @@ def update_neo4j_graph(article, companies, node_types, date_from, date_until, no
         elif type_of_change == "replace node":
             id_new_node = _add_node(name_org_node, node_type, article, date_from, date_until, nodes_to_include, search_depth_new_nodes, driver)
             id_node_deleted = _delete_rel_and_maybe_node(name_org_node, name_selected_node, driver)
-
             return
         elif type_of_change == "modify node information":
             id_of_selected_node = get_wikidata_id_from_name(name_selected_node, driver)
             prop_dict = get_node_properties(id_of_selected_node, driver)
             updated_node_properties_dict = _update_node_properties_dict(article, prop_dict, prop_dict)
             id_of_updated_node = set_node_properties(id_of_selected_node, updated_node_properties_dict, driver)
-
+        elif type_of_change == "noh change required":
+            print("no change required")
             return
         else:
             raise KeyError(f"{type_of_change} not supported")
+
+def _sanity_check(article, name_org_node, node_type, type_of_change, name_selected_node):
+    prompt = f"""
+        Please analyze if the following change in our knowledge graph is in accordance with the article:
+
+        Context:
+        - Based on Article: {article}
+        - Original Node: {name_org_node} with Node Type: {node_type}
+        - Type of Change: {type_of_change}
+        - Node which is changed: {name_selected_node}
+
+
+        Return a JSON response in this format:
+        {{
+            "is_valid": boolean
+        }}
+
+        """
+
+    class ResponseSchema(typing.TypedDict):
+        is_valid: bool
+
+    result = _generate_result_from_llm(prompt, ResponseSchema=ResponseSchema, max_output_tokens=1000)
+    result = json.loads(result)
+    return result
 
 def find_company(article, companies):
     prompt = f"""
@@ -208,7 +109,7 @@ def find_company(article, companies):
                 Available node_types: {str(companies).replace("'", "")}        
                 """
 
-    result = _generate_result_with_enum(prompt, companies)
+    result = _generate_result_from_llm(prompt, enum = companies)
     print(f"Found company '{result}' for article '{article}' and companies '{companies}'.")
     return result
 
@@ -241,42 +142,34 @@ def find_node_type(article, node_types):
             Available node_types: {str(node_types).replace("'", "")}        
             """
 
-    result = _generate_result_with_enum(prompt, node_types)
+    result = _generate_result_from_llm(prompt, enum = node_types)
     print(f"Found node_type of '{result}' for article '{article}' and node_types '{node_types}")
     return result
 
 def find_node_requiring_change(article, company, node_type, search_depth, driver):
+    relevant_nodes = ["None"]
 
+    if node_type == "Company":
+        relevant_nodes.extend([company])  # If e.g. a company is buying another company, it makes sense to include it in the list of relevant nodes, mostly used if new nodes need to be created
 
-    query = f"""
-            MATCH (n:{node_type})-[]-(target {{name: "{company}"}})
-            WHERE n.name IS NOT NULL
-            RETURN DISTINCT n.name
-            """
-
-
-    for path_length in range(1, search_depth+1):
+    for path_length in range(0, search_depth+1):
 
         query = f"""
                 MATCH (start:Company)-[*{path_length}]-(target:{node_type})
                 WHERE start.name = "{company}"
                 AND target.name IS NOT NULL
                 RETURN DISTINCT target.name
-    
                 """
 
         with driver.session() as session:
             result = session.run(query)
             result = [record["target.name"] for record in result]
             if result is not None:
-                print(f"Found relevant nodes '{result}' for company '{company}' and node_type '{node_type}'")
+                print(f"Found node requiring change '{result}' for company '{company}' and node_type '{node_type}'")
             else:
                 raise ValueError(f"Could not find relevant nodes for company '{company}' and node_type '{node_type}")
 
-        relevant_nodes = result
-        relevant_nodes.append("None")
-        if node_type == "Company":
-            relevant_nodes.append(company) #If e.g. a company is buying another company, it makes sense to include it in the list of relevant nodes, mostly used if new nodes need to be created
+        relevant_nodes.extend(result)
 
         prompt = f"""
                 You are a classification assistant. Your task is to analyze a news article and select the SINGLE most relevant node which needs to be changed from a provided list of nodes.
@@ -309,7 +202,7 @@ def find_node_requiring_change(article, company, node_type, search_depth, driver
                 Available node_types: {str(relevant_nodes).replace("'", "")}        
                 """
 
-        result = _generate_result_with_enum(prompt, relevant_nodes)
+        result = _generate_result_from_llm(prompt, enum = relevant_nodes)
         if result != "None":
             print(f"Found node '{result}' to be most relevant for article '{article}' and relevant nodes '{relevant_nodes}")
             return result
@@ -370,7 +263,7 @@ def find_type_of_change(article, node_requiring_change):
                 Node requiring a change: {node_requiring_change}
                 """
 
-    result = _generate_result_with_enum(prompt, types_of_change_enum)
+    result = _generate_result_from_llm(prompt, enum = types_of_change_enum)
     print(f"Found type of change '{result}' to be most fitting for article '{article}' and node '{node_requiring_change}")
     return result
 
@@ -426,6 +319,9 @@ def _get_relationship_properties(node_type):
     elif node_type == "City":
         rel_direction = "OUTBOUND"
         rel_type = "HAS_HEADQUARTER_IN"
+    elif node_type == "Product_or_Service":
+        rel_direction = "OUTBOUND"
+        rel_type = "OFFERS"
     #todo: add all other options ["Company", "Industry_Field", "Person", "City", "Country", "StockMarketIndex"]
     else:
         raise ValueError(f"Unknown node type '{node_type}'")
@@ -465,6 +361,9 @@ def _add_node(name_org_node, node_type, article, date_from, date_until, nodes_to
 def _delete_rel_and_maybe_node(name_company, name_selected_node, driver):
     id_org_node = get_wikidata_id_from_name(name_company, driver)
     id_selected_node = get_wikidata_id_from_name(name_selected_node, driver)
+    if id_selected_node is None:
+        print("No node with name'{name_selected_node}' found, returning False")
+        return False
     rels = get_node_relationships(source_wikidata_id=id_org_node, target_wikidata_id=id_selected_node, driver=driver)
     for rel in rels:
         delete_relationship_by_id(rel['rel_id'], driver)
@@ -479,17 +378,34 @@ def _get_datetime_now_and_max():
     rel_wikidata_end_time = str(datetime.max.replace(tzinfo=timezone.utc))
     return rel_wikidata_start_time, rel_wikidata_end_time
 
-def _generate_result_with_enum(prompt, enum):
-    result = model.generate_content(prompt,
-        generation_config=genai.GenerationConfig(
-            response_mime_type="text/x.enum",
-            response_schema={
-                "type": "STRING",
-                "enum": enum,
-            },
-        ),
-    )
-    return result.text
+def _generate_result_from_llm(prompt, enum = None, ResponseSchema = None, temperature = 0.5, max_output_tokens = 30):
+    if enum is not None:
+        result = model.generate_content(prompt,
+            generation_config=genai.GenerationConfig(
+                response_mime_type="text/x.enum",
+                response_schema={
+                    "type": "STRING",
+                    "enum": enum,
+                },
+                temperature=temperature,
+                max_output_tokens=max_output_tokens,
+            ),
+        )
+        return result.text
+    elif ResponseSchema is not None:
+        result = model.generate_content(
+            prompt,
+            generation_config=genai.GenerationConfig(
+                response_mime_type="application/json",
+                response_schema=ResponseSchema,
+                temperature=temperature,
+                max_output_tokens=max_output_tokens
+            ),
+        )
+        return result.text
+    else:
+        raise KeyError(f"No enum or ResponseSchema provided")
+
 
 def _create_dynamic_dict_schema(key: str) -> Dict[str, str]:
     return {key: str}
@@ -515,7 +431,7 @@ def _update_node_properties_dict(article, properties_dict, response_schema):
                 properties_dict: {properties_dict}        
                 """
 
-    key = _generate_result_with_enum(prompt, list(response_schema.keys()))
+    key = _generate_result_from_llm(prompt, list(response_schema.keys()))
     print(f"Found property of '{key}' requires a change according to article '{article}' and properties '{properties_dict}")
 
     prompt = f"""
@@ -540,17 +456,8 @@ def _update_node_properties_dict(article, properties_dict, response_schema):
     class ResponseSchema(typing.TypedDict):
         new_value: str
 
-    result = model.generate_content(
-        prompt,
-        generation_config=genai.GenerationConfig(
-            response_mime_type="application/json",
-            response_schema=ResponseSchema,
-            temperature = 0.3,
-            max_output_tokens=30
-        ),
-    )
-    updated_node_property = result.text
-    updated_node_property = json.loads(updated_node_property)
+    result = _generate_result_from_llm(prompt, response_schema=ResponseSchema, temperature=0.3, max_output_tokens=30)
+    updated_node_property = json.loads(result)
     updated_node_property = updated_node_property["new_value"]
 
     properties_dict[key] = updated_node_property

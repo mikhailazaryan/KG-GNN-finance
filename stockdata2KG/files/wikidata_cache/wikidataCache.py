@@ -6,8 +6,7 @@ import time
 import requests
 from typing import Dict
 
-# this code is partly written with Claude 3.5 Sonnet because I did not want to code a custom caching function,
-# party of this code are custom to adapt it to the wikidata api
+os.environ['GRPC_VERBOSITY'] = 'ERROR'  # Only show errors
 
 class WikidataCache:
     # Class-level counters
