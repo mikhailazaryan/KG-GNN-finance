@@ -146,7 +146,7 @@ class WikidataCache:
 
         allowed_keys = {'P17', 'P452', 'P1056', 'P108', 'P361', 'P169', 'P946',
                         'P3320', 'P570', 'P1830', 'P373', '127', 'P569', 'P112',
-                        'P159', 'P1037', 'P571', 'P355'}
+                        'P159', 'P1037', 'P571', 'P355', 'P2403', 'P2137', 'P2139', 'P2295', 'P3362', 'P2226', 'P749', 'P749'}
 
         try:
             if 'wbgetentities' in cache_instance.cache:
@@ -159,9 +159,10 @@ class WikidataCache:
                         keys_to_strip = [key for key in claims.keys() if key not in allowed_keys]
 
                         for key in keys_to_strip:
-                            claims[key] = None
+                            #claims.pop(key)
+                            cache_instance.cache['wbgetentities'][entry_id]["entities"][entry_id]["claims"].pop(key)
 
-            cache_instance._save_cache()
+            cache_instance._save_cache(cache_instance.cache)
             print("Cache successfully stripped")
 
         except Exception as e:

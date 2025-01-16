@@ -3,7 +3,6 @@ from datetime import datetime, timezone
 from colorama import Fore, Style
 from stockdata2KG.wikidata import wikidata_wbgetentities, wikidata_wbsearchentities
 
-wikidata_requests = set()
 
 def create_new_node(wikidata_id, label, properties_dict, driver,):
     # Check if node exists using wikidata_id
@@ -41,6 +40,30 @@ def create_relationship_in_graph(rel_direction: str, rel_type: str, org_wikidata
         target_id = org_wikidata_id
     else:
         raise Exception(f"Relation direction {rel_direction} is not supported")
+
+        # First, check if relationship exists
+    check_relationship_query = f"""
+        MATCH (source {{wikidata_id: $source_id}})-[r:{rel_type}]->(target {{wikidata_id: $target_id}})
+        WHERE r.start_time = $start_time AND r.end_time = $end_time
+        RETURN r
+                """
+
+    params = {
+        "source_id": source_id,
+        "target_id": target_id,
+        "start_time": rel_wikidata_start_time,
+        "end_time": rel_wikidata_end_time,
+        "rel_type": rel_type
+    }
+
+    with driver.session() as session:
+        # Check if relationship exists
+        result = session.run(check_relationship_query, params)
+        if list(result):
+            print(
+                Fore.GREEN + f"Relationship {rel_type} between wikidata_ids: {org_wikidata_id} and {rel_wikidata_id} already exists in neo4j graph and has therefore not been added" + Style.RESET_ALL)
+            return False
+
 
     # Create relationship
     create_relationship_query = f"""
@@ -114,7 +137,6 @@ def create_nodes_and_relationships_for_node(org_wikidata_id: str, from_date_of_i
     return temp
 
 def _get_wikidata_entry(key, wikidata_id, wikidata, name = False, time = False):
-    wikidata_requests.add(key)
 
     try:
         if time:
@@ -198,7 +220,6 @@ def get_relationship_dict(wikidata_id, label):
                             "relationship_type": "OWNS",
                             "relationship_direction": "INBOUND"
                         },
-
                         "City": {
                             "wikidata_entries": _get_wikidata_rels(data, wikidata_id, ["P159"]),
                             "label": "City",
@@ -228,7 +249,7 @@ def get_relationship_dict(wikidata_id, label):
                             "label": "Person",
                             "relationship_type": "IS_PART_OF_BOARD",
                             "relationship_direction": "INBOUND"
-                        },
+                        }
             }
             return relationship_dict
         elif label == "StockMarketIndex":
@@ -264,8 +285,7 @@ def get_relationship_dict(wikidata_id, label):
         raise KeyError(f"KeyError for label: '{label}': {e}")
 
 def _get_wikidata_rels(data: dict, wikidata_id: str, property_ids: list) -> list[dict[str, datetime, datetime]]:
-    for id in property_ids:
-        wikidata_requests.add(id)
+
     result = []
 
     for property_id in property_ids:

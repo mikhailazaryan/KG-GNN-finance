@@ -2,6 +2,7 @@ import configparser
 from datetime import datetime, timezone
 from neo4j import GraphDatabase
 from colorama import init, Fore, Style
+import random
 
 from stockdata2KG.arcticles import get_articles
 from stockdata2KG.files.wikidata_cache.wikidataCache import WikidataCache
@@ -38,8 +39,8 @@ def main():
      update_graph_bool = False
 
      # this builds the initial graph from wikidata
-     company_names = ["Allianz SE", "Commerzbank AG", "Boeing"]
-     company_names = ["Adidas AG", "Airbus SE", "Allianz SE", "BASF SE", "Bayer AG", "Beiersdorf AG",
+     company_names = ["Allianz SE", "Commerzbank AG", "Adidas AG"]
+     company_namesFull = ["Adidas AG", "Airbus SE", "Allianz SE", "BASF SE", "Bayer AG", "Beiersdorf AG",
                       "Bayerische Motoren Werke AG", "Brenntag SE", "Commerzbank AG", "Continental AG", "Covestro AG",
                       "Daimler Truck Holding AG", "Deutsche Bank AG", "Deutsche Börse AG", "Deutsche Post AG",
                       "Deutsche Telekom AG", "E.ON SE", "Fresenius SE & Co. KGaA", "Hannover Rück SE",
@@ -48,12 +49,12 @@ def main():
                       "Münchener Rückversicherungs-Gesellschaft AG", "Dr. Ing. h.c. F. Porsche AG",
                       "Porsche Automobil Holding SE", "QIAGEN N.V.", "Rheinmetall AG", "RWE AG", "SAP SE",
                       "Sartorius AG", "Siemens AG", "Siemens Energy AG", "Siemens Healthineers AG", "Symrise AG",
-                      "Volkswagen AG", "Vonovia SE", "Zalando SE"]
+                      "Volkswagen AG", "Vonovia SE", "Zalando SE"] #todo change name again
 
-     date_from = datetime(1950, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+     date_from = datetime(2000, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
      date_until = datetime(2024, 12, 31, 0, 0, 0, tzinfo=timezone.utc)
      nodes_to_include = ["Company", "Industry_Field", "Person", "City", "Country", "Product_or_Service", "Employer", "StockMarketIndex"]
-     search_depth = 2
+     search_depth = 3
 
      if build_actual_graph_bool:
          reset_graph(driver)
@@ -62,12 +63,15 @@ def main():
               build_graph_from_initial_node(company_name, "Company", date_from, date_until, nodes_to_include, search_depth, driver)
               print(Fore.GREEN + f"\n--- Finished building graph for {company_name}---\n" + Style.RESET_ALL)
 
+              # reduce unuseful cache information in 30% of the time,
+              if random.random() < 0.2:
+                WikidataCache.strip_cache()
+
          print(f"\n--- Successfully finished building neo4j graph for companies {company_names} with a depth of {search_depth} ---\n")
 
 
          print("")
          WikidataCache.print_current_stats()
-         WikidataCache.strip_cache()
          print("")
 
 
