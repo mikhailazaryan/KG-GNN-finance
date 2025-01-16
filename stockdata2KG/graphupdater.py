@@ -25,9 +25,12 @@ global custom_id
 custom_id = 0
 
 def update_neo4j_graph(article, companies, node_types, date_from, date_until, nodes_to_include, search_depth_new_nodes, search_depth_for_changes, driver):
+    print("\n")
+
     name_org_node = find_company(article, companies)
     node_type = find_node_type(article, node_types)
     name_selected_node = find_node_requiring_change(article, name_org_node, node_type, search_depth_for_changes, driver)
+    #todo see if name of selected node can be found from wikidata id_selected_node = from wikidata, if not "no wikidata id found
     type_of_change = find_type_of_change(article, name_selected_node)
 
     #if not _sanity_check(article, name_org_node, node_type, type_of_change, name_selected_node).get("is_valid"):
@@ -109,7 +112,8 @@ def find_company(article, companies):
                 Available node_types: {str(companies).replace("'", "")}        
                 """
 
-    result = _generate_result_from_llm(prompt, enum = companies)
+    name = _generate_result_from_llm(prompt, enum = companies)
+    result = wikidata_wbsearchentities(name, id_or_name="name")
     print(f"Found company '{result}' for article '{article}' and companies '{companies}'.")
     return result
 
@@ -338,9 +342,6 @@ def _add_node(name_org_node, node_type, article, date_from, date_until, nodes_to
     name_new_node = find_node_name_to_change(article, node_type)
     id_new_node = wikidata_wbsearchentities(name_new_node, id_or_name='id')
     rel_props = _get_relationship_properties(node_type)
-
-    print(id_new_node)
-
     if id_new_node == "No wikidata entry found":
         id_new_node = _get_and_increment_customID()
         print(
@@ -456,7 +457,7 @@ def _update_node_properties_dict(article, properties_dict, response_schema):
     class ResponseSchema(typing.TypedDict):
         new_value: str
 
-    result = _generate_result_from_llm(prompt, response_schema=ResponseSchema, temperature=0.3, max_output_tokens=30)
+    result = _generate_result_from_llm(prompt, ResponseSchema=ResponseSchema, temperature=0.3, max_output_tokens=40)
     updated_node_property = json.loads(result)
     updated_node_property = updated_node_property["new_value"]
 

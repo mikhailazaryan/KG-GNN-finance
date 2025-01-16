@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from colorama import Fore, Style
 from stockdata2KG.wikidata import wikidata_wbgetentities, wikidata_wbsearchentities
 
-
+wikidata_requests = set()
 
 def create_new_node(wikidata_id, label, properties_dict, driver,):
     # Check if node exists using wikidata_id
@@ -29,7 +29,7 @@ def create_new_node(wikidata_id, label, properties_dict, driver,):
                 raise Exception(f"Error while adding node with wikidata_id: {wikidata_id} to neo4j graph")
         else:
             print(Fore.GREEN+ f"Node with wikidata_id: {wikidata_id} already exists in neo4j graph and has therefore not been added" + Style.RESET_ALL)
-            return None
+            return wikidata_id
 
 
 def create_relationship_in_graph(rel_direction: str, rel_type: str, org_wikidata_id: str, rel_wikidata_id: str, rel_wikidata_start_time: str, rel_wikidata_end_time: str, driver):
@@ -114,6 +114,8 @@ def create_nodes_and_relationships_for_node(org_wikidata_id: str, from_date_of_i
     return temp
 
 def _get_wikidata_entry(key, wikidata_id, wikidata, name = False, time = False):
+    wikidata_requests.add(key)
+
     try:
         if time:
             return str(parse_datetime_to_iso(wikidata.get("entities").get(wikidata_id).get("claims").get(key)[0].get("mainsnak").get("datavalue").get("value").get("time")))
@@ -262,6 +264,8 @@ def get_relationship_dict(wikidata_id, label):
         raise KeyError(f"KeyError for label: '{label}': {e}")
 
 def _get_wikidata_rels(data: dict, wikidata_id: str, property_ids: list) -> list[dict[str, datetime, datetime]]:
+    for id in property_ids:
+        wikidata_requests.add(id)
     result = []
 
     for property_id in property_ids:
@@ -324,7 +328,7 @@ def build_graph_from_initial_node(node_name, label, date_from, date_until, nodes
     queue = [create_new_node(wikidata_id_of_company, label, properties_dict, driver=driver)]
     # iteratively adding nodes and relationships
     for i in range(search_depth):
-        print(Fore.BLUE + f"\n---Started building graph for {node_name} on depth {i}---\n" + Style.RESET_ALL)
+        print(Fore.BLUE + f"\--Started building graph for {node_name} on depth {i}---" + Style.RESET_ALL)
         queue_copy = queue.copy()
         queue = []
         for wikidata_id in queue_copy:
@@ -335,7 +339,7 @@ def build_graph_from_initial_node(node_name, label, date_from, date_until, nodes
                                                                          nodes_to_include=nodes_to_include,
                                                                          driver=driver))
 
-        print(Fore.BLUE + f"\n---Finished building graph for {node_name} on depth {i}---\n" + Style.RESET_ALL)
+        print(Fore.BLUE + f"---Finished building graph for {node_name} on depth {i}---" + Style.RESET_ALL)
     return wikidata_id_of_company
 
 def reset_graph(driver):
@@ -592,5 +596,7 @@ def build_demo_graph(driver):
         session.run(city_query, **city_params)
         session.run(relationship_query, **relationship_params)
 
+def get_wikidata_requests():
+    return wikidata_requests
 
 

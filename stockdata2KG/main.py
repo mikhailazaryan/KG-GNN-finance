@@ -7,6 +7,7 @@ from stockdata2KG.arcticles import get_articles
 from stockdata2KG.files.wikidata_cache.wikidataCache import WikidataCache
 from stockdata2KG.graphbuilder import build_demo_graph, build_graph_from_initial_node, reset_graph
 from stockdata2KG.graphupdater import update_neo4j_graph, find_node_requiring_change
+from graphbuilder import get_wikidata_requests
 
 
 def main():
@@ -34,13 +35,24 @@ def main():
      build_actual_graph_bool = True
      build_demo_graph_bool = False
      get_articles_bool = True
-     update_graph_bool = True
+     update_graph_bool = False
 
      # this builds the initial graph from wikidata
      company_names = ["Allianz SE", "Commerzbank AG", "Boeing"]
-     date_from = datetime(1995, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
-     date_until = datetime(2024, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
-     nodes_to_include = ["Company", "Industry_Field", "Person", "City", "Country", "Product_or_Service", "Employer"] #took out stock marked index
+     company_names = ["Adidas AG", "Airbus SE", "Allianz SE", "BASF SE", "Bayer AG", "Beiersdorf AG",
+                      "Bayerische Motoren Werke AG", "Brenntag SE", "Commerzbank AG", "Continental AG", "Covestro AG",
+                      "Daimler Truck Holding AG", "Deutsche Bank AG", "Deutsche Börse AG", "Deutsche Post AG",
+                      "Deutsche Telekom AG", "E.ON SE", "Fresenius SE & Co. KGaA", "Hannover Rück SE",
+                      "Heidelbergcement AG", "Henkel AG & Co. KGaA", "Infineon Technologies AG",
+                      "Mercedes-Benz", "Merck KGaA", "MTU Aero Engines AG",
+                      "Münchener Rückversicherungs-Gesellschaft AG", "Dr. Ing. h.c. F. Porsche AG",
+                      "Porsche Automobil Holding SE", "QIAGEN N.V.", "Rheinmetall AG", "RWE AG", "SAP SE",
+                      "Sartorius AG", "Siemens AG", "Siemens Energy AG", "Siemens Healthineers AG", "Symrise AG",
+                      "Volkswagen AG", "Vonovia SE", "Zalando SE"]
+
+     date_from = datetime(1950, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+     date_until = datetime(2024, 12, 31, 0, 0, 0, tzinfo=timezone.utc)
+     nodes_to_include = ["Company", "Industry_Field", "Person", "City", "Country", "Product_or_Service", "Employer", "StockMarketIndex"]
      search_depth = 2
 
      if build_actual_graph_bool:
@@ -52,7 +64,12 @@ def main():
 
          print(f"\n--- Successfully finished building neo4j graph for companies {company_names} with a depth of {search_depth} ---\n")
 
+
+         print("")
          WikidataCache.print_current_stats()
+         WikidataCache.strip_cache()
+         print("")
+
 
 
      if build_demo_graph_bool:
