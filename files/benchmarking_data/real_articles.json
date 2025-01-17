@@ -6,9 +6,9 @@
       "date": "todo datetime object",
       "benchmarking": {
         "model update triples": {
-          "unchanged": [],
-          "added": [],
-          "deleted": []
+          "unchanged": ["leave empty, this will be filled during benchmarking"],
+          "added": ["leave empty, this will be filled during benchmarking"],
+          "deleted": ["leave empty, this will be filled during benchmarking"]
         },
         "correct update": null,
         "wikidata structure": null
