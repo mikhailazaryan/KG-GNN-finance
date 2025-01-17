@@ -42,7 +42,7 @@ def wikidata_wbgetentities(id: str, print_output: bool = False) -> Dict[str, Any
         'ids': id,
         'format': 'json',
         'languages': 'en',
-        'props': 'claims'
+        'props': 'labels|claims'
     }
 
     # Use wikidata_cache to get data

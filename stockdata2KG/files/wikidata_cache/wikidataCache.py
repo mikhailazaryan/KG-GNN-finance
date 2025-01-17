@@ -148,6 +148,28 @@ class WikidataCache:
                         'P3320', 'P570', 'P1830', 'P373', '127', 'P569', 'P112',
                         'P159', 'P1037', 'P571', 'P355', 'P2403', 'P2137', 'P2139', 'P2295', 'P3362', 'P2226', 'P749', 'P749'}
 
+
+        """
+           "P159": [
+                            {
+                                "mainsnak": {
+                                    "snaktype": "value",
+                                    "property": "P159",
+                                    "hash": "39f3c696fdc5c7337c6f604af1825d6144f0de18",
+                                    "datavalue": {
+                                        "value": {
+                                            "entity-type": "item",
+                                            "numeric-id": 1615401,
+                                            "id": "Q1615401"
+                                        },
+                                        "type": "wikibase-entityid"
+                                    },
+                                    "datatype": "wikibase-item"
+                                },
+                                "type": "statement",
+                                "qualifiers": {
+        """
+
         try:
             if 'wbgetentities' in cache_instance.cache:
                 for entry_id, entry_data in cache_instance.cache['wbgetentities'].items():
@@ -161,6 +183,7 @@ class WikidataCache:
                         for key in keys_to_strip:
                             #claims.pop(key)
                             cache_instance.cache['wbgetentities'][entry_id]["entities"][entry_id]["claims"].pop(key)
+
 
             cache_instance._save_cache(cache_instance.cache)
             print("Cache successfully stripped")

@@ -1,5 +1,6 @@
 import configparser
 import json
+from json import JSONDecodeError
 
 import google.generativeai as genai
 from datetime import datetime, timezone
@@ -7,12 +8,13 @@ from colorama import Fore, Style
 import typing_extensions as typing
 from typing import Dict
 
-
+from sympy import false
 
 from stockdata2KG.graphbuilder import \
     create_new_node, build_graph_from_initial_node, create_relationship_in_graph, \
     check_if_node_exists_in_graph, delete_node, get_node_relationships, get_wikidata_id_from_name, \
-    delete_relationship_by_id, get_node_properties, set_node_properties, get_properties
+    delete_relationship_by_id, get_node_properties, set_node_properties, get_properties, get_graph_information, \
+    update_relationship_property
 from stockdata2KG.wikidata import wikidata_wbsearchentities
 
 model = genai.GenerativeModel("gemini-1.5-pro-latest")  # Choose the desired model
@@ -24,46 +26,186 @@ genai.configure(api_key=config['gemini']['api_key'])
 global custom_id
 custom_id = 0
 
+
+
+def find_change_triples(article, name_company_at_center, node_type_requiring_change, attempt, max_attempt, driver):
+    if attempt >= max_attempt:
+        return False, False, False
+
+    old_triples = get_graph_information(name_company_at_center, node_type_requiring_change, driver=driver)
+    if old_triples is None:
+        old_triples = "" #["no triples found"]
+
+    node_type_rel_dict = {
+        "Company": "OWNS | IS_OWNED_BY | PARTNERS_WITH",
+        "Industry_Field": "IS_ACTIVE_IN",
+        "Manager": "MANAGED_BY",
+        "Founder": "FOUNDED_BY",
+        "Board_Member" : "HAS_BOARD_MEMBER",
+        "City": "HAS_HEADQUARTER_IN | IS_ACTIVE_IN",
+        "Country" : "LOCATED_IN",
+        "Product_or_Service": "OFFERS | HAS_ANNOUNCED | INVESTS_IN | RESEARCHES",
+        "StockMarketIndex" : "IS_LISTED_IN"
+    }
+
+    favorable_rel = node_type_rel_dict.get(node_type_requiring_change)
+
+    prompt = f"""
+    You are a classification assistant. You provide data to keep a Knowledge Graph about a company up to date. 
+    Your task is to analyze a news article and analyze existing graph-triples consisting of 'node_from', 'relationship' and 'node_to'.
+    You should then update the existing graph-triples according to the article and return them.
+    If no change seems to be required, return the triples unchanged.
+
+    Instructions:
+    1. Read the provided news article carefully.
+    2. Review the existing graph-triples consisting of "node_from", "relationship" and "node_to".
+    3. Update the existing graph-triples according to the article. 
+
+    Example input:
+    
+    Article: "Allianz SE bought Ergo Group'
+    Input: {{triples: [{{'node_from': 'Allianz SE', 'relationship': 'OWNS', 'node_to': 'Dresdner Bank'}}, {{'node_from': 'Allianz SE', 'relationship': 'OWNS', 'node_to': 'Euler Hermes'}}]}}
+    Output triples: {{triples: [{{'node_from': 'Allianz SE', 'relationship': 'OWNS', 'node_to': 'Dresdner Bank'}}, {{'node_from': 'Allianz SE', 'relationship': 'OWNS', 'node_to': 'Euler Hermes'}}, {{'node_from': 'Allianz SE', 'relationship': 'OWNS', 'node_to': 'Ergo Group'}}]}}
+    
+    Article: "Allianz SE fired it's old CEO Oliver Bäte, the new CEO is Boris Hilgat"
+    Input triples: {{triples: [{{'node_from': 'Allianz SE', 'relationship': 'IS_MANAGED_BY', 'node_to': 'Oliver Bäte'}}]}}
+    Output triples: {{triples: [{{'node_from': 'Allianz SE', 'relationship': 'IS_MANAGED_BY', 'node_to': 'Boris Hilgat'}}]}}
+    
+    
+    Please analyze the following:
+    Article: "{article}"
+    Input triples: {old_triples} 
+    
+    If possible, please stick to the following relationships: OWNS, PARTNERS_WITH, IS_ACTIVE_IN, IS:MANAGED_BY, WAS_FOUNDED_BY, HAS_BOARD_MEMBER, HAS_HEADQUARTER_IN, IS_LOCATED_IN, OFFERS, HAS_ANNOUNCED, INVESTS_IN, RESEARCHES IN, IS_LISTED_IN.
+    Remember to only output a valid json with the format {{triples:[{{'node_from': '', 'relationship': '', 'node_to': ''}}]}}
+    """
+
+
+    result = model.generate_content(prompt, generation_config=genai.GenerationConfig(temperature=0.2)).text
+    result = result.replace("```json", "").replace("```", "").replace("'", "\"")
+
+    try:
+        new_triples = json.loads(result)
+
+        new_triples_set = {json.dumps(t, sort_keys=True) for t in new_triples.get("triples")}
+        old_triples_set = {json.dumps(t, sort_keys=True) for t in old_triples}
+
+        intersection = set(new_triples_set).intersection(set(old_triples_set))
+        intersection = [json.loads(s) for s in intersection]
+        print("intersection: " + str(intersection))
+
+
+        added = set(new_triples_set).difference(set(old_triples_set))
+        added = [json.loads(s) for s in added]
+        print("added: " + str(added))
+
+        deleted = set(old_triples_set).difference(set(new_triples_set))
+        if "no triples found" in deleted:
+            deleted = deleted.remove("no triples found")
+        deleted = [json.loads(s) for s in deleted]
+        print("deleted: " + str(deleted))
+
+        return added, deleted, intersection
+    except JSONDecodeError as e:
+        print(Fore.RED + f"JSONDecodeError: '{e}' with result: '{result}', try again" + Style.RESET_ALL)
+        find_change_triples(article, name_company_at_center, node_type_requiring_change, attempt+1, max_attempt, driver)
+    return False, False, False
+
+def _add_node(name_node_from, name_node_to, label_node_to, relationship_type, date_from, date_until, nodes_to_include, search_depth, driver):
+    id_node_from = get_wikidata_id_from_name(name_node_from, driver)
+    id_node_to = wikidata_wbsearchentities(name_node_to, id_or_name='id')
+    rel_props = {
+        "rel_direction": "OUTBOUND",
+        "rel_type": relationship_type,
+        "rel_start_time": str(datetime.now().replace(tzinfo=timezone.utc)),
+        "rel_end_time": "NA",
+    } #todo: see if we can make this more precise by extractime time data from the article
+
+    if id_node_to == "No wikidata entry found":
+        id_node_to = _get_and_increment_customID()
+        print(Fore.YELLOW + f"Created custom ID '{id_node_to}' for node '{name_node_to}' because no wikidata ID was found" + Style.RESET_ALL)
+        property_dict = get_properties(id_node_to, label_node_to, name_node_to)
+        id_new_node = create_new_node(id_node_to, label_node_to, properties_dict=property_dict, driver=driver)
+        print(Fore.GREEN + f"Node with name '{name_node_to}' and wikidata_id: '{id_new_node}' has been added to neo4j graph" + Style.RESET_ALL)
+    else:
+        id_new_node = build_graph_from_initial_node(name_node_from, label_node_to, date_from, date_until, nodes_to_include, search_depth, driver=driver)
+    create_relationship_in_graph(rel_props.get('rel_direction'), rel_props.get('rel_type'), id_node_from, id_node_to, rel_props.get('rel_start_time'), rel_props.get('rel_end_time'), driver)
+    return id_new_node
+
 def update_neo4j_graph(article, companies, node_types, date_from, date_until, nodes_to_include, search_depth_new_nodes, search_depth_for_changes, driver):
     print("\n")
 
-    name_org_node = find_company(article, companies)
-    node_type = find_node_type(article, node_types)
-    name_selected_node = find_node_requiring_change(article, name_org_node, node_type, search_depth_for_changes, driver)
-    #todo see if name of selected node can be found from wikidata id_selected_node = from wikidata, if not "no wikidata id found
-    type_of_change = find_type_of_change(article, name_selected_node)
-
-    #if not _sanity_check(article, name_org_node, node_type, type_of_change, name_selected_node).get("is_valid"):
-        #print("Sanity Check returned false, skipping change \n")
-        #return
-    #else:
-        #print("Sanity Check found to be true, updating graph accordingly\n")
-
-    if type_of_change == "add node":
-        id_new_node = _add_node(name_org_node, node_type, article, date_from, date_until, nodes_to_include, search_depth_new_nodes, driver)
-        return
-    elif name_selected_node is None:
-        raise ValueError("selected node is none")
+    name_company_at_center = find_company_at_center(article, companies, 1, 3)
+    if name_company_at_center != "None":
+        print(Fore.GREEN + f"'{name_company_at_center}' is the company at center for the article '{article}' and companies '{companies}'." + Style.RESET_ALL)
     else:
-        if type_of_change == "delete relationship to node":
-            id_node_deleted = _delete_rel_and_maybe_node(name_org_node, name_selected_node, driver)
-            return
-        elif type_of_change == "replace node":
-            id_new_node = _add_node(name_org_node, node_type, article, date_from, date_until, nodes_to_include, search_depth_new_nodes, driver)
-            id_node_deleted = _delete_rel_and_maybe_node(name_org_node, name_selected_node, driver)
-            return
-        elif type_of_change == "modify node information":
-            id_of_selected_node = get_wikidata_id_from_name(name_selected_node, driver)
-            prop_dict = get_node_properties(id_of_selected_node, driver)
-            updated_node_properties_dict = _update_node_properties_dict(article, prop_dict, prop_dict)
-            id_of_updated_node = set_node_properties(id_of_selected_node, updated_node_properties_dict, driver)
-        elif type_of_change == "noh change required":
-            print("no change required")
-            return
-        else:
-            raise KeyError(f"{type_of_change} not supported")
+        print(Fore.RED + f"Could not find company at center for the article '{article}'." + Style.RESET_ALL)
+        return False
+
+    label_node_requiring_change = find_node_type(article, node_types)
+    if label_node_requiring_change != "None":
+        print(Fore.GREEN + f"'{label_node_requiring_change}' is the node type which requires a change." + Style.RESET_ALL)
+    else:
+        print(Fore.RED + f"Could not find node type which requires change for article '{article}'." + Style.RESET_ALL)
+        return False
+
+    added, deleted, intersection = find_change_triples(article, name_company_at_center, label_node_requiring_change, 1, 3, driver)
+
+    if added:
+        for add in added:
+            try:
+                node_from = add.get("node_from")
+                relationship_type = add.get("relationship")
+                node_to = add.get("node_to")
+
+                id_node_from = get_wikidata_id_from_name(node_from, driver)
+                if id_node_from is None:
+                    id_node_from = wikidata_wbsearchentities(node_from, id_or_name='id')
+                if id_node_from == "No wikidata entry found":
+                    id_node_from = _get_and_increment_customID()
+                id_node_from = create_new_node(id_node_from, "Company" , properties_dict=get_properties(id_node_from, "Company", node_from), driver=driver)
+
+                id_node_to = get_wikidata_id_from_name(node_to, driver)
+                if id_node_to is None:
+                    id_node_to = wikidata_wbsearchentities(node_to, id_or_name='id')
+                if id_node_to == "No wikidata entry found":
+                    id_node_to = _get_and_increment_customID()
+                id_node_to = create_new_node(id_node_to, label_node_requiring_change , properties_dict=get_properties(id_node_to, label_node_requiring_change, node_to), driver=driver)
+                create_relationship_in_graph("OUTBOUND", relationship_type, id_node_from, id_node_to, str(datetime.now().replace(tzinfo=timezone.utc)), "NA", driver)
+            except KeyError as e:
+                print(Fore.RED + f"Key Error for {add}. Error: {e}." + Style.RESET_ALL)
+    if deleted:
+        for delete in deleted:
+            try:
+                node_from = delete.get("node_from")
+                relationship_type = delete.get("relationship")
+                node_to = delete.get("node_to")
+
+                id_node_from = get_wikidata_id_from_name(node_from, driver)
+                if id_node_from is None:
+                    id_node_from = wikidata_wbsearchentities(node_from, id_or_name='id')
+
+                id_node_to = get_wikidata_id_from_name(node_to, driver)
+                if id_node_to is None:
+                    id_node_to = wikidata_wbsearchentities(node_to, id_or_name='id')
+
+                print("id node from: "+ id_node_from, "id node to: "+ id_node_to)
+
+                node_relationships = get_node_relationships(id_node_from, id_node_to, driver)
+                print("test node relationships: " + str(node_relationships))
+                for rel_id in node_relationships:
+                    print(rel_id['rel_id'])
+                    updated_rel_elementID = update_relationship_property(rel_id['rel_id'], "end_time", str(datetime.now().replace(tzinfo=timezone.utc)), driver)
+                print("test" + str(updated_rel_elementID))
+
+            except KeyError as e:
+                print(Fore.RED + f"Key Error for {delete}. Error: {e}." + Style.RESET_ALL)
+
+    return "test"
 
 def _sanity_check(article, name_org_node, node_type, type_of_change, name_selected_node):
+    #todo currently not working, maybe not needed
+
     prompt = f"""
         Please analyze if the following change in our knowledge graph is in accordance with the article:
 
@@ -88,66 +230,87 @@ def _sanity_check(article, name_org_node, node_type, type_of_change, name_select
     result = json.loads(result)
     return result
 
-def find_company(article, companies):
+def find_company_at_center(article, companies, attempt, max_attempt):
+    if "None" not in companies:
+        companies.append("None")
+
+    if attempt >= max_attempt:
+        return False
+
     prompt = f"""
-                You are a classification assistant. Your task is to analyze a news article and select the SINGLE most relevant company from a provided list that is discussed in the article.
+    You are a classification assistant. You provide data to keep a Knowledge Graph about a company up to date. 
+    Your task is to analyze a news article and select a single which is acting in the article. Please always choose the company which is the acting part.
+    If no company seems to be relevant in the article, please return "None"
 
-                Instructions:
-                1. Read the provided news article carefully
-                2. Review the list of available companies
-                3. Return ONE company which is most relevant in the article
+    Instructions:
+    1. Read the provided news article carefully.
+    2. Review the list of possible companies.
+    3. Return ONE company which is acting in the article.
 
-                Example input:
+    Example input:
 
-                Article: "Tesla announces new electric vehicle model with 500-mile range"
-                Available companies: [Tesla, Microsoft, Apple, Volkswagen, Allianz SE, Siemens AG]
-                Output: Tesla
+    Article: "Mercedes-Benz announces new electric vehicle model with 500-mile range"
+    Possible companies: ["Fresenius SE & Co. KGaA", "Hannover Rück SE", "Heidelbergcement AG", "Henkel AG & Co. KGaA", "Allianz SE", "Infineon Technologies AG", "Mercedes-Benz", "Merck KGaA", "MTU Aero Engines AG", "Münchener Rückversicherungs-Gesellschaft AG", "None"]
+    Output: Mercedes-Benz
+    Reasoning: Mercedes-Benz is the company which is acting, as they are announcing something.
 
-                Article: "Allianz SE bought SportGear AG"
-                Available companies: [Tesla, Microsoft, Apple, Volkswagen, Allianz SE, Siemens AG]
-                Output: Allianz SE
+    Article: "Sports Gear AG has been bough by Allianz SE"
+    Possible companies: ["Fresenius SE & Co. KGaA", "Hannover Rück SE", "Heidelbergcement AG", "Henkel AG & Co. KGaA", "Allianz SE", "Infineon Technologies AG", "Mercedes-Benz", "Merck KGaA", "MTU Aero Engines AG", "Münchener Rückversicherungs-Gesellschaft AG", "None"]
+    Output: Allianz SE
+    Reasoning: Allianz SE is the company which is buying a Sports Gear AG, therefore Allianz SE is the acting company.
 
-                Please analyze the following:
-                Article: "{article}"
-                Available node_types: {str(companies).replace("'", "")}        
-                """
+    Please analyze the following:
+    Article: "{article}"
+    Possible companies: {str(companies)}        
+    """
 
-    name = _generate_result_from_llm(prompt, enum = companies)
+    name = _generate_result_from_llm(prompt, enum = companies, max_output_tokens=30, temperature=0.4) #todo: as an idea, the enum could not just be the initial company, but all companies
+
+    if name not in companies:
+        find_company_at_center(article, companies, attempt+1, max_attempt)
+
     result = wikidata_wbsearchentities(name, id_or_name="name")
-    print(f"Found company '{result}' for article '{article}' and companies '{companies}'.")
     return result
 
 def find_node_type(article, node_types):
+    if "None" not in node_types:
+        node_types.append("None")
+
     prompt = f"""
-            You are a classification assistant. Your task is to analyze a news article and select the SINGLE most relevant node type from a provided list that best represents the main entity or concept being updated in the article.
+    You are a classification assistant. You provide data to keep a Knowledge Graph about a company up to date. 
+    Your task is to analyze a news article and select a SINGLE node from a provided list which is most likely to require a change or update in the knowledge graph.                
+    If no node_type seems to be relevant in the article, please return "None"
 
-            Instructions:
-            1. Read the provided news article carefully
-            2. Review the list of available node_types
-            3. Select ONE node_type that best captures the primary subject matter or entity being discussed
 
-            Example input:
+    Instructions:
+    1. Read the provided news article carefully
+    2. Review the list of available node_types: {node_types}. These node_types make up all information in the knowledge graph. 
+    3. Select ONE node_type which has to be modified, added or deleted according to the article.
+
+    Example input:
+    
+    Article: "Mercedes-Benz announces new electric vehicle model 'S-Class' with 500-mile range"
+    Available node_types = ["Company", "Industry_Field", "Person", "City", "Country", "Product_or_Service", "Employer", "StockMarketIndex", "None"]
+    Output: Product_or_Service
+    Reasoning: Mercedes-Benz is offereing their new product 'S-Class' which means the knowledge graph needs a new node 'S-Class'. 
+
+    Article: "Volkswagen AG moved their headquarter from Munich to Berlin",
+    Available node_types = ["Company", "Industry_Field", "Person", "City", "Country", "Product_or_Service", "Employer", "StockMarketIndex", "None"]
+    Output: City
+    Reasoning: As their headquarter is changing it's location, Citiy is the correct node_type which requires change 
             
-            Article: "Tesla announces new electric vehicle model with 500-mile range"
-            Available node_types: [Company, Industry, Person, City, Country, StockMarketIndex]
-            Output: Company
-        
-            Article: "Volkswagen AG moved their headquarter from Munich to Berlin",
-            Available node_types: [Company, Industry_Field, Person, City, Country, StockMarketIndex]
-            Output: City
-                    
-            Article: "Allianz SE is no longer active in the insurance industry",
-            Available node_types: [Company, Industry_Field, Person, City, Country, StockMarketIndex]
-            Output: Industry
-                    
+    Article: "Allianz SE is no longer active in the insurance industry",
+    Available node_types = ["Company", "Industry_Field", "Person", "City", "Country", "Product_or_Service", "Employer", "StockMarketIndex", "None"]
+    Output: Industry_Field
+    Reasoning: The node 'Insurance Industry' of type Industry_Field is most likely to require a change. 
+            
 
-            Please analyze the following:
-            Article: "{article}"
-            Available node_types: {str(node_types).replace("'", "")}        
+    Please analyze the following:
+    Article: "{article}"
+    Available node_types: {str(node_types)}        
             """
 
     result = _generate_result_from_llm(prompt, enum = node_types)
-    print(f"Found node_type of '{result}' for article '{article}' and node_types '{node_types}")
     return result
 
 def find_node_requiring_change(article, company, node_type, search_depth, driver):
@@ -216,7 +379,7 @@ def find_node_requiring_change(article, company, node_type, search_depth, driver
     return None
 
 def find_type_of_change(article, node_requiring_change):
-    types_of_change_enum = ["add node", "delete relationship to node", "modify node information", "replace node", "no change required"]
+    types_of_change_enum = ["add relationship", "delete relationship", "modify node information", "replace node", "no change required"]
 
     prompt = f"""
                 You are a classification assistant to keep an existing Knowledge Graph of company data up-to-date. 
@@ -337,7 +500,7 @@ def _get_relationship_properties(node_type):
     }
     return relationship_properties
 
-def _add_node(name_org_node, node_type, article, date_from, date_until, nodes_to_include, search_depth, driver):
+def _add_nodeDEPRECIATED(name_org_node, node_type, article, date_from, date_until, nodes_to_include, search_depth, driver):
     id_org_node = get_wikidata_id_from_name(name_org_node, driver)
     name_new_node = find_node_name_to_change(article, node_type)
     id_new_node = wikidata_wbsearchentities(name_new_node, id_or_name='id')
@@ -351,7 +514,6 @@ def _add_node(name_org_node, node_type, article, date_from, date_until, nodes_to
         print(property_dict)
         id_new_node = create_new_node(id_new_node, node_type, properties_dict=property_dict, driver=driver)
         print(Fore.GREEN + f"Node with name '{name_new_node}' and wikidata_id: '{id_new_node}' has been added to neo4j graph" + Style.RESET_ALL)
-
     else:
         build_graph_from_initial_node(name_new_node, node_type, date_from, date_until, nodes_to_include, search_depth, driver=driver)
 
@@ -454,8 +616,8 @@ def _update_node_properties_dict(article, properties_dict, response_schema):
            properties_dict: {property}        
            """
 
-    class ResponseSchema(typing.TypedDict):
-        new_value: str
+
+
 
     result = _generate_result_from_llm(prompt, ResponseSchema=ResponseSchema, temperature=0.3, max_output_tokens=40)
     updated_node_property = json.loads(result)
