@@ -4,16 +4,14 @@ from neo4j import GraphDatabase
 from colorama import init, Fore, Style
 import random
 
-from stockdata2KG.arcticles import get_articles, get_synthetic_articles
-from stockdata2KG.files.wikidata_cache.wikidataCache import WikidataCache
+from stockdata2KG.arcticles import get_synthetic_articles
 from stockdata2KG.graphbuilder import build_demo_graph, build_graph_from_initial_node, reset_graph
-from stockdata2KG.graphupdater import update_neo4j_graph, find_node_requiring_change
+from stockdata2KG.graphupdater import update_neo4j_graph
+from stockdata2KG.wikidata.wikidataCache import WikidataCache
 
 
 def main():
      init() # for colorama
-
-     #wikidata_wbgetentities("Q116170621", True) # just for inspecting the wggetentities.json
 
      ## Setup connection to Neo4j
      config = configparser.ConfigParser()
@@ -30,16 +28,14 @@ def main():
         print(f"Connection failed: {e}")
 
 
-     # todo: products, owner of, owned by
-
      build_actual_graph_bool = True
      build_demo_graph_bool = False
-     get_articles_bool = True
+     get_articles_bool = False
      update_graph_bool = True
 
      # this builds the initial graph from wikidata
      company_names = ["Adidas AG"]
-     company_namesOld = ["Adidas AG", "Airbus SE", "Allianz SE", "BASF SE", "Bayer AG", "Beiersdorf AG",
+     company_names = ["Adidas AG", "Airbus SE", "Allianz SE", "BASF SE", "Bayer AG", "Beiersdorf AG",
                       "Bayerische Motoren Werke AG", "Brenntag SE", "Commerzbank AG", "Continental AG", "Covestro AG",
                       "Daimler Truck Holding AG", "Deutsche Bank AG", "Deutsche Börse AG", "Deutsche Post AG",
                       "Deutsche Telekom AG", "E.ON SE", "Fresenius SE & Co. KGaA", "Hannover Rück SE",
@@ -53,7 +49,7 @@ def main():
      date_from = datetime(2022, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
      date_until = datetime(2024, 12, 31, 0, 0, 0, tzinfo=timezone.utc)
      nodes_to_include = ["Company", "Industry_Field", "Manager", "Founder", "Board_Member", "City", "Country", "Product_or_Service", "Employer", "StockMarketIndex"]
-     search_depth = 1
+     search_depth = 3
 
      if build_actual_graph_bool:
          reset_graph(driver)
@@ -68,19 +64,15 @@ def main():
 
          print(f"\n--- Successfully finished building neo4j graph for companies {company_names} with a depth of {search_depth} ---\n")
 
-
          print("")
          WikidataCache.print_current_stats()
          print("")
 
 
-
      if build_demo_graph_bool:
         reset_graph(driver)
         build_demo_graph(driver)
-        print(
-            f"\n--- Successfully finished building neo4j demo graph ---\n")
-
+        print(f"\n--- Successfully finished building neo4j demo graph ---\n")
 
      if get_articles_bool:
          articles = get_synthetic_articles("Adidas AG")
@@ -88,15 +80,10 @@ def main():
      if update_graph_bool & get_articles_bool:
          print(Fore.LIGHTMAGENTA_EX + f"\n--- Stated updating existing neo4j graph ---\n" + Style.RESET_ALL)
 
-         #todo:
-         #  (1) Better and more realistic prompts,
-         #  (3) More detailed Nodes Information from Wikidata
-         #  (4) test on more prompts and extend the graphupdater function to also handle more changes, especially in _get_relationship_properties
-
          for article in articles.values():
-            update_neo4j_graph(article, company_names, nodes_to_include, date_from, date_until, nodes_to_include, search_depth_new_nodes=1, search_depth_for_changes=search_depth, driver=driver)
+             update_neo4j_graph(article, company_names, nodes_to_include, date_from, date_until, nodes_to_include, search_depth_new_nodes=1, search_depth_for_changes=search_depth, driver=driver)
 
-     print(Fore.LIGHTMAGENTA_EX + f"\n--- Finished updating existing neo4j graph ---\n" + Style.RESET_ALL)
+         print(Fore.LIGHTMAGENTA_EX + f"\n--- Finished updating existing neo4j graph ---\n" + Style.RESET_ALL)
 
 
 if __name__ == "__main__":

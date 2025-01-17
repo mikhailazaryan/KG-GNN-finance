@@ -1,11 +1,8 @@
 from typing import Dict, Any
-from colorama import init, Fore, Back, Style
-
-
+from colorama import Fore, Style
 import json
+from stockdata2KG.wikidata.wikidataCache import wikidata_cache
 
-
-from stockdata2KG.files.wikidata_cache.wikidataCache import wikidata_cache
 
 ## Code partially from https://www.jcchouinard.com/wikidata-api-python/
 
@@ -21,7 +18,7 @@ def wikidata_wbsearchentities(query_string: str, id_or_name: str = 'id') -> str:
         'limit': 1,
     }
 
-    # Use wikidata_cache to get data
+    # Use wikidata to get data
     data = wikidata_cache.get_data('wbsearchentities', query_string, params)
 
 
@@ -45,7 +42,7 @@ def wikidata_wbgetentities(id: str, print_output: bool = False) -> Dict[str, Any
         'props': 'labels|claims'
     }
 
-    # Use wikidata_cache to get data
+    # Use wikidata to get data
     data = wikidata_cache.get_data('wbgetentities', id, params)
 
     if print_output and data:

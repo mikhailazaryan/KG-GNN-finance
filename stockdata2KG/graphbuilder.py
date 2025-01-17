@@ -1,10 +1,8 @@
-import warnings
 from datetime import datetime, timezone
 from colorama import Fore, Style
-from stockdata2KG.wikidata import wikidata_wbgetentities, wikidata_wbsearchentities
+from stockdata2KG.wikidata.wikidata import wikidata_wbgetentities, wikidata_wbsearchentities
 
-max_branching_factor = 6
-
+max_branching_factor = 12
 
 def create_new_node(wikidata_id, label, properties_dict, driver,):
     # Check if node exists using wikidata_id
@@ -31,7 +29,6 @@ def create_new_node(wikidata_id, label, properties_dict, driver,):
         else:
             print(Fore.GREEN+ f"Node with wikidata_id: {wikidata_id} already exists in neo4j graph and has therefore not been added" + Style.RESET_ALL)
             return wikidata_id
-
 
 def create_relationship_in_graph(rel_direction: str, rel_type: str, org_wikidata_id: str, rel_wikidata_id: str, rel_wikidata_start_time: str, rel_wikidata_end_time: str, driver):
     if rel_direction == "OUTBOUND":
@@ -140,18 +137,22 @@ def create_nodes_and_relationships_for_node(org_wikidata_id: str, from_date_of_i
     return temp
 
 def _get_wikidata_entry(key, wikidata_id, wikidata, name = False, time = False):
-
-    try:
         if time:
-            return str(parse_datetime_to_iso(wikidata.get("entities").get(wikidata_id).get("claims").get(key)[0].get("mainsnak").get("datavalue").get("value").get("time")))
-        return wikidata.get("entities").get(wikidata_id).get("claims").get(key)[0].get("mainsnak").get("datavalue").get("value")
-    except TypeError as e:
-        if name:
             try:
-                return wikidata_wbsearchentities(wikidata_id, id_or_name="name")
-            except TypeError as e:
-                print(Fore.RED + f"KeyError: {e} for wikidata_id {wikidata_id}, because Wikidata entry exists but no label/name defined by Wikidata" + Style.RESET_ALL)
-        return "NA"
+                return str(parse_datetime_to_iso(wikidata.get("entities").get(wikidata_id).get("claims").get(key)[0].get("mainsnak").get("datavalue").get("value").get("time")))
+            except:
+                return "NA"
+        else:
+            try:
+                return wikidata.get("entities").get(wikidata_id).get("claims").get(key)[0].get("mainsnak").get("datavalue").get("value")
+            except:
+                if name:
+                    try:
+                        return wikidata_wbsearchentities(wikidata_id, id_or_name="name")
+                    except:
+                        print(Fore.RED + f"Error: for wikidata_id {wikidata_id}, because Wikidata entry exists but no label/name defined by Wikidata. Returning NA" + Style.RESET_ALL)
+                        return "NA"
+                return "NA"
 
 def get_properties(wikidata_id, label, name):
 
@@ -188,7 +189,11 @@ def get_properties(wikidata_id, label, name):
     else:
         raise KeyError(f"Could not find label {label} in get_properties_dict")
 
-    properties_dict["name"] = data["entities"][wikidata_id]["labels"]["en"]["value"]
+    try:
+        properties_dict["name"] = data["entities"][wikidata_id]["labels"]["en"]["value"]
+    except KeyError as e:
+        print(Fore.RED + f"KeyError: for wikidata_id {wikidata_id}, because Wikidata entry exists but no label/name defined by Wikidata. Returning Wikidata_ID as Name" + Style.RESET_ALL)
+        properties_dict["name"] = wikidata_id
     properties_dict["wikidata_id"] = wikidata_id
 
     return properties_dict
@@ -287,7 +292,6 @@ def get_relationship_dict(wikidata_id, label):
         return relationship_dict
     except KeyError as e:
         raise KeyError(f"KeyError for label: '{label}': {e}")
-
 
 def _get_wikidata_rels(data: dict, wikidata_id: str, property_ids: list) -> list[dict[str, datetime, datetime]]:
 
@@ -640,7 +644,6 @@ def build_demo_graph(driver):
         session.run(company_query, **company_params)
         session.run(city_query, **city_params)
         session.run(relationship_query, **relationship_params)
-
 
 def get_graph_information(node_name: str, node_label: str, driver):
         query = """

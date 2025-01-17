@@ -1,13 +1,11 @@
 import json
 import os
-import this
 import warnings
 import time
-
 import requests
 from typing import Dict
 
-os.environ['GRPC_VERBOSITY'] = 'ERROR'  # Only show errors
+os.environ['GRPC_VERBOSITY'] = 'ERROR'
 
 class WikidataCache:
     # Class-level counters
@@ -16,7 +14,7 @@ class WikidataCache:
     request_times = []
 
 
-    def __init__(self, cache_file='files/wikidata_cache/wikidata_cache.json'):
+    def __init__(self, cache_file='files/wikidata/wikidata.json'):
         self.cache_file = cache_file
         self._ensure_cache_directory()
         self.cache = self._load_cache()
@@ -87,7 +85,7 @@ class WikidataCache:
 
         if key in cache_dict:
             if print_update:
-                print(f"Retrieved from wikidata_cache: {action} - {key}")
+                print(f"Retrieved from wikidata: {action} - {key}")
             WikidataCache.cache_hits += 1
             return cache_dict[key]
 
@@ -109,7 +107,7 @@ class WikidataCache:
             print(f"Retrieved data from wikidata {action} - {key}")
         WikidataCache.internet_retrievals += 1
 
-        # Store in wikidata_cache
+        # Store in wikidata
         cache_dict[key] = result
         self._save_cache()
         if print_update:
@@ -142,7 +140,7 @@ class WikidataCache:
         Can be called either on an instance or as a class method.
         """
         if cache_instance is None:
-            cache_instance = cls(cache_file='files/wikidata_cache/wikidata_cache.json')
+            cache_instance = cls(cache_file='files/wikidata/wikidata.json')
 
         allowed_keys = {'P17', 'P452', 'P1056', 'P108', 'P361', 'P169', 'P946',
                         'P3320', 'P570', 'P1830', 'P373', '127', 'P569', 'P112',
@@ -202,7 +200,7 @@ def _make_request(params: Dict) -> Dict:
 
 
 
-# Initialize wikidata_cache globally
+# Initialize wikidata globally
 wikidata_cache = WikidataCache()
 print_update = False
 
