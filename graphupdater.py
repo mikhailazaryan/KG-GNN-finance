@@ -20,6 +20,7 @@ genai.configure(api_key=config['gemini']['api_key'])
 global custom_id
 custom_id = 0
 
+
 def find_change_triples(article, name_company_at_center, node_type_requiring_change, attempt, max_attempt, driver):
     if attempt >= max_attempt:
         return False, False, False
@@ -58,7 +59,6 @@ def find_change_triples(article, name_company_at_center, node_type_requiring_cha
     Remember to only output a valid json with the format {{triples:[{{'node_from': '', 'relationship': '', 'node_to': ''}}]}}
     """
 
-
     result = model.generate_content(prompt, generation_config=genai.GenerationConfig(temperature=0.2)).text
     result = result.replace("```json", "").replace("```", "").replace("'", "\"")
 
@@ -71,7 +71,6 @@ def find_change_triples(article, name_company_at_center, node_type_requiring_cha
         intersection = set(new_triples_set).intersection(set(old_triples_set))
         intersection = [json.loads(s) for s in intersection]
         print("intersection: " + str(intersection))
-
 
         added = set(new_triples_set).difference(set(old_triples_set))
         added = [json.loads(s) for s in added]
@@ -86,27 +85,32 @@ def find_change_triples(article, name_company_at_center, node_type_requiring_cha
         return added, deleted, intersection
     except JSONDecodeError as e:
         print(Fore.RED + f"JSONDecodeError: '{e}' with result: '{result}', try again" + Style.RESET_ALL)
-        find_change_triples(article, name_company_at_center, node_type_requiring_change, attempt+1, max_attempt, driver)
+        find_change_triples(article, name_company_at_center, node_type_requiring_change, attempt + 1, max_attempt,
+                            driver)
     return False, False, False
 
-def update_neo4j_graph(article, companies, node_types, date_from, date_until, nodes_to_include, search_depth_new_nodes, search_depth_for_changes, driver):
-    print("\n")
+
+def update_neo4j_graph(article, companies, node_types, date_from, date_until, nodes_to_include, search_depth_new_nodes,
+                       search_depth_for_changes, driver):
 
     name_company_at_center = find_company_at_center(article, companies, 1, 3)
     if name_company_at_center != "None":
-        print(Fore.GREEN + f"'{name_company_at_center}' is the company at center for the article '{article}' and companies '{companies}'." + Style.RESET_ALL)
+        print(
+            Fore.GREEN + f"'{name_company_at_center}' is the company at center for the article '{article}' and companies '{companies}'." + Style.RESET_ALL)
     else:
         print(Fore.RED + f"Could not find company at center for the article '{article}'." + Style.RESET_ALL)
         return False
 
     label_node_requiring_change = find_node_type(article, node_types)
     if label_node_requiring_change != "None":
-        print(Fore.GREEN + f"'{label_node_requiring_change}' is the node type which requires a change." + Style.RESET_ALL)
+        print(
+            Fore.GREEN + f"'{label_node_requiring_change}' is the node type which requires a change." + Style.RESET_ALL)
     else:
         print(Fore.RED + f"Could not find node type which requires change for article '{article}'." + Style.RESET_ALL)
         return False
 
-    added, deleted, unchanged = find_change_triples(article, name_company_at_center, label_node_requiring_change, 1, 3, driver)
+    added, deleted, unchanged = find_change_triples(article, name_company_at_center, label_node_requiring_change, 1, 3,
+                                                    driver)
 
     if added:
         for add in added:
@@ -120,15 +124,20 @@ def update_neo4j_graph(article, companies, node_types, date_from, date_until, no
                     id_node_from = wikidata_wbsearchentities(node_from, id_or_name='id')
                 if id_node_from == "No wikidata entry found":
                     id_node_from = _get_and_increment_customID()
-                id_node_from = create_new_node(id_node_from, "Company" , properties_dict=get_properties(id_node_from, "Company", node_from), driver=driver)
+                id_node_from = create_new_node(id_node_from, "Company",
+                                               properties_dict=get_properties(id_node_from, "Company", node_from),
+                                               driver=driver)
 
                 id_node_to = get_wikidata_id_from_name(node_to, driver)
                 if id_node_to is None:
                     id_node_to = wikidata_wbsearchentities(node_to, id_or_name='id')
                 if id_node_to == "No wikidata entry found":
                     id_node_to = _get_and_increment_customID()
-                id_node_to = create_new_node(id_node_to, label_node_requiring_change , properties_dict=get_properties(id_node_to, label_node_requiring_change, node_to), driver=driver)
-                create_relationship_in_graph("OUTBOUND", relationship_type, id_node_from, id_node_to, str(datetime.now().replace(tzinfo=timezone.utc)), "NA", driver)
+                id_node_to = create_new_node(id_node_to, label_node_requiring_change,
+                                             properties_dict=get_properties(id_node_to, label_node_requiring_change,
+                                                                            node_to), driver=driver)
+                create_relationship_in_graph("OUTBOUND", relationship_type, id_node_from, id_node_to,
+                                             str(datetime.now().replace(tzinfo=timezone.utc)), "NA", driver)
             except KeyError as e:
                 print(Fore.RED + f"Key Error for {add}. Error: {e}." + Style.RESET_ALL)
     if deleted:
@@ -148,12 +157,15 @@ def update_neo4j_graph(article, companies, node_types, date_from, date_until, no
 
                 node_relationships = get_node_relationships(id_node_from, id_node_to, driver)
                 for rel_id in node_relationships:
-                    updated_rel_elementID = update_relationship_property(rel_id['rel_id'], "end_time", str(datetime.now().replace(tzinfo=timezone.utc)), driver)
+                    updated_rel_elementID = update_relationship_property(rel_id['rel_id'], "end_time",
+                                                                         str(datetime.now().replace(
+                                                                             tzinfo=timezone.utc)), driver)
 
             except KeyError as e:
                 print(Fore.RED + f"Key Error for {delete}. Error: {e}." + Style.RESET_ALL)
 
     return added, deleted, unchanged
+
 
 def find_company_at_center(article, companies, attempt, max_attempt):
     if "None" not in companies:
@@ -189,13 +201,14 @@ def find_company_at_center(article, companies, attempt, max_attempt):
     Possible companies: {str(companies)}        
     """
 
-    name = _generate_result_from_llm(prompt, enum = companies, max_output_tokens=30, temperature=0.4)
+    name = _generate_result_from_llm(prompt, enum=companies, max_output_tokens=30, temperature=0.4)
 
     if name not in companies:
-        find_company_at_center(article, companies, attempt+1, max_attempt)
+        find_company_at_center(article, companies, attempt + 1, max_attempt)
 
     result = wikidata_wbsearchentities(name, id_or_name="name")
     return result
+
 
 def find_node_type(article, node_types):
     if "None" not in node_types:
@@ -235,8 +248,9 @@ def find_node_type(article, node_types):
     Available node_types: {str(node_types)}        
             """
 
-    result = _generate_result_from_llm(prompt, enum = node_types)
+    result = _generate_result_from_llm(prompt, enum=node_types)
     return result
+
 
 def _get_and_increment_customID():
     global custom_id
@@ -244,24 +258,26 @@ def _get_and_increment_customID():
     custom_node_id = "CustomID" + str(custom_id)
     return custom_node_id
 
+
 def _get_datetime_now_and_max():
     rel_wikidata_start_time = str(datetime.now().replace(tzinfo=timezone.utc))
     rel_wikidata_end_time = str(datetime.max.replace(tzinfo=timezone.utc))
     return rel_wikidata_start_time, rel_wikidata_end_time
 
-def _generate_result_from_llm(prompt, enum = None, ResponseSchema = None, temperature = 0.5, max_output_tokens = 30):
+
+def _generate_result_from_llm(prompt, enum=None, ResponseSchema=None, temperature=0.5, max_output_tokens=30):
     if enum is not None:
         result = model.generate_content(prompt,
-            generation_config=genai.GenerationConfig(
-                response_mime_type="text/x.enum",
-                response_schema={
-                    "type": "STRING",
-                    "enum": enum,
-                },
-                temperature=temperature,
-                max_output_tokens=max_output_tokens,
-            ),
-        )
+                                        generation_config=genai.GenerationConfig(
+                                            response_mime_type="text/x.enum",
+                                            response_schema={
+                                                "type": "STRING",
+                                                "enum": enum,
+                                            },
+                                            temperature=temperature,
+                                            max_output_tokens=max_output_tokens,
+                                        ),
+                                        )
         return result.text
     elif ResponseSchema is not None:
         result = model.generate_content(
@@ -277,9 +293,10 @@ def _generate_result_from_llm(prompt, enum = None, ResponseSchema = None, temper
     else:
         raise KeyError(f"No enum or ResponseSchema provided")
 
+
 def _update_node_properties_dict(article, properties_dict, response_schema):
-    #todo: currently not implemented, does not support changing of node properties
-    prompt =   f"""
+    # todo: currently not implemented, does not support changing of node properties
+    prompt = f"""
                 Your task is to determine which dictionary entry has to be changed based on information from an article.
 
                 Instructions:
@@ -300,7 +317,8 @@ def _update_node_properties_dict(article, properties_dict, response_schema):
                 """
 
     key = _generate_result_from_llm(prompt, list(response_schema.keys()))
-    print(f"Found property of '{key}' requires a change according to article '{article}' and properties '{properties_dict}")
+    print(
+        f"Found property of '{key}' requires a change according to article '{article}' and properties '{properties_dict}")
 
     prompt = f"""
            Your task is to update a dictionary based on information from an article.
@@ -321,7 +339,6 @@ def _update_node_properties_dict(article, properties_dict, response_schema):
            properties_dict: {property}        
            """
 
-
     result = _generate_result_from_llm(prompt, ResponseSchema=ResponseSchema, temperature=0.3, max_output_tokens=40)
     updated_node_property = json.loads(result)
     updated_node_property = updated_node_property["new_value"]
@@ -330,6 +347,3 @@ def _update_node_properties_dict(article, properties_dict, response_schema):
 
     print(f"Updated nodes properties dict to '{properties_dict}' for article '{article}'")
     return properties_dict
-
-
-

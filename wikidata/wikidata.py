@@ -46,7 +46,7 @@ def wikidata_wbgetentities(id: str, print_output: bool = False) -> Dict[str, Any
     data = wikidata_cache.get_data('wbgetentities', id, params)
 
     if print_output and data:
-        filename = "files/initial_graph_data/webgetentities.json"
+        filename = "files/wikidata/webgetentities.json"
         with open(filename, 'w') as f:
             json.dump(data, f, indent=4)
         print(f"JSON data written to {filename}")

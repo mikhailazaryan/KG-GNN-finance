@@ -1,0 +1,18 @@
+{
+  "company 1": {
+    "article_1": {
+      "text": "todo",
+      "source": "todo",
+      "date": "todo datetime object",
+      "benchmarking": {
+        "model update triples": {
+          "unchanged": [],
+          "added": [],
+          "deleted": []
+        },
+        "correct update": null,
+        "wikidata structure": null
+      }
+    }
+  }
+}

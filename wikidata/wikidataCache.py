@@ -14,7 +14,7 @@ class WikidataCache:
     request_times = []
 
 
-    def __init__(self, cache_file='files/wikidata/wikidata.json'):
+    def __init__(self, cache_file='files/wikidata_cache/wikidata.json'):
         self.cache_file = cache_file
         self._ensure_cache_directory()
         self.cache = self._load_cache()
@@ -140,33 +140,12 @@ class WikidataCache:
         Can be called either on an instance or as a class method.
         """
         if cache_instance is None:
-            cache_instance = cls(cache_file='files/wikidata/wikidata.json')
+            cache_instance = cls(cache_file='files/wikidata_cache/wikidata.json')
 
         allowed_keys = {'P17', 'P452', 'P1056', 'P108', 'P361', 'P169', 'P946',
                         'P3320', 'P570', 'P1830', 'P373', '127', 'P569', 'P112',
                         'P159', 'P1037', 'P571', 'P355', 'P2403', 'P2137', 'P2139', 'P2295', 'P3362', 'P2226', 'P749', 'P749'}
 
-
-        """
-           "P159": [
-                            {
-                                "mainsnak": {
-                                    "snaktype": "value",
-                                    "property": "P159",
-                                    "hash": "39f3c696fdc5c7337c6f604af1825d6144f0de18",
-                                    "datavalue": {
-                                        "value": {
-                                            "entity-type": "item",
-                                            "numeric-id": 1615401,
-                                            "id": "Q1615401"
-                                        },
-                                        "type": "wikibase-entityid"
-                                    },
-                                    "datatype": "wikibase-item"
-                                },
-                                "type": "statement",
-                                "qualifiers": {
-        """
 
         try:
             if 'wbgetentities' in cache_instance.cache:

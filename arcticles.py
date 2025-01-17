@@ -1,13 +1,31 @@
+import json
+
 import google.generativeai as genai
 import configparser
-
 
 model = genai.GenerativeModel("gemini-1.5-pro-latest")
 config = configparser.ConfigParser()
 config.read('config.ini')
 genai.configure(api_key=config['gemini']['api_key'])
 
-def get_synthetic_articles(companies: list):
+
+def get_real_articles(companies: list):
+    # todo (1) crawl or research 100 articles
+    # todo (2) evaluate on
+
+    real_articles = {
+
+    }
+
+    result = []
+    for company in companies:
+        result.append(real_articles.get(company))
+
+    return result
+
+
+def get_synthetic_articles(companies: list = None):
+    #depreciated, only here for backup
     synthetic_articles = {
         "Adidas AG": {
             "article_1": "Adidas AG acquires majority stake in fitness technology company Runtastic, expanding its digital sports portfolio.",
@@ -71,7 +89,7 @@ def get_synthetic_articles(companies: list):
             "article_8": "Bayer AG introduces a new precision oncology drug, 'OncoTarget,' targeting specific genetic mutations in cancer cells, while discontinuing the production of its legacy antibiotic, 'Ciprobay XR'.",
             "article_9": "Bayer AG is removed from the Dow Jones Sustainability Index due to concerns regarding its environmental impact related to pesticide production.",
             "article_10": "Bayer AG establishes a partnership with the Bill & Melinda Gates Foundation to develop and distribute affordable malaria treatments in developing countries."
-          },
+        },
 
         "Beiersdorf AG": {
             "article_1": "Beiersdorf AG acquires Coppertone, the iconic sunscreen brand, from Bayer AG, strengthening its sun care portfolio.",
@@ -84,7 +102,7 @@ def get_synthetic_articles(companies: list):
             "article_8": "Beiersdorf AG launches a new line of sustainable, vegan skincare products under the NIVEA Naturally Good brand, while phasing out certain product lines containing microplastics.",
             "article_9": "Beiersdorf AG is added to the EURO STOXX 50 index, reflecting its strong financial performance and market capitalization.",
             "article_10": "Beiersdorf AG partners with Google to develop personalized skincare recommendations using AI-powered skin analysis technology."
-          },
+        },
 
         "BMW AG": {
             "article_1": "BMW AG acquires Alpina Burkard Bovensiepen GmbH & Co. KG, fully integrating the long-time tuning and manufacturing partner into its operations.",
@@ -92,12 +110,13 @@ def get_synthetic_articles(companies: list):
             "article_3": "BMW AG divests its Parkmobile LLC subsidiary, a provider of parking payment solutions, to EasyPark Group.",
             "article_4": "BMW AG announces a significant investment in urban air mobility, developing electric vertical takeoff and landing (eVTOL) aircraft for future transportation solutions.",
             "article_5": "Oliver Zipse replaces Harald Krüger as CEO of BMW AG, bringing a focus on electric mobility and sustainability.",
-            "article_6": "Elon Musk, CEO of Tesla, unexpectedly joins the Supervisory Board of BMW AG, fueling speculation about potential collaborations.",  # Fictional, but possible scenario for testing
+            "article_6": "Elon Musk, CEO of Tesla, unexpectedly joins the Supervisory Board of BMW AG, fueling speculation about potential collaborations.",
+            # Fictional, but possible scenario for testing
             "article_7": "BMW AG establishes a new North American headquarters in Spartanburg, South Carolina, expanding its existing manufacturing facility and creating new jobs.",
             "article_8": "BMW AG launches its new flagship electric sedan, the i7, featuring advanced autonomous driving capabilities, while phasing out production of the i3 city car.",
             "article_9": "BMW AG is added to the STOXX Europe 600 Automobiles & Parts index, reflecting its strong performance in the automotive sector.",
             "article_10": "BMW AG partners with Amazon Web Services (AWS) to develop a connected car platform, offering enhanced driver assistance and entertainment features."
-          },
+        },
 
         "Brenntag SE": {
             "article_1": "Brenntag SE acquires Univar Solutions, a global chemical and ingredients distributor, creating a leading player in the industry.",
@@ -110,7 +129,7 @@ def get_synthetic_articles(companies: list):
             "article_8": "Brenntag SE introduces a new digital platform for chemical distribution, offering enhanced supply chain visibility and online ordering capabilities, while phasing out its traditional paper-based order processing system.",
             "article_9": "Brenntag SE is added to the MDAX index of German mid-cap companies, reflecting its increasing market capitalization and trading volume.",
             "article_10": "Brenntag SE forms a strategic alliance with Maersk, a global logistics and shipping company, to optimize its global supply chain and reduce transportation costs."
-          },
+        },
 
         "Commerzbank AG": {
             "article_1": "Commerzbank AG acquires the online banking platform of ING-DiBa AG, expanding its digital customer base.",
@@ -127,16 +146,19 @@ def get_synthetic_articles(companies: list):
 
         "Continental AG": {
             "article_1": "Continental AG acquires Elektrobit Automotive GmbH, a leading provider of embedded software solutions for the automotive industry, strengthening its software competencies.",
-            "article_2": "Continental AG is acquired by Schaeffler AG, a global automotive and industrial supplier, in a strategic move to consolidate the automotive supply chain.", #// Hypothetical,for testing
+            "article_2": "Continental AG is acquired by Schaeffler AG, a global automotive and industrial supplier, in a strategic move to consolidate the automotive supply chain.",
+            # // Hypothetical,for testing
             "article_3": "Continental AG divests its ContiTech Conveyor Belt Group to private equity firm Carlyle Group, focusing its resources on core automotive technologies.",
             "article_4": "Continental AG expands its focus on mobility services, developing a platform for autonomous driving and smart city solutions, moving beyond traditional tire and automotive parts manufacturing.",
             "article_5": "Nikolai Setzer replaces Elmar Degenhart as CEO of Continental AG, bringing a renewed focus on digital transformation and software-defined vehicles.",
-            "article_6": "Mary Barra, CEO of General Motors, joins the Supervisory Board of Continental AG, fostering collaboration between the two automotive giants.", #Hypothetical,for testing
+            "article_6": "Mary Barra, CEO of General Motors, joins the Supervisory Board of Continental AG, fostering collaboration between the two automotive giants.",
+            # Hypothetical,for testing
             "article_7": "Continental AG relocates its global headquarters from Hanover, Germany, to a new, state-of-the-art facility in Berlin, aiming to attract top talent and enhance its research and development capabilities.",
             "article_8": "Continental AG introduces a new generation of tires with integrated sensors for real-time road condition monitoring, while phasing out production of its traditional hydraulic brake systems in favor of electromechanical brake systems.",
-            "article_9": "Continental AG is removed from the DAX index due to a decline in market capitalization and added to the MDAX index.", #// Hypothetical,
+            "article_9": "Continental AG is removed from the DAX index due to a decline in market capitalization and added to the MDAX index.",
+            # // Hypothetical,
             "article_10": "Continental AG partners with NVIDIA, a leading technology company specializing in AI and graphics processing units (GPUs), to develop advanced driver-assistance systems (ADAS) and autonomous driving solutions."
-            },
+        },
 
         "Covestro": {
             "article_1": "Covestro acquired the thermoplastic polyurethane (TPU) business of the US-based company Lubrizol Corporation for an undisclosed sum.",
@@ -162,7 +184,7 @@ def get_synthetic_articles(companies: list):
             "article_8": "Daimler Truck launched the new electric eCascadia semi-truck, expanding its electric vehicle portfolio and targeting the growing demand for sustainable freight transport.",
             "article_9": "Daimler Truck was included in the DAX 40 index, Germany's benchmark stock market index, reflecting its significant market capitalization and importance to the German economy.",
             "article_10": "Daimler Truck announced a strategic partnership with Waymo Via to develop and deploy autonomous trucking technology in the United States, integrating Waymo Driver into Daimler Truck's Freightliner Cascadia platform."
-            },
+        },
 
         "Deutsche Bank": {
             "article_1": "Deutsche Bank acquired the German fintech company, FinLeap Connect, in July 2024.",
@@ -517,8 +539,45 @@ def get_synthetic_articles(companies: list):
             "article_10": "Zalando SE announced a collaboration with Google to enhance its online shopping experience using AI-powered personalization."
         }
     }
+
+    if companies is None:
+        return synthetic_articles
+
     result = []
     for company in companies:
         result.append(synthetic_articles.get(company))
 
     return result
+
+def build_synthetic_articles_json():
+    # just for setup, no use anymore
+
+    synthetic_articles = get_synthetic_articles()
+    temp = {}
+    for company, articles in synthetic_articles.items():
+        company_temp = {company: {}}  # Initialize correctly
+        for article_key, article_text in articles.items():
+            # ... (your print statements)
+
+            # Correctly populate company_temp
+            company_temp[company][article_key] = {  # Assign the entire inner dictionary
+                "text": article_text,
+                "source": "synthetic",
+                "date": None,
+                "benchmarking": {
+                    "model update triples": {
+                        "unchanged": [],
+                        "added": [],
+                        "deleted": []
+                    },
+                    "correct update": None,
+                    "wikidata structure": None
+                }
+            }
+
+            # No need for this line anymore:
+            # company_temp[company][article_key]["text"] = article_text
+            temp.update(company_temp)
+
+    with open("files/benchmarking_data/synthetic_articles.json", "w",  encoding='utf-8') as f:
+        json.dump(temp, f, indent=4, ensure_ascii=False)

@@ -1,10 +1,12 @@
 from datetime import datetime, timezone
 from colorama import Fore, Style
+
 from wikidata.wikidata import wikidata_wbgetentities, wikidata_wbsearchentities
 
 max_branching_factor = 12
 
-def create_new_node(wikidata_id, label, properties_dict, driver,):
+
+def create_new_node(wikidata_id, label, properties_dict, driver, ):
     # Check if node exists using wikidata_id
     check_query = """
              MATCH (n {wikidata_id: $wikidata_id})
@@ -27,10 +29,13 @@ def create_new_node(wikidata_id, label, properties_dict, driver,):
             else:
                 raise Exception(f"Error while adding node with wikidata_id: {wikidata_id} to neo4j graph")
         else:
-            print(Fore.GREEN+ f"Node with wikidata_id: {wikidata_id} already exists in neo4j graph and has therefore not been added" + Style.RESET_ALL)
+            print(
+                Fore.GREEN + f"Node with wikidata_id: {wikidata_id} already exists in neo4j graph and has therefore not been added" + Style.RESET_ALL)
             return wikidata_id
 
-def create_relationship_in_graph(rel_direction: str, rel_type: str, org_wikidata_id: str, rel_wikidata_id: str, rel_wikidata_start_time: str, rel_wikidata_end_time: str, driver):
+
+def create_relationship_in_graph(rel_direction: str, rel_type: str, org_wikidata_id: str, rel_wikidata_id: str,
+                                 rel_wikidata_start_time: str, rel_wikidata_end_time: str, driver):
     if rel_direction == "OUTBOUND":
         source_id = org_wikidata_id
         target_id = rel_wikidata_id
@@ -63,7 +68,6 @@ def create_relationship_in_graph(rel_direction: str, rel_type: str, org_wikidata
                 Fore.GREEN + f"Relationship {rel_type} between wikidata_ids: {org_wikidata_id} and {rel_wikidata_id} already exists in neo4j graph and has therefore not been added" + Style.RESET_ALL)
             return False
 
-
     # Create relationship
     create_relationship_query = f"""
         MATCH (source {{wikidata_id: $source_id}})
@@ -90,13 +94,15 @@ def create_relationship_in_graph(rel_direction: str, rel_type: str, org_wikidata
         result = session.run(create_relationship_query, params)
         records = list(result)
         if records:
-            print(Fore.GREEN + f"Successfully created relationship between node '{org_wikidata_id}' and node '{rel_wikidata_id}' of type {rel_type}" + Style.RESET_ALL)
+            print(
+                Fore.GREEN + f"Successfully created relationship between node '{org_wikidata_id}' and node '{rel_wikidata_id}' of type {rel_type}" + Style.RESET_ALL)
             return True
         else:
-            #raise KeyError(f"No relationship created for params: '{params}'. Source or target node might not exist.")
+            # raise KeyError(f"No relationship created for params: '{params}'. Source or target node might not exist.")
             return
 
-def check_if_node_exists_in_graph(wikidata_id = None, name = None, driver=None):
+
+def check_if_node_exists_in_graph(wikidata_id=None, name=None, driver=None):
     if wikidata_id is not None:
         check_query = f"""
                 MATCH (n {{wikidata_id: $wikidata_id}})
@@ -119,43 +125,54 @@ def check_if_node_exists_in_graph(wikidata_id = None, name = None, driver=None):
         raise Exception("Please specify at least one of name or wikidata_id")
     return False
 
-def create_nodes_and_relationships_for_node(org_wikidata_id: str, from_date_of_interest: datetime, until_date_of_interest: datetime, nodes_to_include: list, driver):
+
+def create_nodes_and_relationships_for_node(org_wikidata_id: str, from_date_of_interest: datetime,
+                                            until_date_of_interest: datetime, nodes_to_include: list, driver):
     result = check_if_node_exists_in_graph(wikidata_id=org_wikidata_id, driver=driver)
     temp = []
     if result is False:
-         raise Exception(f"Could not find node with wikidata_id {org_wikidata_id} in graph")
+        raise Exception(f"Could not find node with wikidata_id {org_wikidata_id} in graph")
     else:
         # Process each relationship type
         rel_dict = get_relationship_dict(org_wikidata_id, result.get("label")).items()
         for rel_type, rel_info in rel_dict:
             if rel_info["label"] in nodes_to_include:
                 for rel in rel_info["wikidata_entries"]:
-                        if is_date_in_range(rel["start_time"], rel["end_time"], from_date_of_interest, until_date_of_interest):
-                            properties_dict = get_properties(rel['id'], rel_info["label"], None)
-                            temp.append(create_new_node(rel["id"], label=rel_info["label"], properties_dict=properties_dict, driver=driver))
-                            create_relationship_in_graph(rel_info["relationship_direction"], rel_info["relationship_type"], org_wikidata_id, rel["id"], rel["start_time"], rel["end_time"], driver)
+                    if is_date_in_range(rel["start_time"], rel["end_time"], from_date_of_interest,
+                                        until_date_of_interest):
+                        properties_dict = get_properties(rel['id'], rel_info["label"], None)
+                        temp.append(create_new_node(rel["id"], label=rel_info["label"], properties_dict=properties_dict,
+                                                    driver=driver))
+                        create_relationship_in_graph(rel_info["relationship_direction"], rel_info["relationship_type"],
+                                                     org_wikidata_id, rel["id"], rel["start_time"], rel["end_time"],
+                                                     driver)
     return temp
 
-def _get_wikidata_entry(key, wikidata_id, wikidata, name = False, time = False):
-        if time:
-            try:
-                return str(parse_datetime_to_iso(wikidata.get("entities").get(wikidata_id).get("claims").get(key)[0].get("mainsnak").get("datavalue").get("value").get("time")))
-            except:
-                return "NA"
-        else:
-            try:
-                return wikidata.get("entities").get(wikidata_id).get("claims").get(key)[0].get("mainsnak").get("datavalue").get("value")
-            except:
-                if name:
-                    try:
-                        return wikidata_wbsearchentities(wikidata_id, id_or_name="name")
-                    except:
-                        print(Fore.RED + f"Error: for wikidata_id {wikidata_id}, because Wikidata entry exists but no label/name defined by Wikidata. Returning NA" + Style.RESET_ALL)
-                        return "NA"
-                return "NA"
+
+def _get_wikidata_entry(key, wikidata_id, wikidata, name=False, time=False):
+    if time:
+        try:
+            return str(parse_datetime_to_iso(
+                wikidata.get("entities").get(wikidata_id).get("claims").get(key)[0].get("mainsnak").get(
+                    "datavalue").get("value").get("time")))
+        except:
+            return "NA"
+    else:
+        try:
+            return wikidata.get("entities").get(wikidata_id).get("claims").get(key)[0].get("mainsnak").get(
+                "datavalue").get("value")
+        except:
+            if name:
+                try:
+                    return wikidata_wbsearchentities(wikidata_id, id_or_name="name")
+                except:
+                    print(
+                        Fore.RED + f"Error: for wikidata_id {wikidata_id}, because Wikidata entry exists but no label/name defined by Wikidata. Returning NA" + Style.RESET_ALL)
+                    return "NA"
+            return "NA"
+
 
 def get_properties(wikidata_id, label, name):
-
     if wikidata_id[0:8] == "CustomID":
         properties_dict = {
             "name": name,
@@ -166,17 +183,17 @@ def get_properties(wikidata_id, label, name):
 
     data = wikidata_wbgetentities(wikidata_id)
 
-    if label =="Company":
-         properties_dict ={
-                "inception": _get_wikidata_entry("P571", wikidata_id, data, time=True),
-                "isin": _get_wikidata_entry("P946", wikidata_id, data)
-         }
+    if label == "Company":
+        properties_dict = {
+            "inception": _get_wikidata_entry("P571", wikidata_id, data, time=True),
+            "isin": _get_wikidata_entry("P946", wikidata_id, data)
+        }
     elif label == "StockMarketIndex":
         properties_dict = {}
     elif label == "Industry_Field":
-        properties_dict ={}
+        properties_dict = {}
     elif label in ["Manager", "Founder", "Board_Member"]:
-        properties_dict ={
+        properties_dict = {
             "date_of_birth": _get_wikidata_entry("P569", wikidata_id, data, time=True),
             "date_of_death": _get_wikidata_entry("P570", wikidata_id, data, time=True),
         }
@@ -192,72 +209,75 @@ def get_properties(wikidata_id, label, name):
     try:
         properties_dict["name"] = data["entities"][wikidata_id]["labels"]["en"]["value"]
     except KeyError as e:
-        print(Fore.RED + f"KeyError: for wikidata_id {wikidata_id}, because Wikidata entry exists but no label/name defined by Wikidata. Returning Wikidata_ID as Name" + Style.RESET_ALL)
+        print(
+            Fore.RED + f"KeyError: for wikidata_id {wikidata_id}, because Wikidata entry exists but no label/name defined by Wikidata. Returning Wikidata_ID as Name" + Style.RESET_ALL)
         properties_dict["name"] = wikidata_id
     properties_dict["wikidata_id"] = wikidata_id
 
     return properties_dict
 
+
 def get_relationship_dict(wikidata_id, label):
     data = wikidata_wbgetentities(wikidata_id)
     try:
         if label == "Company":
-            #wikidata_wbgetentities(org_wikidata_id, True)
+            # wikidata_wbgetentities(org_wikidata_id, True)
             relationship_dict = {
-                        "StockMarketIndex": {
-                            "wikidata_entries": _get_wikidata_rels(data, wikidata_id, ["P361"]),
-                            "label": "StockMarketIndex",
-                            "relationship_type": "IS_LISTED_IN",
-                            "relationship_direction": "OUTBOUND",
-                        },
-                        "Industry_Field": {
-                            "wikidata_entries": _get_wikidata_rels(data, wikidata_id, ["P452"]),
-                            "label": "Industry_Field",
-                            "relationship_type": "IS_ACTIVE_IN",
-                            "relationship_direction": "OUTBOUND"
-                        },
-                        "Subsidiary": {
-                            "wikidata_entries": _get_wikidata_rels(data, wikidata_id, ["P355"]), #removed P1830 because also included buildings, football clubs etx
-                            "label": "Company",
-                            "relationship_type": "OWNS",
-                            "relationship_direction": "OUTBOUND"
-                        },
-                        "Owner": {
-                            "wikidata_entries": _get_wikidata_rels(data, wikidata_id, ["127"]),
-                            "label": "Company",
-                            "relationship_type": "IS_OWNED_BY",
-                            "relationship_direction": "OUTBOUND"
-                        },
-                        "City": {
-                            "wikidata_entries": _get_wikidata_rels(data, wikidata_id, ["P159"]),
-                            "label": "City",
-                            "relationship_type": "HAS_HEADQUARTER_IN",
-                            "relationship_direction": "OUTBOUND"
-                        },
-                        "Product_or_Service": {
-                            "wikidata_entries": _get_wikidata_rels(data, wikidata_id, ["P1056"]),
-                            "label": "Product_or_Service",
-                            "relationship_type": "OFFERS",
-                            "relationship_direction": "OUTBOUND"
-                        },
-                        "Founder": {
-                            "wikidata_entries": _get_wikidata_rels(data, wikidata_id, ["P112"]),
-                            "label": "Founder",
-                            "relationship_type": "WAS_FOUNDED_BY",
-                            "relationship_direction": "OUTBOUND"
-                        },
-                        "Manager": {
-                            "wikidata_entries": _get_wikidata_rels(data, wikidata_id, ["P169", "P1037"]),
-                            "label": "Manager",
-                            "relationship_type": "IS_MANAGED_BY",
-                            "relationship_direction": "OUTBOUND"
-                        },
-                        "Board_Member": {
-                            "wikidata_entries": _get_wikidata_rels(data, wikidata_id, ["P3320"]),
-                            "label": "Board_Member",
-                            "relationship_type": "HAS_BOARD_MEMBER",
-                            "relationship_direction": "OUTBOUND"
-                        }
+                "StockMarketIndex": {
+                    "wikidata_entries": _get_wikidata_rels(data, wikidata_id, ["P361"]),
+                    "label": "StockMarketIndex",
+                    "relationship_type": "IS_LISTED_IN",
+                    "relationship_direction": "OUTBOUND",
+                },
+                "Industry_Field": {
+                    "wikidata_entries": _get_wikidata_rels(data, wikidata_id, ["P452"]),
+                    "label": "Industry_Field",
+                    "relationship_type": "IS_ACTIVE_IN",
+                    "relationship_direction": "OUTBOUND"
+                },
+                "Subsidiary": {
+                    "wikidata_entries": _get_wikidata_rels(data, wikidata_id, ["P355"]),
+                    # removed P1830 because also included buildings, football clubs etx
+                    "label": "Company",
+                    "relationship_type": "OWNS",
+                    "relationship_direction": "OUTBOUND"
+                },
+                "Owner": {
+                    "wikidata_entries": _get_wikidata_rels(data, wikidata_id, ["127"]),
+                    "label": "Company",
+                    "relationship_type": "IS_OWNED_BY",
+                    "relationship_direction": "OUTBOUND"
+                },
+                "City": {
+                    "wikidata_entries": _get_wikidata_rels(data, wikidata_id, ["P159"]),
+                    "label": "City",
+                    "relationship_type": "HAS_HEADQUARTER_IN",
+                    "relationship_direction": "OUTBOUND"
+                },
+                "Product_or_Service": {
+                    "wikidata_entries": _get_wikidata_rels(data, wikidata_id, ["P1056"]),
+                    "label": "Product_or_Service",
+                    "relationship_type": "OFFERS",
+                    "relationship_direction": "OUTBOUND"
+                },
+                "Founder": {
+                    "wikidata_entries": _get_wikidata_rels(data, wikidata_id, ["P112"]),
+                    "label": "Founder",
+                    "relationship_type": "WAS_FOUNDED_BY",
+                    "relationship_direction": "OUTBOUND"
+                },
+                "Manager": {
+                    "wikidata_entries": _get_wikidata_rels(data, wikidata_id, ["P169", "P1037"]),
+                    "label": "Manager",
+                    "relationship_type": "IS_MANAGED_BY",
+                    "relationship_direction": "OUTBOUND"
+                },
+                "Board_Member": {
+                    "wikidata_entries": _get_wikidata_rels(data, wikidata_id, ["P3320"]),
+                    "label": "Board_Member",
+                    "relationship_type": "HAS_BOARD_MEMBER",
+                    "relationship_direction": "OUTBOUND"
+                }
             }
             return relationship_dict
         elif label == "StockMarketIndex":
@@ -266,13 +286,13 @@ def get_relationship_dict(wikidata_id, label):
             relationship_dict = {}
         elif label == "City":
             relationship_dict = {
-                        "Country" : {
-                            "wikidata_entries": _get_wikidata_rels(data, wikidata_id, ["P17"]),
-                            "label": "Country",
-                            "relationship_type": "LOCATED_IN",
-                            "relationship_direction": "OUTBOUND"
-                        }
-                    }
+                "Country": {
+                    "wikidata_entries": _get_wikidata_rels(data, wikidata_id, ["P17"]),
+                    "label": "Country",
+                    "relationship_type": "LOCATED_IN",
+                    "relationship_direction": "OUTBOUND"
+                }
+            }
         elif label == "Country":
             relationship_dict = {}
         elif label == "Product_or_Service":
@@ -293,15 +313,15 @@ def get_relationship_dict(wikidata_id, label):
     except KeyError as e:
         raise KeyError(f"KeyError for label: '{label}': {e}")
 
-def _get_wikidata_rels(data: dict, wikidata_id: str, property_ids: list) -> list[dict[str, datetime, datetime]]:
 
+def _get_wikidata_rels(data: dict, wikidata_id: str, property_ids: list) -> list[dict[str, datetime, datetime]]:
     result = []
 
     for property_id in property_ids:
         try:
             entries = data["entities"][wikidata_id]["claims"][property_id]
         except KeyError:
-            #print(Fore.YELLOW + f"Key Error {property_id} for wikidata_id {wikidata_id}, skipping this key" + Style.RESET_ALL)
+            # print(Fore.YELLOW + f"Key Error {property_id} for wikidata_id {wikidata_id}, skipping this key" + Style.RESET_ALL)
             continue
         for entry in entries:
             try:
@@ -317,7 +337,8 @@ def _get_wikidata_rels(data: dict, wikidata_id: str, property_ids: list) -> list
             try:
                 id = entry["mainsnak"]["datavalue"]["value"]["id"]
             except KeyError:
-                print(Fore.YELLOW + f"Key Error for single relationship for wikidata_id {wikidata_id}, skipping this relationship" + Style.RESET_ALL)
+                print(
+                    Fore.YELLOW + f"Key Error for single relationship for wikidata_id {wikidata_id}, skipping this relationship" + Style.RESET_ALL)
                 continue
             result.append({"id": id, "start_time": start_time, "end_time": end_time})
 
@@ -326,12 +347,14 @@ def _get_wikidata_rels(data: dict, wikidata_id: str, property_ids: list) -> list
 
     return result
 
+
 def parse_datetime_to_iso(date_string: str) -> datetime:
     try:
         if date_string.startswith('+'):
-            dt = datetime.strptime(date_string.lstrip('+').rstrip('Z'),"%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc)
+            dt = datetime.strptime(date_string.lstrip('+').rstrip('Z'), "%Y-%m-%dT%H:%M:%S").replace(
+                tzinfo=timezone.utc)
         elif date_string.startswith('-'):
-            dt = datetime.min.replace(tzinfo=timezone.utc) # in case there are datetimes from before Christ
+            dt = datetime.min.replace(tzinfo=timezone.utc)  # in case there are datetimes from before Christ
         else:
             dt = datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S%z").replace(tzinfo=timezone.utc)
         return dt
@@ -339,21 +362,24 @@ def parse_datetime_to_iso(date_string: str) -> datetime:
         try:
             if "-00" in date_string:
                 fixed_date = date_string.replace("-00", "-01")
-                #print(Fore.LIGHTYELLOW_EX + f"date_string: {date_string} contained invalid month or day information, changed to: {fixed_date}" + Style.RESET_ALL)
+                # print(Fore.LIGHTYELLOW_EX + f"date_string: {date_string} contained invalid month or day information, changed to: {fixed_date}" + Style.RESET_ALL)
                 return parse_datetime_to_iso(fixed_date)
         except:
             raise ValueError(f"Could not parse date string {date_string} to datetime format. ValueError: {e}")
 
-def is_date_in_range(rel_wikidata_start_time: datetime, rel_wikidata_end_time: datetime, from_date_of_interest: datetime, until_date_of_interest: datetime) -> bool:
-        if rel_wikidata_start_time == "NA":
-            rel_wikidata_start_time = datetime.min.replace(tzinfo=timezone.utc)
-        if rel_wikidata_end_time == "NA":
-            rel_wikidata_end_time = datetime.max.replace(tzinfo=timezone.utc)
 
-        if rel_wikidata_end_time < from_date_of_interest or rel_wikidata_start_time > until_date_of_interest:
-            return False
-        else:
-            return True
+def is_date_in_range(rel_wikidata_start_time: datetime, rel_wikidata_end_time: datetime,
+                     from_date_of_interest: datetime, until_date_of_interest: datetime) -> bool:
+    if rel_wikidata_start_time == "NA":
+        rel_wikidata_start_time = datetime.min.replace(tzinfo=timezone.utc)
+    if rel_wikidata_end_time == "NA":
+        rel_wikidata_end_time = datetime.max.replace(tzinfo=timezone.utc)
+
+    if rel_wikidata_end_time < from_date_of_interest or rel_wikidata_start_time > until_date_of_interest:
+        return False
+    else:
+        return True
+
 
 def build_graph_from_initial_node(node_name, label, date_from, date_until, nodes_to_include, search_depth, driver):
     wikidata_id_of_company = wikidata_wbsearchentities(node_name)
@@ -367,17 +393,19 @@ def build_graph_from_initial_node(node_name, label, date_from, date_until, nodes
         for wikidata_id in queue_copy:
             if wikidata_id is not None:
                 queue.extend(create_nodes_and_relationships_for_node(org_wikidata_id=wikidata_id,
-                                                                         from_date_of_interest=date_from,
-                                                                         until_date_of_interest=date_until,
-                                                                         nodes_to_include=nodes_to_include,
-                                                                         driver=driver))
+                                                                     from_date_of_interest=date_from,
+                                                                     until_date_of_interest=date_until,
+                                                                     nodes_to_include=nodes_to_include,
+                                                                     driver=driver))
 
         print(Fore.BLUE + f"---Finished building graph for {node_name} on depth {i}---" + Style.RESET_ALL)
     return wikidata_id_of_company
 
+
 def reset_graph(driver):
     with driver.session() as session:
         session.run("MATCH(n) DETACH DELETE n")
+
 
 def delete_node(wikidata_id, driver) -> bool:
     if wikidata_id is not None:
@@ -387,7 +415,8 @@ def delete_node(wikidata_id, driver) -> bool:
                    RETURN count(n) as deleted_count
                     """
     else:
-        print(Fore.RED + f"Error: Wikidata id '{wikidata_id}' is none, either because no wikidata id was specified or because no wikidata id was found" + Style.RESET_ALL)
+        print(
+            Fore.RED + f"Error: Wikidata id '{wikidata_id}' is none, either because no wikidata id was specified or because no wikidata id was found" + Style.RESET_ALL)
         return False
     try:
         with driver.session() as session:
@@ -398,6 +427,7 @@ def delete_node(wikidata_id, driver) -> bool:
             return False
     except Exception as e:
         raise Exception(Fore.RED + f"Error deleting node: {str(e)} + Error: {e}" + Style.RESET_ALL)
+
 
 def delete_relationship_by_id(relationship_id: str, driver) -> bool:
     """
@@ -420,11 +450,12 @@ def delete_relationship_by_id(relationship_id: str, driver) -> bool:
                                  relationship_id=relationship_id).single()
 
             if result and result["deleted_count"] > 0:
-                print(Fore.GREEN +f"Relationship with ID '{relationship_id}' has been deleted" +Style.RESET_ALL)
+                print(Fore.GREEN + f"Relationship with ID '{relationship_id}' has been deleted" + Style.RESET_ALL)
                 return True
             raise Exception(Fore.YELLOW + f"No relationship found with ID '{relationship_id}'" + Style.RESET_ALL)
     except Exception as e:
         raise Exception(Fore.RED + f"Error deleting relationship: {str(e)} + Error: {e}" + Style.RESET_ALL)
+
 
 def get_node_relationships(source_wikidata_id: str = None, target_wikidata_id: str = None, driver=None) -> list:
     """
@@ -462,9 +493,10 @@ def get_node_relationships(source_wikidata_id: str = None, target_wikidata_id: s
             """
             result = session.run(relationship_query, node_id=source_wikidata_id).single()
         else:
-            raise KeyError(Fore.RED + f"Error: No source wikidata_id provided, source_wikidata_id: '{source_wikidata_id}', target_wikidata_id: '{target_wikidata_id}'" + Style.RESET_ALL)
+            raise KeyError(
+                Fore.RED + f"Error: No source wikidata_id provided, source_wikidata_id: '{source_wikidata_id}', target_wikidata_id: '{target_wikidata_id}'" + Style.RESET_ALL)
         if not result:
-            #print(Fore.YELLOW + "No nodes or relationships found" + Style.RESET_ALL)
+            # print(Fore.YELLOW + "No nodes or relationships found" + Style.RESET_ALL)
             return []
 
         # Combine and format relationships
@@ -479,11 +511,12 @@ def get_node_relationships(source_wikidata_id: str = None, target_wikidata_id: s
             if rel['type'] is not None
         ]
 
-        #if formatted_relationships:
-            #print(Fore.GREEN + f"Found {len(formatted_relationships)} relationships" + Style.RESET_ALL)
-        #else:
-        #print(Fore.YELLOW + "No relationships found" + Style.RESET_ALL)
+        # if formatted_relationships:
+        # print(Fore.GREEN + f"Found {len(formatted_relationships)} relationships" + Style.RESET_ALL)
+        # else:
+        # print(Fore.YELLOW + "No relationships found" + Style.RESET_ALL)
         return formatted_relationships
+
 
 def update_relationship_property(elementID, rel_property, new_property_value, driver):
     query = f"""
@@ -491,8 +524,6 @@ def update_relationship_property(elementID, rel_property, new_property_value, dr
                     SET r.{rel_property} = '{new_property_value}'
                     RETURN r.{rel_property} as new_property_value
             """
-
-
 
     with driver.session() as session:
         result = session.run(query)
@@ -502,6 +533,7 @@ def update_relationship_property(elementID, rel_property, new_property_value, dr
             return elementID
         else:
             raise ValueError(f"Updating of relationship with '{elementID}' failed")
+
 
 def get_node_properties(wikidata_id: str, driver) -> dict:
     """
@@ -538,6 +570,7 @@ def get_node_properties(wikidata_id: str, driver) -> dict:
     except Exception as e:
         raise ValueError(Fore.RED + f"Error getting node properties: {str(e)}" + Style.RESET_ALL)
 
+
 def set_node_properties(wikidata_id: str, properties_dict: dict, driver) -> str:
     try:
         with driver.session() as session:
@@ -554,9 +587,10 @@ def set_node_properties(wikidata_id: str, properties_dict: dict, driver) -> str:
                 print(Fore.GREEN + f"Successfully updated node with ID: {wikidata_id}" + Style.RESET_ALL)
                 return updated_node['wikidata_id']
             else:
-                raise KeyError( f"No node found with ID: {wikidata_id}")
+                raise KeyError(f"No node found with ID: {wikidata_id}")
     except Exception as e:
         raise KeyError(Fore.RED + f"Error updating node with wikidata_id: '{wikidata_id}': {str(e)}" + Style.RESET_ALL)
+
 
 def get_wikidata_id_from_name(name: str, driver) -> str:
     try:
@@ -573,6 +607,7 @@ def get_wikidata_id_from_name(name: str, driver) -> str:
     except Exception as e:
         print(Fore.RED + f"Error finding wikidata_id: {str(e)}" + Style.RESET_ALL)
         return None
+
 
 def build_demo_graph(driver):
     company_query = """
@@ -646,31 +681,31 @@ def build_demo_graph(driver):
         session.run(city_query, **city_params)
         session.run(relationship_query, **relationship_params)
 
+
 def get_graph_information(node_name: str, node_label: str, driver):
-        query = """
+    query = """
         MATCH (n) WHERE n.name = $node_name
         MATCH (n)-[r]-(connected)
         WHERE labels(connected)[0] = $node_label
         RETURN type(r) as relationship_type, connected.name as connected_node_name
         """
 
-        with driver.session() as session:
-            try:
-                result = session.run(query,
-                                     node_name=node_name,
-                                     node_label=node_label)
+    with driver.session() as session:
+        try:
+            result = session.run(query,
+                                 node_name=node_name,
+                                 node_label=node_label)
 
+            relationships = []
+            for record in result:
+                relationships.append({"node_from": node_name, "relationship": record["relationship_type"],
+                                      "node_to": record["connected_node_name"]})
 
-                relationships = []
-                for record in result:
-                    relationships.append({"node_from": node_name, "relationship": record["relationship_type"], "node_to": record["connected_node_name"]})
-
-                if relationships:
-                    return relationships
-                else:
-                    print(f"No relationships found for node '{node_name}'")
-                    return None
-            except Exception as e:
-                raise Exception(f"Error executing query: {str(e)}")
+            if relationships:
+                return relationships
+            else:
+                print(f"No relationships found for node '{node_name}'")
                 return None
-
+        except Exception as e:
+            raise Exception(f"Error executing query: {str(e)}")
+            return None
