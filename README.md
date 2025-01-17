@@ -18,7 +18,6 @@ This project builds and dynamically updates a knowledge graph from Wikidata, inc
     * neo4j~=5.0
     * colorama
     *configparser
-    *wikidata
     *google-generativeai
     *requests
 

@@ -28,14 +28,12 @@ def main():
         print(f"Connection failed: {e}")
 
 
-     build_actual_graph_bool = True
-     build_demo_graph_bool = False
-     get_articles_bool = False
+     build_graph_bool = True
      update_graph_bool = True
 
      # this builds the initial graph from wikidata
-     company_names = ["Adidas AG"]
-     company_names = ["Adidas AG", "Airbus SE", "Allianz SE", "BASF SE", "Bayer AG", "Beiersdorf AG",
+     companies_to_include_in_graph = ["MTU Aero Engines AG"]
+     DAX_companies = ["Adidas AG", "Airbus SE", "Allianz SE", "BASF SE", "Bayer AG", "Beiersdorf AG",
                       "Bayerische Motoren Werke AG", "Brenntag SE", "Commerzbank AG", "Continental AG", "Covestro AG",
                       "Daimler Truck Holding AG", "Deutsche Bank AG", "Deutsche Börse AG", "Deutsche Post AG",
                       "Deutsche Telekom AG", "E.ON SE", "Fresenius SE & Co. KGaA", "Hannover Rück SE",
@@ -46,14 +44,16 @@ def main():
                       "Sartorius AG", "Siemens AG", "Siemens Energy AG", "Siemens Healthineers AG", "Symrise AG",
                       "Volkswagen AG", "Vonovia SE", "Zalando SE"]
 
+     #companies_to_include_in_graph = DAX_companies
+
      date_from = datetime(2022, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
      date_until = datetime(2024, 12, 31, 0, 0, 0, tzinfo=timezone.utc)
      nodes_to_include = ["Company", "Industry_Field", "Manager", "Founder", "Board_Member", "City", "Country", "Product_or_Service", "Employer", "StockMarketIndex"]
-     search_depth = 3
+     search_depth = 2
 
-     if build_actual_graph_bool:
+     if build_graph_bool:
          reset_graph(driver)
-         for company_name in company_names:
+         for company_name in companies_to_include_in_graph:
               print(Fore.GREEN + f"\n---Started building graph for {company_name}---\n" + Style.RESET_ALL)
               build_graph_from_initial_node(company_name, "Company", date_from, date_until, nodes_to_include, search_depth, driver)
               print(Fore.GREEN + f"\n--- Finished building graph for {company_name}---\n" + Style.RESET_ALL)
@@ -62,26 +62,20 @@ def main():
               if random.random() < 0.1:
                 WikidataCache.strip_cache()
 
-         print(f"\n--- Successfully finished building neo4j graph for companies {company_names} with a depth of {search_depth} ---\n")
+         print(f"\n--- Successfully finished building neo4j graph for companies {companies_to_include_in_graph} with a depth of {search_depth} ---\n")
 
          print("")
          WikidataCache.print_current_stats()
          print("")
 
 
-     if build_demo_graph_bool:
-        reset_graph(driver)
-        build_demo_graph(driver)
-        print(f"\n--- Successfully finished building neo4j demo graph ---\n")
-
-     if get_articles_bool:
-         articles = get_synthetic_articles("Adidas AG")
-
-     if update_graph_bool & get_articles_bool:
+     if update_graph_bool:
          print(Fore.LIGHTMAGENTA_EX + f"\n--- Stated updating existing neo4j graph ---\n" + Style.RESET_ALL)
 
-         for article in articles.values():
-             update_neo4j_graph(article, company_names, nodes_to_include, date_from, date_until, nodes_to_include, search_depth_new_nodes=1, search_depth_for_changes=search_depth, driver=driver)
+         synthetic_articles_list = get_synthetic_articles(companies_to_include_in_graph)
+         for synthetic_articles in synthetic_articles_list:
+             for synthetic_article in synthetic_articles.values():
+                 update_neo4j_graph(synthetic_article, companies_to_include_in_graph, nodes_to_include, date_from, date_until, nodes_to_include, search_depth_new_nodes=1, search_depth_for_changes=search_depth, driver=driver)
 
          print(Fore.LIGHTMAGENTA_EX + f"\n--- Finished updating existing neo4j graph ---\n" + Style.RESET_ALL)
 

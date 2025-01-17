@@ -146,14 +146,9 @@ def update_neo4j_graph(article, companies, node_types, date_from, date_until, no
                 if id_node_to is None:
                     id_node_to = wikidata_wbsearchentities(node_to, id_or_name='id')
 
-                print("id node from: "+ id_node_from, "id node to: "+ id_node_to)
-
                 node_relationships = get_node_relationships(id_node_from, id_node_to, driver)
-                print("test node relationships: " + str(node_relationships))
                 for rel_id in node_relationships:
-                    print(rel_id['rel_id'])
                     updated_rel_elementID = update_relationship_property(rel_id['rel_id'], "end_time", str(datetime.now().replace(tzinfo=timezone.utc)), driver)
-                print("test" + str(updated_rel_elementID))
 
             except KeyError as e:
                 print(Fore.RED + f"Key Error for {delete}. Error: {e}." + Style.RESET_ALL)

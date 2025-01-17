@@ -492,14 +492,16 @@ def update_relationship_property(elementID, rel_property, new_property_value, dr
                     RETURN r.{rel_property} as new_property_value
             """
 
+
+
     with driver.session() as session:
         result = session.run(query)
         if result:
-            print(f"Node with element ID {elementID} updated successfully to {new_property_value}")
+            for record in result:
+                print(f"Node with element ID {elementID} updated successfully to {record['new_property_value']}")
             return elementID
         else:
             raise ValueError(f"Updating of relationship with '{elementID}' failed")
-            return False
 
 def get_node_properties(wikidata_id: str, driver) -> dict:
     """
@@ -567,7 +569,6 @@ def get_wikidata_id_from_name(name: str, driver) -> str:
             result = session.run(query, {"name": name}).single()
             if result:
                 return result["wikidata_id"]
-            print(Fore.YELLOW + f"No node found with name: {name}" + Style.RESET_ALL)
             return None
     except Exception as e:
         print(Fore.RED + f"Error finding wikidata_id: {str(e)}" + Style.RESET_ALL)

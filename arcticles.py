@@ -7,7 +7,7 @@ config = configparser.ConfigParser()
 config.read('config.ini')
 genai.configure(api_key=config['gemini']['api_key'])
 
-def get_synthetic_articles(company: str):
+def get_synthetic_articles(companies: list):
     synthetic_articles = {
         "Adidas AG": {
             "article_1": "Adidas AG acquires majority stake in fitness technology company Runtastic, expanding its digital sports portfolio.",
@@ -517,5 +517,8 @@ def get_synthetic_articles(company: str):
             "article_10": "Zalando SE announced a collaboration with Google to enhance its online shopping experience using AI-powered personalization."
         }
     }
+    result = []
+    for company in companies:
+        result.append(synthetic_articles.get(company))
 
-    return synthetic_articles.get(company)
+    return result
