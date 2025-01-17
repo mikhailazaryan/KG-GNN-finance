@@ -5,12 +5,12 @@ import google.generativeai as genai
 from datetime import datetime, timezone
 from colorama import Fore, Style
 
-from stockdata2KG.graphbuilder import \
+from graphbuilder import \
     create_new_node, create_relationship_in_graph, \
     get_node_relationships, get_wikidata_id_from_name, \
     get_properties, get_graph_information, \
     update_relationship_property
-from stockdata2KG.wikidata.wikidata import wikidata_wbsearchentities
+from wikidata.wikidata import wikidata_wbsearchentities
 
 model = genai.GenerativeModel("gemini-1.5-pro-latest")
 config = configparser.ConfigParser()

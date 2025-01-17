@@ -1,7 +1,7 @@
 from typing import Dict, Any
 from colorama import Fore, Style
 import json
-from stockdata2KG.wikidata.wikidataCache import wikidata_cache
+from wikidata.wikidataCache import wikidata_cache
 
 
 ## Code partially from https://www.jcchouinard.com/wikidata-api-python/

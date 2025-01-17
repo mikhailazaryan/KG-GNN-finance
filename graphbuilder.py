@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from colorama import Fore, Style
-from stockdata2KG.wikidata.wikidata import wikidata_wbgetentities, wikidata_wbsearchentities
+from wikidata.wikidata import wikidata_wbgetentities, wikidata_wbsearchentities
 
 max_branching_factor = 12
 

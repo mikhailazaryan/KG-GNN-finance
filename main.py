@@ -4,10 +4,10 @@ from neo4j import GraphDatabase
 from colorama import init, Fore, Style
 import random
 
-from stockdata2KG.arcticles import get_synthetic_articles
-from stockdata2KG.graphbuilder import build_demo_graph, build_graph_from_initial_node, reset_graph
-from stockdata2KG.graphupdater import update_neo4j_graph
-from stockdata2KG.wikidata.wikidataCache import WikidataCache
+from arcticles import get_synthetic_articles
+from graphbuilder import build_demo_graph, build_graph_from_initial_node, reset_graph
+from graphupdater import update_neo4j_graph
+from wikidata.wikidataCache import WikidataCache
 
 
 def main():
