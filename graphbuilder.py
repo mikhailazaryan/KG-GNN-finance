@@ -6,7 +6,7 @@ from wikidata.wikidata import wikidata_wbgetentities, wikidata_wbsearchentities
 max_branching_factor = 12
 
 
-def create_new_node(wikidata_id, label, properties_dict, driver, ):
+def create_new_node(wikidata_id, label, properties_dict, driver, node_name = ""):
     # Check if node exists using wikidata_id
     check_query = """
              MATCH (n {wikidata_id: $wikidata_id})
@@ -27,15 +27,15 @@ def create_new_node(wikidata_id, label, properties_dict, driver, ):
             if result and result.get("wikidata_id") is not None:
                 return result.get("wikidata_id")
             else:
-                raise Exception(f"Error while adding node with wikidata_id: {wikidata_id} to neo4j graph")
+                raise Exception(f"Error while adding node '{node_name}' with wikidata_id: {wikidata_id} to neo4j graph")
         else:
             print(
-                Fore.GREEN + f"Node with wikidata_id: {wikidata_id} already exists in neo4j graph and has therefore not been added" + Style.RESET_ALL)
+                Fore.GREEN + f"Node '{node_name}' with wikidata_id: {wikidata_id} already exists in neo4j graph and has therefore not been added" + Style.RESET_ALL)
             return wikidata_id
 
 
 def create_relationship_in_graph(rel_direction: str, rel_type: str, org_wikidata_id: str, rel_wikidata_id: str,
-                                 rel_wikidata_start_time: str, rel_wikidata_end_time: str, driver):
+                                 rel_wikidata_start_time: str, rel_wikidata_end_time: str, driver, name_org_node = "", name_rel_node = ""):
     if rel_direction == "OUTBOUND":
         source_id = org_wikidata_id
         target_id = rel_wikidata_id
@@ -95,7 +95,7 @@ def create_relationship_in_graph(rel_direction: str, rel_type: str, org_wikidata
         records = list(result)
         if records:
             print(
-                Fore.GREEN + f"Successfully created relationship between node '{org_wikidata_id}' and node '{rel_wikidata_id}' of type {rel_type}" + Style.RESET_ALL)
+                Fore.GREEN + f"Successfully created relationship between node '{name_org_node}' with wikidataID = '{org_wikidata_id}' and node {name_rel_node} with wikidataID'{rel_wikidata_id}' of type {rel_type}" + Style.RESET_ALL)
             return True
         else:
             # raise KeyError(f"No relationship created for params: '{params}'. Source or target node might not exist.")
@@ -518,7 +518,7 @@ def get_node_relationships(source_wikidata_id: str = None, target_wikidata_id: s
         return formatted_relationships
 
 
-def update_relationship_property(elementID, rel_property, new_property_value, driver):
+def update_relationship_property(elementID, node_name, rel_property, new_property_value, driver):
     query = f"""
                 MATCH ()-[r]-() WHERE elementId(r) = '{elementID}'
                     SET r.{rel_property} = '{new_property_value}'
@@ -529,7 +529,7 @@ def update_relationship_property(elementID, rel_property, new_property_value, dr
         result = session.run(query)
         if result:
             for record in result:
-                print(f"Node with element ID {elementID} updated successfully to {record['new_property_value']}")
+                print(Fore.GREEN + f"Node '{node_name}' with element ID '{elementID}' updated successfully to {record['new_property_value']}" + Style.RESET_ALL)
             return elementID
         else:
             raise ValueError(f"Updating of relationship with '{elementID}' failed")

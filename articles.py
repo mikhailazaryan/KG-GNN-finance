@@ -654,12 +654,12 @@ def build_synthetic_articles_json(companies: list):
 def preprocess_news(article):
     """Uses the LLM to condense a news article into one sentence."""
     prompt = f"""
-    You are a summarization assistant. Your task is to summarize a news article into a single sentence. Keep the main event and relevant company details.
+    You are a summarization assistant. Your task is to summarize a news article into a single sentence. Keep the main event and relevant company details. 
 
     Example:
-    Input: "Tesla unveiled its latest electric vehicle modxel, the Tesla Y, which is expected to revolutionize the market with its features."
-    Output: "Tesla unveiled the Tesla Y, a groundbreaking electric vehicle."
-
+    Input: "Jochen Hanebeck Appointed New CEO of Infineon: Munich-based Infineon’s supervisory board announced it has appointed Jochen Hanebeck as the new CEO, effective April 1, 2022. He will succeed Reinhard Ploss, in place since 2012. Hanebeck, a member of the management board and chief operations officer (COO) since 2016, has been offered a five-year CEO contract, until March 2027, Infineon’s supervisory board announced today (Nov. 25). The supervisory board, Ploss and Hanebeck will work together to develop a transition plan in the coming months. "
+    Output: "Jochen Hanebeck is replacing Reinhard Ploss as the new CEO of infineon effective April 1, 2022"
+    
     Please summarize the following article in one sentence:
     {article}
     """

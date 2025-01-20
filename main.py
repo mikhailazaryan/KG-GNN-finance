@@ -28,12 +28,12 @@ def main():
         print(f"Connection failed: {e}")
 
     build_graph_bool = True
-    update_graph_bool = False
-    benchmark_bool = False
+    update_graph_bool = True
+    benchmark_bool = True
 
     # this builds the initial graph from wikidata
     companies_to_include_in_graph = ["MTU Aero Engines AG"]
-    companies_to_include_in_graph = ["Daimler Truck Holding AG"]
+    companies_to_include_in_graph = ["Adidas AG"]
     DAX_companies = ["Adidas AG", "Airbus SE", "Allianz SE", "BASF SE", "Bayer AG", "Beiersdorf AG",
                      "Bayerische Motoren Werke AG", "Brenntag SE", "Commerzbank AG", "Continental AG", "Covestro AG",
                      "Daimler Truck Holding AG", "Deutsche Bank AG", "Deutsche Börse AG", "Deutsche Post AG",
@@ -129,10 +129,10 @@ def main():
                                 user_input = input(
                                     f"Is the update in accordance with the wikidata structure for {company} - {article_key} correct? [y/n]: ")
                                 if user_input.lower() == 'y':
-                                    synthetic_articles_json[company][article_key]["wikidata structure"] = True
+                                    synthetic_articles_json[company][article_key]["benchmarking"]["wikidata structure"] = True
                                     break
                                 elif user_input.lower() == 'n':
-                                    synthetic_articles_json[company][article_key]["wikidata structure"] = False
+                                    synthetic_articles_json[company][article_key]["benchmarking"]["wikidata structure"] = False
                                     break
                                 else:
                                     print("Invalid input. Please enter 'y' or 'n'.")
@@ -150,22 +150,6 @@ def main():
                     print("---")
 
                 print(Fore.LIGHTMAGENTA_EX + f"\n--- Finished updating existing neo4j graph ---\n" + Style.RESET_ALL)
-
-    #news_article = preprocess_news("""Germany’s DAX 40 has a new female CEO: Daimler Truck appoints Karin Radstrom as next head in rare move Karin Radstrom will take up the role next month with a term that runs through January 2029. Daimler Truck Holding AG named Karin Radstrom as its next chief executive officer in a rare appointment of a woman at the head of one of Germany’s top listed companies. She will take up the role next month with a term that runs through January 2029, the company said in a statement on Wednesday. The 45-year old succeeds Martin Daum, who will remain a management board member through the end of this year “to support a smooth handover,” Daimler Truck said. Radstrom will become just the second female CEO of a DAX 40 firm, joining Belen Garijo, the head of pharmaceutical giant Merck KGaA. While Germany has an international reputation for being progressive on gender parity, the country has one of the largest male-female pay gaps in Europe. Radstrom, a former elite rower who competed internationally for her native Sweden, joined the Daimler Truck board in 2021 and has since been responsible for Mercedes-Benz Trucks, where she’s been credited with improving customer service. During Radstrom’s tenure, Mercedes-Benz Trucks saw its profit margins rise, even as it invested heavily in the transition to zero-emission trucks. The company is betting on both hydrogen and battery-electric models as the eventual alternatives to combustion engines. “Within a short period of time, the trained engineer has successfully reshaped the segment profitability and advanced its transformation toward sustainability,” the company said. She introduced a range of new battery-electric trucks, according to the statement. Radstrom rose to prominence at Scania CV AB, Daimler Truck’s Swedish rival. Insiders often point to her popularity among employees, her consensual management style and her focus on the shift to zero-emission logistics. Her appointment comes at a turbulent time for Germany’s industrial sector. Rising interest rates and higher energy prices since Russia’s invasion of Ukraine are squeezing capital investment budgets, making it harder to invest in new assets like trucks. A worsening shortage of skilled engineers — a result of a demographic crisis that’s developed over decades — is also increasing the cost of producing in Germany.""")
-    #print(news_article)
-
-    news_article = """Daimler Truck Holding AG appointed Karin Radstrom as its new CEO, succeeding Martin Daum, making her the second female CEO of a DAX 40 company."""
-    print(Fore.LIGHTMAGENTA_EX + f"\n--- Stated updating existing neo4j graph ---\n" + Style.RESET_ALL)
-
-    added, deleted, unchanged = update_neo4j_graph(news_article,
-                                                   companies_to_include_in_graph,
-                                                   nodes_to_include, date_from,
-                                                   date_until, nodes_to_include,
-                                                   search_depth_new_nodes=1,
-                                                   search_depth_for_changes=search_depth,
-                                                   driver=driver)
-
-    print(Fore.LIGHTMAGENTA_EX + f"\n--- Finished updating existing neo4j graph ---\n" + Style.RESET_ALL)
 
 
 if __name__ == "__main__":

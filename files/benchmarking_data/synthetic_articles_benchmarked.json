@@ -1,18 +1,52 @@
 {
     "Adidas AG": {
         "article_1": {
-            "text": "Adidas AG acquires majority stake in fitness technology company Runtastic, expanding its digital sports portfolio.",
+            "text": "Adidas AG acquires majority stake in fitness technology company TrackYourRun, expanding its digital sports portfolio.",
             "source": "synthetic",
             "date": null,
             "benchmarking": {
                 "model update triples": {
-                    "unchanged": [],
-                    "added": [],
+                    "unchanged": [
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "Adidas (Netherlands)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "Adidas (Canada)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "adidas Runtastic",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "TaylorMade Golf Company",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "Ashworth",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "added": [
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "TrackYourRun",
+                            "relationship": "OWNS"
+                        }
+                    ],
                     "deleted": []
                 },
                 "correct update": null,
                 "wikidata structure": null
-            }
+            },
+            "correct update": true,
+            "wikidata structure": true
         },
         "article_2": {
             "text": "Kasper Rorsted steps down as CEO of Adidas AG; Bjørn Gulden appointed as his successor.",
@@ -3400,32 +3434,15 @@
             "date": null,
             "benchmarking": {
                 "model update triples": {
-                    "unchanged": [
-                        {
-                            "node_from": "MTU Aero Engines",
-                            "node_to": "MTU Maintenance Hannover GmbH",
-                            "relationship": "OWNS"
-                        },
-                        {
-                            "node_from": "MTU Aero Engines",
-                            "node_to": "Q124034360",
-                            "relationship": "OWNS"
-                        }
-                    ],
-                    "added": [
-                        {
-                            "node_from": "MTU Aero Engines",
-                            "node_to": "Lufthansa Technik AG",
-                            "relationship": "OWNS"
-                        }
-                    ],
+                    "unchanged": [],
+                    "added": [],
                     "deleted": []
                 },
                 "correct update": null,
                 "wikidata structure": null
             },
-            "correct update": true,
-            "wikidata structure": true
+            "correct update": null,
+            "wikidata structure": null
         },
         "article_2": {
             "text": "Rolls-Royce plc acquires MTU Aero Engines AG in a strategic move to consolidate the aerospace industry.",
@@ -3433,37 +3450,13 @@
             "date": null,
             "benchmarking": {
                 "model update triples": {
-                    "unchanged": [
-                        {
-                            "node_from": "MTU Aero Engines",
-                            "node_to": "MTU Maintenance Hannover GmbH",
-                            "relationship": "OWNS"
-                        },
-                        {
-                            "node_from": "MTU Aero Engines",
-                            "node_to": "Q124034360",
-                            "relationship": "OWNS"
-                        },
-                        {
-                            "node_from": "MTU Aero Engines",
-                            "node_to": "Lufthansa Technik",
-                            "relationship": "OWNS"
-                        }
-                    ],
-                    "added": [
-                        {
-                            "node_from": "Rolls-Royce plc",
-                            "node_to": "MTU Aero Engines",
-                            "relationship": "OWNS"
-                        }
-                    ],
+                    "unchanged": [],
+                    "added": [],
                     "deleted": []
                 },
                 "correct update": null,
                 "wikidata structure": null
-            },
-            "correct update": true,
-            "wikidata structure": true
+            }
         },
         "article_3": {
             "text": "MTU Aero Engines AG sells its military engine division to Pratt & Whitney.",

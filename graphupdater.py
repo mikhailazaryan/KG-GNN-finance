@@ -26,6 +26,7 @@ def find_change_triples(article, name_company_at_center, node_type_requiring_cha
         return False, False, False
 
     old_triples = get_graph_information(name_company_at_center, node_type_requiring_change, driver=driver)
+    print(f"Relevant information retrieved from graph: {old_triples}")
     if old_triples is None:
         old_triples = ""
 
@@ -70,7 +71,7 @@ def find_change_triples(article, name_company_at_center, node_type_requiring_cha
 
         intersection = set(new_triples_set).intersection(set(old_triples_set))
         intersection = [json.loads(s) for s in intersection]
-        print("intersection: " + str(intersection))
+        print("unchanged: " + str(intersection))
 
         added = set(new_triples_set).difference(set(old_triples_set))
         added = [json.loads(s) for s in added]
@@ -136,7 +137,7 @@ def update_neo4j_graph(article, companies, node_types, date_from, date_until, no
                                              properties_dict=get_properties(id_node_to, label_node_requiring_change,
                                                                             node_to), driver=driver)
                 create_relationship_in_graph("OUTBOUND", relationship_type, id_node_from, id_node_to,
-                                             str(datetime.now().replace(tzinfo=timezone.utc)), "NA", driver)
+                                             str(datetime.now().replace(tzinfo=timezone.utc)), "NA", driver, name_org_node=node_from, name_rel_node=node_to)
             except KeyError as e:
                 print(Fore.RED + f"Key Error for {add}. Error: {e}." + Style.RESET_ALL)
     if deleted:
@@ -156,7 +157,7 @@ def update_neo4j_graph(article, companies, node_types, date_from, date_until, no
 
                 node_relationships = get_node_relationships(id_node_from, id_node_to, driver)
                 for rel_id in node_relationships:
-                    updated_rel_elementID = update_relationship_property(rel_id['rel_id'], "end_time",
+                    updated_rel_elementID = update_relationship_property(rel_id['rel_id'], node_from,"end_time",
                                                                          str(datetime.now().replace(
                                                                              tzinfo=timezone.utc)), driver)
 
