@@ -1,31 +1,97 @@
 import json
-
-import google.generativeai as genai
+import feedparser
 import configparser
+import google.generativeai as genai
 
 model = genai.GenerativeModel("gemini-1.5-pro-latest")
 config = configparser.ConfigParser()
 config.read('config.ini')
 genai.configure(api_key=config['gemini']['api_key'])
 
+output_file_path = "files/benchmarking_data/real_articles_temp.json"
 
-def get_real_articles(companies: list):
-    # todo (1) crawl or research 100 articles
-    # todo (2) evaluate on
+def fetch_news(search_term, max_articles=10):
+    """
+    Fetch news articles for a given search term from Google RSS feed.
 
-    real_articles = {
+    Args:
+        search_term (str): The search term for querying Google News RSS.
+        max_articles (int): Maximum number of articles to fetch.
 
-    }
+    Returns:
+        list: A list of dictionaries, each containing details of a news article.
+    """
+    search_term = search_term.replace(" ", "+")
+    gn_url = f"https://news.google.com/rss/search?q={search_term}&hl=en-US&gl=US&ceid=US:en"
+    gn_feed = feedparser.parse(gn_url)
+    print(f"Generated RSS URL: {gn_url}")
 
-    result = []
+    articles = []
+
+    if gn_feed.entries:
+        print(f"Found {len(gn_feed.entries)} articles. Limiting to {max_articles}.")
+        for news_item in gn_feed.entries[:max_articles]:  # Limit the number of articles
+            print(f"Processing article {news_item}: {news_item.title}")
+            article = {
+                "text": news_item.title,
+                "source": news_item.link,
+                "date": news_item.published if "published" in news_item else None,
+                "benchmarking": {
+                    "model update triples": {
+                        "unchanged": [],
+                        "added": [],
+                        "deleted": []
+                    },
+                    "correct update": None,
+                    "wikidata structure": None
+                }
+            }
+            articles.append(article)
+    else:
+        print(f"No news found for the term: {search_term}")
+
+    return articles
+
+
+def generate_real_articles_json(companies):
+    """
+    Build a JSON structure for synthetic articles.
+
+    Args:
+        companies (list): List of company names for which to fetch articles.
+
+    Returns:
+        dict: A dictionary structured as synthetic articles JSON.
+    """
+    real_articles = {}
+
     for company in companies:
-        result.append(real_articles.get(company))
+        print(f"\nFetching articles for company: {company}")
+        articles = fetch_news(company)  # Fetch news articles for the company
+        company_data = {company: {}}
 
-    return result
+        for idx, article in enumerate(articles, 1):
+            article_key = f"article_{idx}"
+            print(f"Adding article {idx} to {company}'s data.")
+            company_data[company][article_key] = article  # Directly assign the article data
+
+
+        real_articles.update(company_data)
+        print(f"Completed processing for company: {company}")
+    print("All companies processed. Returning synthetic articles JSON.")
+    return real_articles
+
+
+def save_to_json(data, filename=output_file_path):
+    """Saves the generated data to a JSON file."""
+    print(f"Saving synthetic articles to {filename}")
+    with open(filename, "w") as file:
+        json.dump(data, file, indent=4)
+    print("Data successfully saved.")
 
 
 def get_synthetic_articles(companies: list = None):
-    #depreciated, only here for backup
+    # depreciated, only here for backup
     synthetic_articles = {
         "Adidas AG": {
             "article_1": "Adidas AG acquires majority stake in fitness technology company Runtastic, expanding its digital sports portfolio.",
@@ -549,16 +615,17 @@ def get_synthetic_articles(companies: list = None):
 
     return result
 
-def build_synthetic_articles_json():
+
+def build_synthetic_articles_json(companies: list):
     # just for setup, no use anymore
 
-    synthetic_articles = get_synthetic_articles()
+    synthetic_articles = get_synthetic_articles(companies)
     temp = {}
     for company, articles in synthetic_articles.items():
         company_temp = {company: {}}  # Initialize correctly
         for article_key, article_text in articles.items():
             # ... (your print statements)
-
+            print("ok")
             # Correctly populate company_temp
             company_temp[company][article_key] = {  # Assign the entire inner dictionary
                 "text": article_text,
@@ -579,5 +646,22 @@ def build_synthetic_articles_json():
             # company_temp[company][article_key]["text"] = article_text
             temp.update(company_temp)
 
-    with open("files/benchmarking_data/synthetic_articles.json", "w",  encoding='utf-8') as f:
+    with open("files/benchmarking_data/real_articles_temp.json", "w", encoding='utf-8') as f:
         json.dump(temp, f, indent=4, ensure_ascii=False)
+
+
+# Following functions are currently not needed
+def preprocess_news(article):
+    """Uses the LLM to condense a news article into one sentence."""
+    prompt = f"""
+    You are a summarization assistant. Your task is to summarize a news article into a single sentence. Keep the main event and relevant company details.
+
+    Example:
+    Input: "Tesla unveiled its latest electric vehicle modxel, the Tesla Y, which is expected to revolutionize the market with its features."
+    Output: "Tesla unveiled the Tesla Y, a groundbreaking electric vehicle."
+
+    Please summarize the following article in one sentence:
+    {article}
+    """
+    result = model.generate_content(prompt, generation_config={"temperature": 0.2})
+    return result.text.strip()

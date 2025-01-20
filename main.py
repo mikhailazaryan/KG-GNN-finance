@@ -5,11 +5,12 @@ from neo4j import GraphDatabase
 from colorama import init, Fore, Style
 import random
 
-from arcticles import get_synthetic_articles
+from articles import get_synthetic_articles, generate_real_articles_json, save_to_json
 from graphbuilder import build_graph_from_initial_node, reset_graph
 from graphupdater import update_neo4j_graph
 from wikidata.wikidataCache import WikidataCache
 
+#TODO: add options for getting Real or Synthetic news
 
 def main():
     init()  # for colorama
@@ -33,7 +34,7 @@ def main():
     benchmark_bool = True
 
     # this builds the initial graph from wikidata
-    companies_to_include_in_graph = ["MTU Aero Engines AG"]
+    companies_to_include_in_graph = ["Mercedes-Benz"]
     DAX_companies = ["Adidas AG", "Airbus SE", "Allianz SE", "BASF SE", "Bayer AG", "Beiersdorf AG",
                      "Bayerische Motoren Werke AG", "Brenntag SE", "Commerzbank AG", "Continental AG", "Covestro AG",
                      "Daimler Truck Holding AG", "Deutsche Bank AG", "Deutsche Börse AG", "Deutsche Post AG",
@@ -45,7 +46,7 @@ def main():
                      "Sartorius AG", "Siemens AG", "Siemens Energy AG", "Siemens Healthineers AG", "Symrise AG",
                      "Volkswagen AG", "Vonovia SE", "Zalando SE"]
 
-    # companies_to_include_in_graph = DAX_companies
+    companies_to_include_in_graph = DAX_companies
 
     date_from = datetime(2022, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
     date_until = datetime(2024, 12, 31, 0, 0, 0, tzinfo=timezone.utc)
@@ -70,10 +71,12 @@ def main():
         WikidataCache.strip_cache()
         WikidataCache.print_current_stats()
         print("---")
-
+        r = generate_real_articles_json(companies_to_include_in_graph)
+        save_to_json(r)
+        print("Real articles saved to 'real_articles_temp.json'")
     if update_graph_bool:
         '''
-        If update_graph_bool == True, then 
+        If update_graph_bool == True, then
             (1) opens filepath = "files/benchmarking_data/synthetic_articles.json" and loads articles
             (2) updates KG according to articles
             (3) saves updates into variables added, deleted and unchanged.
@@ -105,7 +108,7 @@ def main():
 
                         if benchmark_bool:
                             '''
-                            If benchmark_bool == True, then 
+                            If benchmark_bool == True, then
                                 (1) saves the updates (addd, deleted, unchanged) into synthetic_articles_benchmarked.json
                                 (2) asks for keyboard input whether the updates were correct and adhered to the wikidata structure
                                 (3) also saves these infos into synthetic_articles_benchmarked.json
@@ -150,6 +153,7 @@ def main():
                     print("---")
 
                 print(Fore.LIGHTMAGENTA_EX + f"\n--- Finished updating existing neo4j graph ---\n" + Style.RESET_ALL)
+
 
 if __name__ == "__main__":
     main()
