@@ -21,14 +21,14 @@ global custom_id
 custom_id = 0
 
 
-def find_change_triples(article, name_company_at_center, node_type_requiring_change, attempt, max_attempt, driver):
+def find_change_triples(article, name_company_at_center, node_type_requiring_change, relevant_triples, attempt,
+                        max_attempt, driver):
     if attempt >= max_attempt:
         return False, False, False
 
-    old_triples = get_graph_information(name_company_at_center, node_type_requiring_change, driver=driver)
-    print(f"Relevant information retrieved from graph: {old_triples}")
-    if old_triples is None:
-        old_triples = ""
+    print(f"Relevant information retrieved from graph: {relevant_triples}")
+    if relevant_triples is None:
+        relevant_triples = ""
 
     prompt = f"""
     You are a classification assistant. You provide data to keep a Knowledge Graph about a company up to date. 
@@ -54,7 +54,7 @@ def find_change_triples(article, name_company_at_center, node_type_requiring_cha
     
     Please analyze the following:
     Article: "{article}"
-    Input triples: {old_triples} 
+    Input triples: {relevant_triples} 
     
     If possible, please stick to the following relationships: OWNS, PARTNERS_WITH, IS_ACTIVE_IN, IS:MANAGED_BY, WAS_FOUNDED_BY, HAS_BOARD_MEMBER, HAS_HEADQUARTER_IN, IS_LOCATED_IN, OFFERS, HAS_ANNOUNCED, INVESTS_IN, RESEARCHES IN, IS_LISTED_IN.
     Remember to only output a valid json with the format {{triples:[{{'node_from': '', 'relationship': '', 'node_to': ''}}]}}
@@ -67,7 +67,7 @@ def find_change_triples(article, name_company_at_center, node_type_requiring_cha
         new_triples = json.loads(result)
 
         new_triples_set = {json.dumps(t, sort_keys=True) for t in new_triples.get("triples")}
-        old_triples_set = {json.dumps(t, sort_keys=True) for t in old_triples}
+        old_triples_set = {json.dumps(t, sort_keys=True) for t in relevant_triples}
 
         intersection = set(new_triples_set).intersection(set(old_triples_set))
         intersection = [json.loads(s) for s in intersection]
@@ -84,7 +84,7 @@ def find_change_triples(article, name_company_at_center, node_type_requiring_cha
         print("deleted: " + str(deleted))
 
         return added, deleted, intersection
-    except JSONDecodeError as e:
+    except Exception as e:
         print(Fore.RED + f"JSONDecodeError: '{e}' with result: '{result}', try again" + Style.RESET_ALL)
         find_change_triples(article, name_company_at_center, node_type_requiring_change, attempt + 1, max_attempt,
                             driver)
@@ -94,22 +94,27 @@ def find_change_triples(article, name_company_at_center, node_type_requiring_cha
 def update_neo4j_graph(article, companies, node_types, date_from, date_until, nodes_to_include, search_depth_new_nodes,
                        search_depth_for_changes, driver):
     name_company_at_center = find_company_at_center(article, companies, 1, 3)
+    label_node_requiring_change = find_node_type(article, node_types)
+    relevant_triples = get_graph_information(name_company_at_center, label_node_requiring_change, driver=driver)
+
+
     if name_company_at_center != "None":
         print(
             Fore.GREEN + f"'{name_company_at_center}' is the company at center for the article '{article}' and companies '{companies}'." + Style.RESET_ALL)
     else:
         print(Fore.RED + f"Could not find company at center for the article '{article}'." + Style.RESET_ALL)
-        return False
+        return [], [], relevant_triples
 
-    label_node_requiring_change = find_node_type(article, node_types)
     if label_node_requiring_change != "None":
         print(
             Fore.GREEN + f"'{label_node_requiring_change}' is the node type which requires a change." + Style.RESET_ALL)
     else:
         print(Fore.RED + f"Could not find node type which requires change for article '{article}'." + Style.RESET_ALL)
-        return False
+        return [], [], relevant_triples
 
-    added, deleted, unchanged = find_change_triples(article, name_company_at_center, label_node_requiring_change, 1, 3,
+
+    added, deleted, unchanged = find_change_triples(article, name_company_at_center, label_node_requiring_change,
+                                                    relevant_triples, 1, 4,
                                                     driver)
 
     if added:
@@ -126,7 +131,7 @@ def update_neo4j_graph(article, companies, node_types, date_from, date_until, no
                     id_node_from = _get_and_increment_customID()
                 id_node_from = create_new_node(id_node_from, "Company",
                                                properties_dict=get_properties(id_node_from, "Company", node_from),
-                                               driver=driver)
+                                               driver=driver, node_name=node_from)
 
                 id_node_to = get_wikidata_id_from_name(node_to, driver)
                 if id_node_to is None:
@@ -135,9 +140,10 @@ def update_neo4j_graph(article, companies, node_types, date_from, date_until, no
                     id_node_to = _get_and_increment_customID()
                 id_node_to = create_new_node(id_node_to, label_node_requiring_change,
                                              properties_dict=get_properties(id_node_to, label_node_requiring_change,
-                                                                            node_to), driver=driver)
+                                                                            node_to), driver=driver, node_name=node_to)
                 create_relationship_in_graph("OUTBOUND", relationship_type, id_node_from, id_node_to,
-                                             str(datetime.now().replace(tzinfo=timezone.utc)), "NA", driver, name_org_node=node_from, name_rel_node=node_to)
+                                             str(datetime.now().replace(tzinfo=timezone.utc)), "NA", driver,
+                                             name_org_node=node_from, name_rel_node=node_to)
             except KeyError as e:
                 print(Fore.RED + f"Key Error for {add}. Error: {e}." + Style.RESET_ALL)
     if deleted:
@@ -157,7 +163,7 @@ def update_neo4j_graph(article, companies, node_types, date_from, date_until, no
 
                 node_relationships = get_node_relationships(id_node_from, id_node_to, driver)
                 for rel_id in node_relationships:
-                    updated_rel_elementID = update_relationship_property(rel_id['rel_id'], node_from,"end_time",
+                    updated_rel_elementID = update_relationship_property(rel_id['rel_id'], node_from, "end_time",
                                                                          str(datetime.now().replace(
                                                                              tzinfo=timezone.utc)), driver)
 

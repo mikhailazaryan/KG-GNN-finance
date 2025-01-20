@@ -6,47 +6,13 @@
             "date": null,
             "benchmarking": {
                 "model update triples": {
-                    "unchanged": [
-                        {
-                            "node_from": "Adidas AG",
-                            "node_to": "Adidas (Netherlands)",
-                            "relationship": "OWNS"
-                        },
-                        {
-                            "node_from": "Adidas AG",
-                            "node_to": "Adidas (Canada)",
-                            "relationship": "OWNS"
-                        },
-                        {
-                            "node_from": "Adidas AG",
-                            "node_to": "adidas Runtastic",
-                            "relationship": "OWNS"
-                        },
-                        {
-                            "node_from": "Adidas AG",
-                            "node_to": "TaylorMade Golf Company",
-                            "relationship": "OWNS"
-                        },
-                        {
-                            "node_from": "Adidas AG",
-                            "node_to": "Ashworth",
-                            "relationship": "OWNS"
-                        }
-                    ],
-                    "added": [
-                        {
-                            "node_from": "Adidas AG",
-                            "node_to": "TrackYourRun",
-                            "relationship": "OWNS"
-                        }
-                    ],
+                    "unchanged": [],
+                    "added": [],
                     "deleted": []
                 },
                 "correct update": null,
                 "wikidata structure": null
-            },
-            "correct update": true,
-            "wikidata structure": true
+            }
         },
         "article_2": {
             "text": "Kasper Rorsted steps down as CEO of Adidas AG; Bjørn Gulden appointed as his successor.",
@@ -91,7 +57,7 @@
             }
         },
         "article_5": {
-            "text": "Adidas AG founder Adi Dassler's legacy celebrated with a special exhibition at the Deutsches Historisches Museum in Berlin, Germany.",
+            "text": "Adidas AG celebrated it's founders Adi Dassler's legacy at the Deutsches Historisches Museum in Berlin, Germany.",
             "source": "synthetic",
             "date": null,
             "benchmarking": {
@@ -153,11 +119,17 @@
             "benchmarking": {
                 "model update triples": {
                     "unchanged": [],
-                    "added": [],
+                    "added": [
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "Thomas Rabe",
+                            "relationship": "HAS_BOARD_MEMBER"
+                        }
+                    ],
                     "deleted": []
                 },
-                "correct update": null,
-                "wikidata structure": null
+                "correct update": true,
+                "wikidata structure": true
             }
         },
         "article_10": {
@@ -166,12 +138,29 @@
             "date": null,
             "benchmarking": {
                 "model update triples": {
-                    "unchanged": [],
+                    "unchanged": [
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "EURO STOXX 50",
+                            "relationship": "IS_LISTED_IN"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "DAX",
+                            "relationship": "IS_LISTED_IN"
+                        }
+                    ],
                     "added": [],
-                    "deleted": []
+                    "deleted": [
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "CDAX",
+                            "relationship": "IS_LISTED_IN"
+                        }
+                    ]
                 },
-                "correct update": null,
-                "wikidata structure": null
+                "correct update": true,
+                "wikidata structure": true
             }
         }
     },

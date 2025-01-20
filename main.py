@@ -93,6 +93,14 @@ def main():
             if company in companies_to_include_in_graph:
                 for article_key, article_data in articles.items():
                     try:
+                        filepath = "files/benchmarking_data/synthetic_articles_benchmarked.json"
+                        with open(filepath, 'r', encoding='utf-8') as z:
+                            synthetic_articles_benchmarked_json = json.load(z)
+                            if synthetic_articles_benchmarked_json[company][article_key]["benchmarking"]["correct update"] is not None:
+                                print(synthetic_articles_benchmarked_json[company][article_key]["benchmarking"]["correct update"])
+                                print("skipping this articles because it seems to have already been benchmarked")
+                                continue
+
                         print("---")
                         print(f"Company: {company}, Article Nr: {article_key}, Article Text: {article_data['text']}")
                         added, deleted, unchanged = update_neo4j_graph(article_data['text'],

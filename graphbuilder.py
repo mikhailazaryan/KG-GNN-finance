@@ -95,7 +95,7 @@ def create_relationship_in_graph(rel_direction: str, rel_type: str, org_wikidata
         records = list(result)
         if records:
             print(
-                Fore.GREEN + f"Successfully created relationship between node '{name_org_node}' with wikidataID = '{org_wikidata_id}' and node {name_rel_node} with wikidataID'{rel_wikidata_id}' of type {rel_type}" + Style.RESET_ALL)
+                Fore.GREEN + f"Successfully created relationship between node '{name_org_node}' with wikidataID = '{org_wikidata_id}' and node '{name_rel_node}' with wikidataID' = {rel_wikidata_id}' of type '{rel_type}'" + Style.RESET_ALL)
             return True
         else:
             # raise KeyError(f"No relationship created for params: '{params}'. Source or target node might not exist.")
