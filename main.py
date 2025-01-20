@@ -29,11 +29,12 @@ def main():
         print(f"Connection failed: {e}")
 
     build_graph_bool = True
-    update_graph_bool = True
-    benchmark_bool = True
+    update_graph_bool = False
+    benchmark_bool = False
 
     # this builds the initial graph from wikidata
     companies_to_include_in_graph = ["MTU Aero Engines AG"]
+    companies_to_include_in_graph = ["Daimler Truck Holding AG"]
     DAX_companies = ["Adidas AG", "Airbus SE", "Allianz SE", "BASF SE", "Bayer AG", "Beiersdorf AG",
                      "Bayerische Motoren Werke AG", "Brenntag SE", "Commerzbank AG", "Continental AG", "Covestro AG",
                      "Daimler Truck Holding AG", "Deutsche Bank AG", "Deutsche Börse AG", "Deutsche Post AG",
@@ -45,9 +46,9 @@ def main():
                      "Sartorius AG", "Siemens AG", "Siemens Energy AG", "Siemens Healthineers AG", "Symrise AG",
                      "Volkswagen AG", "Vonovia SE", "Zalando SE"]
 
-    # companies_to_include_in_graph = DAX_companies
+    companies_to_include_in_graph = DAX_companies
 
-    date_from = datetime(2022, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+    date_from = datetime(2020, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
     date_until = datetime(2024, 12, 31, 0, 0, 0, tzinfo=timezone.utc)
     nodes_to_include = ["Company", "Industry_Field", "Manager", "Founder", "Board_Member", "City", "Country",
                         "Product_or_Service", "Employer", "StockMarketIndex"]
