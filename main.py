@@ -5,12 +5,13 @@ from neo4j import GraphDatabase
 from colorama import init, Fore, Style
 import random
 
-from articles import get_synthetic_articles, generate_real_articles_json, save_to_json
+from articles import get_synthetic_articles, generate_real_articles, save_to_json
 from graphbuilder import build_graph_from_initial_node, reset_graph
 from graphupdater import update_neo4j_graph
 from wikidata.wikidataCache import WikidataCache
 
-#TODO: add options for getting Real or Synthetic news
+
+# TODO: add options for getting Real or Synthetic news
 
 def main():
     init()  # for colorama
@@ -32,9 +33,10 @@ def main():
     build_graph_bool = True
     update_graph_bool = True
     benchmark_bool = True
+    real_news_bool = True
 
     # this builds the initial graph from wikidata
-    companies_to_include_in_graph = ["Mercedes-Benz"]
+    companies_to_include_in_graph = ["Mercedes-Benz", "Beiersdorf AG", "Bayer AG"]
     DAX_companies = ["Adidas AG", "Airbus SE", "Allianz SE", "BASF SE", "Bayer AG", "Beiersdorf AG",
                      "Bayerische Motoren Werke AG", "Brenntag SE", "Commerzbank AG", "Continental AG", "Covestro AG",
                      "Daimler Truck Holding AG", "Deutsche Bank AG", "Deutsche Börse AG", "Deutsche Post AG",
@@ -71,7 +73,7 @@ def main():
         WikidataCache.strip_cache()
         WikidataCache.print_current_stats()
         print("---")
-        r = generate_real_articles_json(companies_to_include_in_graph)
+        r = generate_real_articles(companies_to_include_in_graph)
         save_to_json(r)
         print("Real articles saved to 'real_articles_temp.json'")
     if update_graph_bool:
@@ -113,9 +115,12 @@ def main():
                                 (2) asks for keyboard input whether the updates were correct and adhered to the wikidata structure
                                 (3) also saves these infos into synthetic_articles_benchmarked.json
                             '''
-                            synthetic_articles_json[company][article_key]["benchmarking"]["model update triples"]["unchanged"] = unchanged
-                            synthetic_articles_json[company][article_key]["benchmarking"]["model update triples"]["added"] = added
-                            synthetic_articles_json[company][article_key]["benchmarking"]["model update triples"]["deleted"] = deleted
+                            synthetic_articles_json[company][article_key]["benchmarking"]["model update triples"][
+                                "unchanged"] = unchanged
+                            synthetic_articles_json[company][article_key]["benchmarking"]["model update triples"][
+                                "added"] = added
+                            synthetic_articles_json[company][article_key]["benchmarking"]["model update triples"][
+                                "deleted"] = deleted
 
                             while True:  # Loop until valid input is received
                                 user_input = input(f"Is the update for {company} - {article_key} correct? [y/n]: ")

@@ -10,6 +10,7 @@ genai.configure(api_key=config['gemini']['api_key'])
 
 output_file_path = "files/benchmarking_data/real_articles_temp.json"
 
+
 def fetch_news(search_term, max_articles=10):
     """
     Fetch news articles for a given search term from Google RSS feed.
@@ -53,7 +54,7 @@ def fetch_news(search_term, max_articles=10):
     return articles
 
 
-def generate_real_articles_json(companies):
+def generate_real_articles(companies):
     """
     Build a JSON structure for synthetic articles.
 
@@ -74,7 +75,6 @@ def generate_real_articles_json(companies):
             article_key = f"article_{idx}"
             print(f"Adding article {idx} to {company}'s data.")
             company_data[company][article_key] = article  # Directly assign the article data
-
 
         real_articles.update(company_data)
         print(f"Completed processing for company: {company}")
