@@ -117,10 +117,10 @@ def main():
                             while True:  # Loop until valid input is received
                                 user_input = input(f"Is the update for {company} - {article_key} correct? [y/n]: ")
                                 if user_input.lower() == 'y':
-                                    synthetic_articles_json[company][article_key]["correct update"] = True
+                                    synthetic_articles_json[company][article_key]["benchmarking"]["correct update"] = True
                                     break
                                 elif user_input.lower() == 'n':
-                                    synthetic_articles_json[company][article_key]["correct update"] = False
+                                    synthetic_articles_json[company][article_key]["benchmarking"]["correct update"] = False
                                     break
                                 else:
                                     print("Invalid input. Please enter 'y' or 'n'.")
