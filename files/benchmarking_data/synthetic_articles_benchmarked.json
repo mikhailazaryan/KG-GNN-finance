@@ -3403,12 +3403,12 @@
                     "unchanged": [
                         {
                             "node_from": "MTU Aero Engines",
-                            "node_to": "Q124034360",
+                            "node_to": "MTU Maintenance Hannover GmbH",
                             "relationship": "OWNS"
                         },
                         {
                             "node_from": "MTU Aero Engines",
-                            "node_to": "MTU Maintenance Hannover GmbH",
+                            "node_to": "Q124034360",
                             "relationship": "OWNS"
                         }
                     ],
@@ -3425,7 +3425,7 @@
                 "wikidata structure": null
             },
             "correct update": true,
-            "wikidata structure": false
+            "wikidata structure": true
         },
         "article_2": {
             "text": "Rolls-Royce plc acquires MTU Aero Engines AG in a strategic move to consolidate the aerospace industry.",
@@ -3436,17 +3436,17 @@
                     "unchanged": [
                         {
                             "node_from": "MTU Aero Engines",
+                            "node_to": "MTU Maintenance Hannover GmbH",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "MTU Aero Engines",
                             "node_to": "Q124034360",
                             "relationship": "OWNS"
                         },
                         {
                             "node_from": "MTU Aero Engines",
                             "node_to": "Lufthansa Technik",
-                            "relationship": "OWNS"
-                        },
-                        {
-                            "node_from": "MTU Aero Engines",
-                            "node_to": "MTU Maintenance Hannover GmbH",
                             "relationship": "OWNS"
                         }
                     ],
@@ -3462,8 +3462,8 @@
                 "correct update": null,
                 "wikidata structure": null
             },
-            "correct update": false,
-            "wikidata structure": false
+            "correct update": true,
+            "wikidata structure": true
         },
         "article_3": {
             "text": "MTU Aero Engines AG sells its military engine division to Pratt & Whitney.",

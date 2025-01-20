@@ -92,7 +92,6 @@ def find_change_triples(article, name_company_at_center, node_type_requiring_cha
 
 def update_neo4j_graph(article, companies, node_types, date_from, date_until, nodes_to_include, search_depth_new_nodes,
                        search_depth_for_changes, driver):
-
     name_company_at_center = find_company_at_center(article, companies, 1, 3)
     if name_company_at_center != "None":
         print(
