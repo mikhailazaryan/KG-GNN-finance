@@ -3,9 +3,8 @@ import json
 from datetime import datetime, timezone
 from neo4j import GraphDatabase
 from colorama import init, Fore, Style
-import random
 
-from arcticles import get_synthetic_articles
+from articles import preprocess_news
 from graphbuilder import build_graph_from_initial_node, reset_graph
 from graphupdater import update_neo4j_graph
 from wikidata.wikidataCache import WikidataCache
@@ -46,7 +45,7 @@ def main():
                      "Sartorius AG", "Siemens AG", "Siemens Energy AG", "Siemens Healthineers AG", "Symrise AG",
                      "Volkswagen AG", "Vonovia SE", "Zalando SE"]
 
-    companies_to_include_in_graph = DAX_companies
+    #companies_to_include_in_graph = DAX_companies
 
     date_from = datetime(2020, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
     date_until = datetime(2024, 12, 31, 0, 0, 0, tzinfo=timezone.utc)
@@ -151,6 +150,23 @@ def main():
                     print("---")
 
                 print(Fore.LIGHTMAGENTA_EX + f"\n--- Finished updating existing neo4j graph ---\n" + Style.RESET_ALL)
+
+    #news_article = preprocess_news("""Germany’s DAX 40 has a new female CEO: Daimler Truck appoints Karin Radstrom as next head in rare move Karin Radstrom will take up the role next month with a term that runs through January 2029. Daimler Truck Holding AG named Karin Radstrom as its next chief executive officer in a rare appointment of a woman at the head of one of Germany’s top listed companies. She will take up the role next month with a term that runs through January 2029, the company said in a statement on Wednesday. The 45-year old succeeds Martin Daum, who will remain a management board member through the end of this year “to support a smooth handover,” Daimler Truck said. Radstrom will become just the second female CEO of a DAX 40 firm, joining Belen Garijo, the head of pharmaceutical giant Merck KGaA. While Germany has an international reputation for being progressive on gender parity, the country has one of the largest male-female pay gaps in Europe. Radstrom, a former elite rower who competed internationally for her native Sweden, joined the Daimler Truck board in 2021 and has since been responsible for Mercedes-Benz Trucks, where she’s been credited with improving customer service. During Radstrom’s tenure, Mercedes-Benz Trucks saw its profit margins rise, even as it invested heavily in the transition to zero-emission trucks. The company is betting on both hydrogen and battery-electric models as the eventual alternatives to combustion engines. “Within a short period of time, the trained engineer has successfully reshaped the segment profitability and advanced its transformation toward sustainability,” the company said. She introduced a range of new battery-electric trucks, according to the statement. Radstrom rose to prominence at Scania CV AB, Daimler Truck’s Swedish rival. Insiders often point to her popularity among employees, her consensual management style and her focus on the shift to zero-emission logistics. Her appointment comes at a turbulent time for Germany’s industrial sector. Rising interest rates and higher energy prices since Russia’s invasion of Ukraine are squeezing capital investment budgets, making it harder to invest in new assets like trucks. A worsening shortage of skilled engineers — a result of a demographic crisis that’s developed over decades — is also increasing the cost of producing in Germany.""")
+    #print(news_article)
+
+    news_article = """Daimler Truck Holding AG appointed Karin Radstrom as its new CEO, succeeding Martin Daum, making her the second female CEO of a DAX 40 company."""
+    print(Fore.LIGHTMAGENTA_EX + f"\n--- Stated updating existing neo4j graph ---\n" + Style.RESET_ALL)
+
+    added, deleted, unchanged = update_neo4j_graph(news_article,
+                                                   companies_to_include_in_graph,
+                                                   nodes_to_include, date_from,
+                                                   date_until, nodes_to_include,
+                                                   search_depth_new_nodes=1,
+                                                   search_depth_for_changes=search_depth,
+                                                   driver=driver)
+
+    print(Fore.LIGHTMAGENTA_EX + f"\n--- Finished updating existing neo4j graph ---\n" + Style.RESET_ALL)
+
 
 if __name__ == "__main__":
     main()
