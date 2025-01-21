@@ -487,11 +487,40 @@ def get_node_relationships(source_wikidata_id: str = None, target_wikidata_id: s
             relationship_query = """
                 MATCH (n {wikidata_id: $node_id})
                 OPTIONAL MATCH (n)-[r1]->(out)
-                WITH n, collect({direction: 'OUTBOUND', type: type(r1), id: elementId(r1)}) as outgoing
+                WITH n, collect({
+                    direction: 'OUTBOUND', 
+                    type: type(r1), 
+                    id: elementId(r1),
+                    end_time: end_time(r1)
+                }) as outgoing
                 OPTIONAL MATCH (n)<-[r2]-(in)
-                RETURN outgoing, collect({direction: 'INBOUND', type: type(r2), id: elementId(r2)}) as incoming
+                RETURN outgoing, collect({
+                    direction: 'INBOUND', 
+                    type: type(r2), 
+                    id: elementId(r2),
+                    end_time: end_time(r2)
+                }) as incoming
             """
-            result = session.run(relationship_query, node_id=source_wikidata_id).single()
+
+            relationship_query = """
+                            MATCH (n {wikidata_id: $node_id})
+                            OPTIONAL MATCH (n)-[r1]->(out)
+                            WITH n, collect({
+                                direction: 'OUTBOUND', 
+                                type: type(r1), 
+                                id: elementId(r1),
+                                end_time: r1.end_time
+                            }) as outgoing
+                            OPTIONAL MATCH (n)<-[r2]-(in)
+                            RETURN outgoing, collect({
+                                direction: 'INBOUND', 
+                                type: type(r2), 
+                                id: elementId(r2),
+                                end_time: r2.end_time
+                            }) as incoming
+                        """
+
+            result = session.run(relationship_query, node_id=source_wikidata_id)
         else:
             raise KeyError(
                 Fore.RED + f"Error: No source wikidata_id provided, source_wikidata_id: '{source_wikidata_id}', target_wikidata_id: '{target_wikidata_id}'" + Style.RESET_ALL)
@@ -501,15 +530,20 @@ def get_node_relationships(source_wikidata_id: str = None, target_wikidata_id: s
 
         # Combine and format relationships
         relationships = result["outgoing"] + result["incoming"]
-        formatted_relationships = [
-            {
-                'rel_direction': rel['direction'],
-                'rel_type': rel['type'],
-                'rel_id': rel['id']
-            }
-            for rel in relationships
-            if rel['type'] is not None
-        ]
+
+        try:
+            formatted_relationships = [
+                {
+                    'rel_direction': rel['direction'],
+                    'rel_type': rel['type'],
+                    'rel_id': rel['id'],
+                    'rel_end_time' : rel.get('end_time', 'NA')
+                }
+                for rel in relationships
+                if rel['type'] is not None
+            ]
+        except Exception as e:
+            raise Exception({e})
 
         # if formatted_relationships:
         # print(Fore.GREEN + f"Found {len(formatted_relationships)} relationships" + Style.RESET_ALL)
@@ -518,7 +552,7 @@ def get_node_relationships(source_wikidata_id: str = None, target_wikidata_id: s
         return formatted_relationships
 
 
-def update_relationship_property(elementID, node_name, rel_property, new_property_value, driver):
+def update_relationship_property(elementID, rel_property, new_property_value, driver):
     query = f"""
                 MATCH ()-[r]-() WHERE elementId(r) = '{elementID}'
                     SET r.{rel_property} = '{new_property_value}'
@@ -528,9 +562,7 @@ def update_relationship_property(elementID, node_name, rel_property, new_propert
     with driver.session() as session:
         result = session.run(query)
         if result:
-            for record in result:
-                print(Fore.GREEN + f"Node '{node_name}' with element ID '{elementID}' updated successfully to {record['new_property_value']}" + Style.RESET_ALL)
-            return elementID
+            return elementID, new_property_value
         else:
             raise ValueError(f"Updating of relationship with '{elementID}' failed")
 
@@ -698,8 +730,8 @@ def get_graph_information(node_name: str, node_label: str, driver):
 
             relationships = []
             for record in result:
-                relationships.append({"node_from": node_name, "relationship": record["relationship_type"],
-                                      "node_to": record["connected_node_name"]})
+                relationships.append({"node_from": node_name.replace("'", ""), "relationship": record["relationship_type"].replace("'", ""),
+                                      "node_to": record["connected_node_name"].replace("'", "")}) # escaping " ' " to prevent issues with the json formatting later
 
             if relationships:
                 return relationships
@@ -709,3 +741,18 @@ def get_graph_information(node_name: str, node_label: str, driver):
         except Exception as e:
             raise Exception(f"Error executing query: {str(e)}")
             return None
+
+def get_current_customID_n(driver):
+    query = """
+        MATCH (n)
+        WHERE n.wikidata_id STARTS WITH 'CustomID'
+        RETURN n
+        ORDER BY toInteger(substring(n.wikidata_id, 8)) DESC
+        LIMIT 1
+        """
+    with driver.session() as session:
+        result = session.run(query)
+        if result:
+            return result.single()
+        else:
+            return 0

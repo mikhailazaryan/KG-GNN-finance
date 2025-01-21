@@ -1,0 +1,344 @@
+{
+    "Adidas AG": {
+        "article_1": {
+            "text": "Adidas AG acquires majority stake in fitness technology company TrackYourRun, expanding its digital sports portfolio.",
+            "source": "synthetic",
+            "date": null,
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "Ashworth",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "TaylorMade Golf Company",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "Adidas (Canada)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "Adidas (Netherlands)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "adidas Runtastic",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "added": [
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "TrackYourRun",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_2": {
+            "text": "Kasper Rorsted steps down as CEO of Adidas AG; Bjørn Gulden appointed as his successor.",
+            "source": "synthetic",
+            "date": null,
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "Bjørn Gulden",
+                            "relationship": "IS_MANAGED_BY"
+                        }
+                    ],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_3": {
+            "text": "Adidas AG opens new North American headquarters in Portland, Oregon, strengthening its presence in the US sports market.",
+            "source": "synthetic",
+            "date": null,
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "Herzogenaurach",
+                            "relationship": "HAS_HEADQUARTER_IN"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "Linz",
+                            "relationship": "HAS_HEADQUARTER_IN"
+                        }
+                    ],
+                    "added": [
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "Portland, Oregon",
+                            "relationship": "HAS_HEADQUARTER_IN"
+                        }
+                    ],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_4": {
+            "text": "Adidas AG launches 'UltraBoost 23,' its latest running shoe innovation, featuring improved cushioning and energy return.",
+            "source": "synthetic",
+            "date": null,
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "sports equipment",
+                            "relationship": "OFFERS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "personal care product",
+                            "relationship": "OFFERS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "sportswear",
+                            "relationship": "OFFERS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "footwear",
+                            "relationship": "OFFERS"
+                        }
+                    ],
+                    "added": [
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "UltraBoost 23",
+                            "relationship": "OFFERS"
+                        }
+                    ],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_5": {
+            "text": "Adidas AG celebrated it's founders Adi Dassler's legacy at the Deutsches Historisches Museum in Berlin, Germany.",
+            "source": "synthetic",
+            "date": null,
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": null,
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_6": {
+            "text": "Adidas AG partners with Parley for the Oceans to create sustainable sportswear made from recycled ocean plastic.",
+            "source": "synthetic",
+            "date": null,
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "footwear",
+                            "relationship": "OFFERS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "personal care product",
+                            "relationship": "OFFERS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "sports equipment",
+                            "relationship": "OFFERS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "sportswear",
+                            "relationship": "OFFERS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "UltraBoost 23",
+                            "relationship": "OFFERS"
+                        }
+                    ],
+                    "added": [
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "Parley for the Oceans",
+                            "relationship": "PARTNERS_WITH"
+                        }
+                    ],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": false
+            }
+        },
+        "article_7": {
+            "text": "Adidas AG joins the Dow Jones Sustainability Index, recognizing its commitment to environmental and social responsibility.",
+            "source": "synthetic",
+            "date": null,
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "CDAX",
+                            "relationship": "IS_LISTED_IN"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "DAX",
+                            "relationship": "IS_LISTED_IN"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "EURO STOXX 50",
+                            "relationship": "IS_LISTED_IN"
+                        }
+                    ],
+                    "added": [
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "Dow Jones Sustainability Index",
+                            "relationship": "IS_LISTED_IN"
+                        }
+                    ],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_8": {
+            "text": "Adidas AG expands its partnership with Major League Soccer (MLS), becoming the official outfitter for all MLS teams.",
+            "source": "synthetic",
+            "date": null,
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "Ashworth",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "TaylorMade Golf Company",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "Adidas (Canada)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "TrackYourRun",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "Adidas (Netherlands)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "adidas Runtastic",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "added": [
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "Major League Soccer",
+                            "relationship": "PARTNERS_WITH"
+                        }
+                    ],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": false
+            }
+        },
+        "article_9": {
+            "text": "Thomas Rabe appointed to the Adidas AG Supervisory Board, bringing extensive experience in the media and entertainment industry.",
+            "source": "synthetic",
+            "date": null,
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [],
+                    "added": [
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "Thomas Rabe",
+                            "relationship": "HAS_BOARD_MEMBER"
+                        }
+                    ],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_10": {
+            "text": "Sportware Company Adidas is no longer part of the CDAX after a couple of bad quarters, says company spokesperson",
+            "source": "synthetic",
+            "date": null,
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "Dow Jones Sustainability Index",
+                            "relationship": "IS_LISTED_IN"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "DAX",
+                            "relationship": "IS_LISTED_IN"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "EURO STOXX 50",
+                            "relationship": "IS_LISTED_IN"
+                        }
+                    ],
+                    "added": [],
+                    "deleted": [
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "CDAX",
+                            "relationship": "IS_LISTED_IN"
+                        }
+                    ]
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        }
+    },

@@ -27,13 +27,13 @@ def main():
     except Exception as e:
         print(f"Connection failed: {e}")
 
-    build_graph_bool = True
+    build_graph_bool = False
     update_graph_bool = True
     benchmark_bool = True
 
     # this builds the initial graph from wikidata
     companies_to_include_in_graph = ["MTU Aero Engines AG"]
-    companies_to_include_in_graph = ["Adidas AG"]
+    companies_to_include_in_graph = ["Adidas AG", "Airbus SE", "Allianz SE"]
     DAX_companies = ["Adidas AG", "Airbus SE", "Allianz SE", "BASF SE", "Bayer AG", "Beiersdorf AG",
                      "Bayerische Motoren Werke AG", "Brenntag SE", "Commerzbank AG", "Continental AG", "Covestro AG",
                      "Daimler Truck Holding AG", "Deutsche Bank AG", "Deutsche Börse AG", "Deutsche Post AG",
@@ -45,7 +45,7 @@ def main():
                      "Sartorius AG", "Siemens AG", "Siemens Energy AG", "Siemens Healthineers AG", "Symrise AG",
                      "Volkswagen AG", "Vonovia SE", "Zalando SE"]
 
-    #companies_to_include_in_graph = DAX_companies
+    companies_to_include_in_graph = DAX_companies
 
     date_from = datetime(2020, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
     date_until = datetime(2024, 12, 31, 0, 0, 0, tzinfo=timezone.utc)
@@ -81,9 +81,9 @@ def main():
 
         print(Fore.LIGHTMAGENTA_EX + f"\n--- Stated updating existing neo4j graph ---\n" + Style.RESET_ALL)
 
-        filepath = "files/benchmarking_data/synthetic_articles.json"
+        filepath = "files/benchmarking_data/synthetic_articles_benchmarked.json"
         try:
-            with open(filepath, 'r', encoding='utf-8') as f:
+            with open(filepath, 'r+', encoding='utf-8') as f:
                 synthetic_articles_json = json.load(f)
         except FileNotFoundError:
             print(f"Error: File not found: {filepath}")
@@ -94,11 +94,10 @@ def main():
                 for article_key, article_data in articles.items():
                     try:
                         filepath = "files/benchmarking_data/synthetic_articles_benchmarked.json"
-                        with open(filepath, 'r', encoding='utf-8') as z:
+                        with open(filepath, 'r+', encoding='utf-8') as z:
                             synthetic_articles_benchmarked_json = json.load(z)
                             if synthetic_articles_benchmarked_json[company][article_key]["benchmarking"]["correct update"] is not None:
-                                print(synthetic_articles_benchmarked_json[company][article_key]["benchmarking"]["correct update"])
-                                print("skipping this articles because it seems to have already been benchmarked")
+                                print(f"skipping {company}, {article_key} because it seems to have already been benchmarked")
                                 continue
 
                         print("---")

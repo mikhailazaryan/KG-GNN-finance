@@ -9,7 +9,7 @@ from graphbuilder import \
     create_new_node, create_relationship_in_graph, \
     get_node_relationships, get_wikidata_id_from_name, \
     get_properties, get_graph_information, \
-    update_relationship_property
+    update_relationship_property, get_current_customID_n
 from wikidata.wikidata import wikidata_wbsearchentities
 
 model = genai.GenerativeModel("gemini-1.5-pro-latest")
@@ -18,7 +18,7 @@ config.read('config.ini')
 genai.configure(api_key=config['gemini']['api_key'])
 
 global custom_id
-custom_id = 0
+custom_id = None
 
 
 def find_change_triples(article, name_company_at_center, node_type_requiring_change, relevant_triples, attempt,
@@ -51,12 +51,17 @@ def find_change_triples(article, name_company_at_center, node_type_requiring_cha
     Input triples: {{triples: [{{'node_from': 'Allianz SE', 'relationship': 'IS_MANAGED_BY', 'node_to': 'Oliver Bäte'}}]}}
     Output triples: {{triples: [{{'node_from': 'Allianz SE', 'relationship': 'IS_MANAGED_BY', 'node_to': 'Boris Hilgat'}}]}}
     
+    Article: "Company A divests its Environmental Science Professional business called EnvSciPro to Company B, a British private equity firm, for $2.6 billion.
+    Input triples: {{'node_from': 'Company A', 'relationship': 'OFFERS', 'node_to': 'EnvSciPro'}}
+    Output triples: {{triples: [{{'node_from': 'Company B', 'relationship': 'OFFERS', 'node_to': 'EnvSciPro'}}]}}
+
+    
     
     Please analyze the following:
-    Article: "{article}"
+    Article: "{article.replace("'", "")}"
     Input triples: {relevant_triples} 
     
-    If possible, please stick to the following relationships: OWNS, PARTNERS_WITH, IS_ACTIVE_IN, IS:MANAGED_BY, WAS_FOUNDED_BY, HAS_BOARD_MEMBER, HAS_HEADQUARTER_IN, IS_LOCATED_IN, OFFERS, HAS_ANNOUNCED, INVESTS_IN, RESEARCHES IN, IS_LISTED_IN.
+    Please stick to the following relationships: OWNS, PARTNERS_WITH, IS_ACTIVE_IN, IS_MANAGED_BY, WAS_FOUNDED_BY, HAS_BOARD_MEMBER, HAS_HEADQUARTER_IN, OFFERS, IS_LISTED_IN. If none of these relationships fit, then do not make any changes.
     Remember to only output a valid json with the format {{triples:[{{'node_from': '', 'relationship': '', 'node_to': ''}}]}}
     """
 
@@ -86,7 +91,7 @@ def find_change_triples(article, name_company_at_center, node_type_requiring_cha
         return added, deleted, intersection
     except Exception as e:
         print(Fore.RED + f"JSONDecodeError: '{e}' with result: '{result}', try again" + Style.RESET_ALL)
-        find_change_triples(article, name_company_at_center, node_type_requiring_change, attempt + 1, max_attempt,
+        find_change_triples(article, name_company_at_center, node_type_requiring_change, relevant_triples, attempt + 1, max_attempt,
                             driver)
     return False, False, False
 
@@ -162,10 +167,14 @@ def update_neo4j_graph(article, companies, node_types, date_from, date_until, no
                     id_node_to = wikidata_wbsearchentities(node_to, id_or_name='id')
 
                 node_relationships = get_node_relationships(id_node_from, id_node_to, driver)
-                for rel_id in node_relationships:
-                    updated_rel_elementID = update_relationship_property(rel_id['rel_id'], node_from, "end_time",
-                                                                         str(datetime.now().replace(
-                                                                             tzinfo=timezone.utc)), driver)
+                for rel in node_relationships:
+                    if rel['rel_end_time'] == "NA":
+                        updated_rel_elementID, updated_property_value = update_relationship_property(rel['rel_id'], "end_time",
+                                                                             str(datetime.now().replace(
+                                                                                 tzinfo=timezone.utc)), driver)
+                        if updated_rel_elementID:
+                            print(Fore.GREEN + f"Relationship with from: '{node_from}' to '{node_to}' with relationship_type = '{relationship_type}' and element ID '{updated_rel_elementID}' updated 'end_time' from '{rel['rel_end_time']}' to '{updated_property_value}'" + Style.RESET_ALL)
+
 
             except KeyError as e:
                 print(Fore.RED + f"Key Error for {delete}. Error: {e}." + Style.RESET_ALL)
@@ -260,7 +269,10 @@ def find_node_type(article, node_types):
 
 def _get_and_increment_customID():
     global custom_id
+
+    custom_id = get_current_customID_n()
     custom_id += 1
+
     custom_node_id = "CustomID" + str(custom_id)
     return custom_node_id
 
