@@ -43,7 +43,7 @@ def main():
                      "Porsche Automobil Holding SE", "QIAGEN N.V.", "Rheinmetall AG", "RWE AG", "SAP SE",
                      "Sartorius AG", "Siemens AG", "Siemens Energy AG", "Siemens Healthineers AG", "Symrise AG",
                      "Volkswagen AG", "Vonovia SE", "Zalando SE"]
-    #companies_to_include_in_graph = DAX_companies
+    # companies_to_include_in_graph = DAX_companies
 
     date_from = datetime(2020, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
     date_until = datetime(2024, 12, 31, 0, 0, 0, tzinfo=timezone.utc)
@@ -68,7 +68,8 @@ def main():
         WikidataCache.strip_cache()
         WikidataCache.print_current_stats()
         print("---")
-        generate_real_articles(companies_to_include_in_graph)
+
+    # generate_real_articles(companies_to_include_in_graph) #test real news crawling
 
     if update_graph_bool:
         '''
@@ -95,8 +96,10 @@ def main():
                         filepath = "files/benchmarking_data/synthetic_articles_benchmarked.json"
                         with open(filepath, 'r+', encoding='utf-8') as z:
                             synthetic_articles_benchmarked_json = json.load(z)
-                            if synthetic_articles_benchmarked_json[company][article_key]["benchmarking"]["correct update"] is not None:
-                                print(f"skipping {company}, {article_key} because it seems to have already been benchmarked")
+                            if synthetic_articles_benchmarked_json[company][article_key]["benchmarking"][
+                                "correct update"] is not None:
+                                print(
+                                    f"skipping {company}, {article_key} because it seems to have already been benchmarked")
                                 continue
 
                         print("---")
@@ -116,17 +119,22 @@ def main():
                                 (2) asks for keyboard input whether the updates were correct and adhered to the wikidata structure
                                 (3) also saves these infos into synthetic_articles_benchmarked.json
                             '''
-                            synthetic_articles_json[company][article_key]["benchmarking"]["model update triples"]["unchanged"] = unchanged
-                            synthetic_articles_json[company][article_key]["benchmarking"]["model update triples"]["added"] = added
-                            synthetic_articles_json[company][article_key]["benchmarking"]["model update triples"]["deleted"] = deleted
+                            synthetic_articles_json[company][article_key]["benchmarking"]["model update triples"][
+                                "unchanged"] = unchanged
+                            synthetic_articles_json[company][article_key]["benchmarking"]["model update triples"][
+                                "added"] = added
+                            synthetic_articles_json[company][article_key]["benchmarking"]["model update triples"][
+                                "deleted"] = deleted
 
                             while True:  # Loop until valid input is received
                                 user_input = input(f"Is the update for {company} - {article_key} correct? [y/n]: ")
                                 if user_input.lower() == 'y':
-                                    synthetic_articles_json[company][article_key]["benchmarking"]["correct update"] = True
+                                    synthetic_articles_json[company][article_key]["benchmarking"][
+                                        "correct update"] = True
                                     break
                                 elif user_input.lower() == 'n':
-                                    synthetic_articles_json[company][article_key]["benchmarking"]["correct update"] = False
+                                    synthetic_articles_json[company][article_key]["benchmarking"][
+                                        "correct update"] = False
                                     break
                                 else:
                                     print("Invalid input. Please enter 'y' or 'n'.")
@@ -135,10 +143,12 @@ def main():
                                 user_input = input(
                                     f"Is the update in accordance with the wikidata structure for {company} - {article_key} correct? [y/n]: ")
                                 if user_input.lower() == 'y':
-                                    synthetic_articles_json[company][article_key]["benchmarking"]["wikidata structure"] = True
+                                    synthetic_articles_json[company][article_key]["benchmarking"][
+                                        "wikidata structure"] = True
                                     break
                                 elif user_input.lower() == 'n':
-                                    synthetic_articles_json[company][article_key]["benchmarking"]["wikidata structure"] = False
+                                    synthetic_articles_json[company][article_key]["benchmarking"][
+                                        "wikidata structure"] = False
                                     break
                                 else:
                                     print("Invalid input. Please enter 'y' or 'n'.")
