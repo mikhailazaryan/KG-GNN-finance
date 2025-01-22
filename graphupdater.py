@@ -35,6 +35,7 @@ def find_change_triples(article, name_company_at_center, node_type_requiring_cha
     Your task is to analyze a news article and analyze existing graph-triples consisting of 'node_from', 'relationship' and 'node_to'.
     You should then update the existing graph-triples according to the article and return them.
     If no change seems to be required, return the triples unchanged.
+    You should only make changes when the article describes an event that has happened, but not when it is only vaguely announced.
 
     Instructions:
     1. Read the provided news article carefully.
@@ -100,7 +101,8 @@ def update_neo4j_graph(article, companies, node_types, date_from, date_until, no
                        search_depth_for_changes, driver):
     name_company_at_center = find_company_at_center(article, companies, 1, 3)
     label_node_requiring_change = find_node_type(article, node_types)
-    relevant_triples = get_graph_information(name_company_at_center, label_node_requiring_change, driver=driver)
+    relevant_triples = get_graph_information(name_company_at_center, node_label=label_node_requiring_change, driver=driver)
+    #relevant_triples = get_graph_information(name_company_at_center, driver=driver)
 
 
     if name_company_at_center != "None":
@@ -125,6 +127,11 @@ def update_neo4j_graph(article, companies, node_types, date_from, date_until, no
     if added:
         for add in added:
             try:
+                node_type_from, node_type_to = determine_triple_types(add, nodes_to_include, 1, 3)
+                if node_type_from is None or node_type_to is None:
+                    print(Fore.RED + f"Could not find node type of added nodes for triple {add}." + Style.RESET_ALL)
+                    continue
+
                 node_from = add.get("node_from")
                 relationship_type = add.get("relationship")
                 node_to = add.get("node_to")
@@ -133,19 +140,21 @@ def update_neo4j_graph(article, companies, node_types, date_from, date_until, no
                 if id_node_from is None:
                     id_node_from = wikidata_wbsearchentities(node_from, id_or_name='id')
                 if id_node_from == "No wikidata entry found":
-                    id_node_from = _get_and_increment_customID()
-                id_node_from = create_new_node(id_node_from, "Company",
-                                               properties_dict=get_properties(id_node_from, "Company", node_from),
+                    id_node_from = _get_and_increment_customID(driver)
+                id_node_from = create_new_node(id_node_from, node_type_from,
+                                               properties_dict=get_properties(id_node_from, node_type_from, node_from),
                                                driver=driver, node_name=node_from)
 
                 id_node_to = get_wikidata_id_from_name(node_to, driver)
                 if id_node_to is None:
                     id_node_to = wikidata_wbsearchentities(node_to, id_or_name='id')
                 if id_node_to == "No wikidata entry found":
-                    id_node_to = _get_and_increment_customID()
-                id_node_to = create_new_node(id_node_to, label_node_requiring_change,
-                                             properties_dict=get_properties(id_node_to, label_node_requiring_change,
+                    id_node_to = _get_and_increment_customID(driver)
+
+                id_node_to = create_new_node(id_node_to, node_type_to,
+                                             properties_dict=get_properties(id_node_to, node_type_to,
                                                                             node_to), driver=driver, node_name=node_to)
+
                 create_relationship_in_graph("OUTBOUND", relationship_type, id_node_from, id_node_to,
                                              str(datetime.now().replace(tzinfo=timezone.utc)), "NA", driver,
                                              name_org_node=node_from, name_rel_node=node_to)
@@ -180,6 +189,52 @@ def update_neo4j_graph(article, companies, node_types, date_from, date_until, no
                 print(Fore.RED + f"Key Error for {delete}. Error: {e}." + Style.RESET_ALL)
 
     return added, deleted, unchanged
+
+def determine_triple_types(triple, nodes_to_include, attempt, max_attempt, ):
+        if attempt >= max_attempt:
+            return None, None
+
+        prompt = f"""
+        You are a classification assistant. You provide data to keep a Knowledge Graph about a company up to date. 
+        Your task is to analyze a graph triple and select the the single best fitting node_type from a list.       
+
+        Instructions:
+        1. Read the provided graph triple carefully
+        2. Review the list of available node_types: {nodes_to_include}.
+        3. Select the node_types of the node_from and node_to
+        4. If no category seems to fit, please use 'Product_or_Service'
+
+        Example input:
+
+        Input: {{'node_from': 'Henkel AG & Co. KGaA', 'relationship': 'IS_ACTIVE_IN', 'node_to': 'chemical industry'}}
+        Available node_types = ['Company', 'Industry_Field', 'Manager', 'Founder', 'Board_Member', 'City', 'Country','Product_or_Service', 'Employer', 'StockMarketIndex']
+        Output: {{'type_node_from': 'Company', 'type_node_to': 'Industry_Field'}}
+
+        Input: {{'node_from': 'Continental AG', 'node_to': 'Nikolai Setzer', 'relationship': 'IS_MANAGED_BY'}}
+        Available node_types = ['Company', 'Industry_Field', 'Manager', 'Founder', 'Board_Member', 'City', 'Country','Product_or_Service', 'Employer', 'StockMarketIndex']
+        Output: {{'type_node_from': 'Company', 'type_node_to': 'Manager'}}
+
+
+        Please analyze the following:
+        Input: {triple}
+        Available node_types: {nodes_to_include}       
+        """
+
+        result = model.generate_content(prompt, generation_config=genai.GenerationConfig(temperature=0.2)).text
+        result = result.replace("```json", "").replace("```", "").replace("'", "\"").replace("Output: ", "")
+
+        try:
+            result = json.loads(result)
+            type_node_from = result.get("type_node_from")
+            type_node_to = result.get("type_node_to")
+            if (type_node_from in nodes_to_include) and (type_node_to in nodes_to_include):
+                print(Fore.GREEN + f"Determined type_node_from = '{type_node_from}' and type_node_to = '{type_node_to}'" + Style.RESET_ALL)
+                return type_node_from, type_node_to
+            else:
+                determine_triple_types(triple, nodes_to_include, attempt + 1, max_attempt)
+        except Exception as e:
+            print(Fore.RED + f"JSONDecodeError while trying to determine node types: '{e}' with result: '{result}', try again" + Style.RESET_ALL)
+            determine_triple_types(triple, nodes_to_include, attempt + 1, max_attempt)
 
 
 def find_company_at_center(article, companies, attempt, max_attempt):
@@ -225,6 +280,26 @@ def find_company_at_center(article, companies, attempt, max_attempt):
     return result
 
 
+def article_describes_relevant_change(article):
+
+    prompt = f"""
+    You are a classification assistant. You provide data to keep a Knowledge Graph about a company up to date. 
+    Your task is to analyze a news article and determine if the news article is already relevant. 
+
+    #todo
+   
+
+    
+    Please analyze the following:
+    Article: "{article}"
+    """
+
+    enum = ["relevant", "not relevant"]
+
+    result = _generate_result_from_llm(prompt, enum=enum, max_output_tokens=10, temperature=0.4)
+    return result.text
+
+
 def find_node_type(article, node_types):
     if "None" not in node_types:
         node_types.append("None")
@@ -267,10 +342,10 @@ def find_node_type(article, node_types):
     return result
 
 
-def _get_and_increment_customID():
+def _get_and_increment_customID(driver):
     global custom_id
 
-    custom_id = get_current_customID_n()
+    custom_id = get_current_customID_n(driver)
     custom_id += 1
 
     custom_node_id = "CustomID" + str(custom_id)

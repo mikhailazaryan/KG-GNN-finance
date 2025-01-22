@@ -30,6 +30,7 @@ def main():
     build_graph_bool = False
     update_graph_bool = True
     benchmark_bool = True
+    benchmark_statistics_bool = True
 
     # this builds the initial graph from wikidata
     companies_to_include_in_graph = ["MTU Aero Engines AG"]
@@ -40,7 +41,7 @@ def main():
                      "Deutsche Telekom AG", "E.ON SE", "Fresenius SE & Co. KGaA", "Hannover Rück SE",
                      "Heidelbergcement AG", "Henkel AG & Co. KGaA", "Infineon Technologies AG",
                      "Mercedes-Benz", "Merck KGaA", "MTU Aero Engines AG",
-                     "Münchener Rückversicherungs-Gesellschaft AG", "Dr. Ing. h.c. F. Porsche AG",
+                     "Munich RE AG", "Porsche AG",
                      "Porsche Automobil Holding SE", "QIAGEN N.V.", "Rheinmetall AG", "RWE AG", "SAP SE",
                      "Sartorius AG", "Siemens AG", "Siemens Energy AG", "Siemens Healthineers AG", "Symrise AG",
                      "Volkswagen AG", "Vonovia SE", "Zalando SE"]
@@ -157,6 +158,36 @@ def main():
                     print("---")
 
                 print(Fore.LIGHTMAGENTA_EX + f"\n--- Finished updating existing neo4j graph ---\n" + Style.RESET_ALL)
+
+    if benchmark_statistics_bool:
+        total = 0
+        correct_update = 0
+        incorrect_update = 0
+        correct_structure = 0
+        incorrect_structure = 0
+
+        filepath = "files/benchmarking_data/synthetic_articles_benchmarked.json"
+        try:
+            with open(filepath, 'r+', encoding='utf-8') as f:
+                synthetic_articles_json = json.load(f)
+        except FileNotFoundError:
+            print(f"Error: File not found: {filepath}")
+            return
+
+        for company, articles in synthetic_articles_json.items():
+                for article_key, article_data in articles.items():
+                    total += 1
+                    if synthetic_articles_json[company][article_key]["benchmarking"]["correct update"] == True:
+                        correct_update += 1
+                    elif synthetic_articles_json[company][article_key]["benchmarking"]["correct update"] == False:
+                        incorrect_update += 1
+                    if synthetic_articles_json[company][article_key]["benchmarking"]["wikidata structure"] == True:
+                        correct_structure += 1
+                    elif synthetic_articles_json[company][article_key]["benchmarking"]["wikidata structure"] == False:
+                        incorrect_structure += 1
+
+
+        print(f"total = {total}, correct_update = {correct_update}, incorrect_update = {incorrect_update}, correct_structure = {correct_structure}, incorrect_structure = {incorrect_structure}")
 
 
 if __name__ == "__main__":

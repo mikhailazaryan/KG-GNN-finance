@@ -714,7 +714,7 @@ def build_demo_graph(driver):
         session.run(relationship_query, **relationship_params)
 
 
-def get_graph_information(node_name: str, node_label: str, driver):
+def get_graph_information(node_name: str, node_label: str = None, driver= None):
     query = """
         MATCH (n) WHERE n.name = $node_name
         MATCH (n)-[r]-(connected)
@@ -722,11 +722,23 @@ def get_graph_information(node_name: str, node_label: str, driver):
         RETURN type(r) as relationship_type, connected.name as connected_node_name
         """
 
+    query_all_node_labels = """
+        MATCH (n) WHERE n.name = $node_name
+        MATCH (n)-[r]-(connected)
+        RETURN type(r) as relationship_type, 
+               connected.name as connected_node_name,
+               labels(connected) as connected_labels
+    """
+
     with driver.session() as session:
         try:
-            result = session.run(query,
+            if node_label is not None:
+                result = session.run(query,
                                  node_name=node_name,
                                  node_label=node_label)
+            else:
+                result = session.run(query_all_node_labels,
+                                     node_name=node_name)
 
             relationships = []
             for record in result:
@@ -742,17 +754,20 @@ def get_graph_information(node_name: str, node_label: str, driver):
             raise Exception(f"Error executing query: {str(e)}")
             return None
 
+
 def get_current_customID_n(driver):
     query = """
         MATCH (n)
         WHERE n.wikidata_id STARTS WITH 'CustomID'
-        RETURN n
-        ORDER BY toInteger(substring(n.wikidata_id, 8)) DESC
+        RETURN n, toInteger(substring(n.wikidata_id, 8)) as custom_id
+        ORDER BY custom_id DESC
         LIMIT 1
-        """
+    """
+
     with driver.session() as session:
         result = session.run(query)
-        if result:
-            return result.single()
-        else:
-            return 0
+        record = result.single()
+
+        if record:
+            return record['custom_id']
+        return 0
