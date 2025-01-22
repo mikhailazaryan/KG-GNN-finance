@@ -187,6 +187,7 @@ def main():
                         incorrect_structure += 1
 
 
+
         print(f"total = {total}, correct_update = {correct_update}, incorrect_update = {incorrect_update}, correct_structure = {correct_structure}, incorrect_structure = {incorrect_structure}")
 
 
