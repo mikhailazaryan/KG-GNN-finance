@@ -34,7 +34,7 @@ def fetch_news(search_term, max_articles=10):
         for news_item in gn_feed.entries[:max_articles]:  # Limit the number of articles
             print(f"Processing article {news_item}: {news_item.title}")
             article = {
-                "text": news_item.title,
+                "text": news_item.summary,
                 "source": news_item.link,
                 "date": news_item.published if "published" in news_item else None,
                 "benchmarking": {
