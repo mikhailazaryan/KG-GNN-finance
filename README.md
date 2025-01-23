@@ -1,6 +1,6 @@
 # Graph Builder and Updater for publicly listed Companies
 
-This project builds and dynamically updates a knowledge graph from Wikidata, incorporating information from news articles. It utilizes Neo4j as the graph database.
+This project builds and dynamically updates a knowledge graph from Wikidata, incorporating information from news articles provided by The New York Times API. The project utilizes Neo4j as the graph database.
 
 ## Features
 
