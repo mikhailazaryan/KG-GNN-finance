@@ -1,16 +1,216 @@
 {
     "Adidas AG": {
         "article_1": {
-            "text": "Adidas AG acquires majority stake in fitness technology company TrackYourRun, expanding its digital sports portfolio.",
-            "source": "synthetic",
-            "date": null,
+            "text": "Teenagers in Westport, Ireland, suggested gift ideas ranging from bikes (Trek), soccer boots (Adidas Predator), cozy pajamas, beauty products (Charlotte Tilbury, Nars, Rare Beauty, Sol de Janeiro), hair care items (The Smooth Company), jewelry (Pandora, Nomination), puffer jackets (Nike), fragrances (Paco Rabanne, Jean Paul Gaultier), concert/travel vouchers, and quality gold or silver jewelry.",
+            "source": "International New York Times",
+            "date": "2024-11-29T10:00:27+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": null,
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_2": {
+            "text": "Adidas-Salomon A.G., the world's second-largest sporting goods maker, warned of a 35-40% drop in first-quarter pretax income due to declining sales at its Taylor Made Golf Company, despite flat overall sales of 2.7 billion marks driven by slight growth in Adidas and strong Salomon sales.",
+            "source": "The New York Times",
+            "date": "1999-04-13T05:00:00+0000",
             "benchmarking": {
                 "model update triples": {
                     "unchanged": [
                         {
                             "node_from": "Adidas AG",
+                            "node_to": "TaylorMade Golf Company",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "Adidas (Canada)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
                             "node_to": "Ashworth",
                             "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "adidas Runtastic",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "Adidas (Netherlands)",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_3": {
+            "text": "Rossignol's shares rose 5 francs to 134.50 after Adidas acquired its rival Salomon, sparking speculation that Nike might bid for Rossignol.",
+            "source": "The New York Times",
+            "date": "1997-09-18T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "TaylorMade Golf Company",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "Adidas (Canada)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "Ashworth",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "adidas Runtastic",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "Adidas (Netherlands)",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "added": [
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "Salomon",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_4": {
+            "text": "Adidas' first-quarter profit jumped 33% to $97.5 million on strong sales of clothing and shoes, exceeding expectations after a successful 1996.",
+            "source": "The New York Times",
+            "date": "1997-05-07T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "TaylorMade Golf Company",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "Adidas (Canada)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "Ashworth",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "adidas Runtastic",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "Adidas (Netherlands)",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_5": {
+            "text": "Yankees lawyer David Boies stated the team will eventually share their $90-95 million Adidas sponsorship deal with Major League Baseball, pending confidentiality discussions with Adidas, while MLB spokesman Rich Levin insisted teams must provide copies of sponsorship deals exceeding five years to ensure no conflict with national baseball rights.",
+            "source": "The New York Times",
+            "date": "1997-03-06T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "TaylorMade Golf Company",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "Adidas (Canada)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "Ashworth",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "adidas Runtastic",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "Adidas (Netherlands)",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "added": [
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "New York Yankees",
+                            "relationship": "PARTNERS_WITH"
+                        }
+                    ],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_6": {
+            "text": "Please provide me with the article you would like me to summarize. I need the text of the article to create a one-sentence summary.",
+            "source": "The New York Times",
+            "date": "2023-10-26T22:35:34+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": null,
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": false,
+                "wikidata structure": false
+            }
+        },
+        "article_7": {
+            "text": "Adidas shares rose 12% to 76.20 marks ($54.40) on the Frankfurt Stock Exchange in their first day of trading after a heavily oversubscribed initial public offering that raised $1.3 billion for existing shareholders.",
+            "source": "The New York Times",
+            "date": "1995-11-18T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "New York Yankees",
+                            "relationship": "PARTNERS_WITH"
                         },
                         {
                             "node_from": "Adidas AG",
@@ -24,19 +224,442 @@
                         },
                         {
                             "node_from": "Adidas AG",
-                            "node_to": "Adidas (Netherlands)",
+                            "node_to": "Ashworth",
                             "relationship": "OWNS"
                         },
                         {
                             "node_from": "Adidas AG",
                             "node_to": "adidas Runtastic",
                             "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "Adidas (Netherlands)",
+                            "relationship": "OWNS"
                         }
                     ],
                     "added": [
                         {
                             "node_from": "Adidas AG",
-                            "node_to": "TrackYourRun",
+                            "node_to": "Frankfurt Stock Exchange",
+                            "relationship": "IS_LISTED_IN"
+                        }
+                    ],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_8": {
+            "text": "Beyoncé has partnered with Adidas to create a signature collection, expand her activewear brand Ivy Park, and serve as a creative partner, marking a significant collaboration emphasizing creativity, growth, and social responsibility.",
+            "source": "The New York Times",
+            "date": "2019-04-04T15:26:32+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "Salomon",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "footwear",
+                            "relationship": "OFFERS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "personal care product",
+                            "relationship": "OFFERS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "sports equipment",
+                            "relationship": "OFFERS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "sportswear",
+                            "relationship": "OFFERS"
+                        }
+                    ],
+                    "added": [
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "Beyoncé",
+                            "relationship": "PARTNERS_WITH"
+                        },
+                        {
+                            "node_from": "Beyoncé",
+                            "node_to": "Adidas AG",
+                            "relationship": "PARTNERS_WITH"
+                        }
+                    ],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_9": {
+            "text": "Adidas will acquire Salomon, the French sports equipment maker, for $1.4 billion, creating the world's second-largest sporting goods company behind Nike.",
+            "source": "The New York Times",
+            "date": "1997-09-17T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "New York Yankees",
+                            "relationship": "PARTNERS_WITH"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "TaylorMade Golf Company",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "Adidas (Canada)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "Ashworth",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "adidas Runtastic",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "Adidas (Netherlands)",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "added": [
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "Salomon",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_10": {
+            "text": "Adidas shares dropped 13% after the German sportswear maker lowered its 2014 profit forecast due to the Ukraine crisis' impact on the Russian ruble, consumer spending, and its Russian retail expansion plans.",
+            "source": "The New York Times",
+            "date": "2014-07-31T12:18:27+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "New York Yankees",
+                            "relationship": "PARTNERS_WITH"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "TaylorMade Golf Company",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "Adidas (Canada)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "Ashworth",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "adidas Runtastic",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Adidas AG",
+                            "node_to": "Adidas (Netherlands)",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        }
+    },
+    "Airbus SE": {
+        "article_1": {
+            "text": "Airbus CEO Thomas Enders called for equal government subsidies compared to Boeing, particularly for programs like the 787 Dreamliner, while EADS CEO Louis Gallois addressed shareholder concerns about falling stock prices due to industry downturn and A380 delays, proposing a higher dividend for 2008.",
+            "source": "International Herald Tribune",
+            "date": "2008-05-26T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": null,
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_2": {
+            "text": "At Madison Square Garden, Virgil Akins knocked out Isaac Logart of Camaguey, Cuba, in the sixth round, earning a welterweight title shot.",
+            "source": "The New York Times",
+            "date": "1958-03-22T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": null,
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": false,
+                "wikidata structure": false
+            }
+        },
+        "article_3": {
+            "text": "Struggling insurance giant A.I.G. plans to sell its NYC headquarters, the city's fifth tallest building, amidst other news snippets including cocaine-stuffed peppers, a snakehead fish story, high Brooklyn retail vacancy rates, Emirates discontinuing A380 service to NYC, and Madoff's prison amenities.",
+            "source": "The New York Times",
+            "date": "2009-03-19T17:23:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": false,
+                "wikidata structure": false
+            }
+        },
+        "article_4": {
+            "text": "Lockheed Aircraft Corporation is negotiating a $430 million financing package with the government and 24 banks to avoid bankruptcy and continue production of the L-1011 airbus and C-5A transport.",
+            "source": "The New York Times",
+            "date": "1970-07-23T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Airbus SE",
+                            "node_to": "Airbus Helicopters",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Airbus SE",
+                            "node_to": "Airbus Commercial Aircraft",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Airbus SE",
+                            "node_to": "Airbus UK",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Airbus SE",
+                            "node_to": "STELIA Aerospace",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Airbus SE",
+                            "node_to": "Airbus Defence and Space",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Airbus SE",
+                            "node_to": "Airbus Operations S.A.S.",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Airbus SE",
+                            "node_to": "Laboratoire Sciences de lUnivers au Cerfacs",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Airbus SE",
+                            "node_to": "ATR",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Airbus SE",
+                            "node_to": "Infoterra Ltd",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_5": {
+            "text": "A 1969 New York Times article revealed that 55 of the 344 signatories on a pro-ABM newspaper advertisement had ties to defense companies, some of which held defense contracts.",
+            "source": "The New York Times",
+            "date": "1969-08-04T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": null,
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": false,
+                "wikidata structure": false
+            }
+        },
+        "article_6": {
+            "text": "Senator Proxmire delayed a Senate committee meeting on a bill to provide government loan guarantees for Lockheed Aircraft Corporation, but the committee rescheduled to address the issue before the July 4th recess, while Air Canada maintained its order for Lockheed Tristar planes pending the outcome.",
+            "source": "The New York Times",
+            "date": "1971-06-30T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": false,
+                "wikidata structure": false
+            }
+        },
+        "article_7": {
+            "text": "The 2022 Beijing Winter Olympics presented unprecedented logistical challenges, forcing the U.S. Olympic & Paralympic Committee and other international delegations to navigate complex travel restrictions, stringent COVID-19 testing protocols, cybersecurity concerns, and a massive closed-loop system, all while managing athlete safety and well-being.",
+            "source": "The New York Times",
+            "date": "2022-01-31T18:11:30+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": null,
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": false,
+                "wikidata structure": false
+            }
+        },
+        "article_8": {
+            "text": "The Senate Banking Committee is likely to approve a broadened bill providing government loan guarantees not only for Lockheed but also for other large corporations facing financial difficulty, despite Senator Proxmire's opposition and Lockheed's urgent need for aid to continue operations.",
+            "source": "The New York Times",
+            "date": "1971-06-29T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": false,
+                "wikidata structure": true
+            }
+        },
+        "article_9": {
+            "text": "Hungarian composer and pianist Béla Bartók will make his American debut with the Philharmonic Orchestra at Carnegie Hall on Thursday, performing his own piano concerto, which premiered at the Frankfort Festival last summer.",
+            "source": "The New York Times",
+            "date": "1927-12-18T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": null,
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": false,
+                "wikidata structure": false
+            }
+        },
+        "article_10": {
+            "text": "During his visit to China, German Chancellor Olaf Scholz secured an agreement to expedite the approval of BioNTech's COVID-19 vaccine for expatriates in China, while also advocating for Chinese vaccines to gain EU approval.",
+            "source": "The New York Times",
+            "date": "2022-11-04T16:29:54+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": false
+            }
+        }
+    },
+    "Allianz SE": {
+        "article_1": {
+            "text": "Allianz Global Investors (owned by Allianz Group) will acquire the London-based fixed-income firm Rogge Global Partners from Old Mutual, boosting AllianzGI's fixed-income business and expanding Rogge's product distribution.",
+            "source": "The New York Times",
+            "date": "2016-02-08T13:23:45+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Union Allgemeine Deutsche Hagel-Versicherungsgesellschaft",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Kraft Versicherungs-AG",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Stuttgarter Verein",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Allianz Infrastructure Czech Holdco I",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Allianz Infrastructure Czech HoldCo II",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Allianz New Europe Holding",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Dresdner Bank",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Allianz Life",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "PIMCO",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Firemans Fund Insurance Company",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Allianz Trade",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Allianz pojišťovna",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "added": [
+                        {
+                            "node_from": "Allianz Global Investors",
+                            "node_to": "Rogge Global Partners",
                             "relationship": "OWNS"
                         }
                     ],
@@ -47,16 +670,71 @@
             }
         },
         "article_2": {
-            "text": "Kasper Rorsted steps down as CEO of Adidas AG; Bjørn Gulden appointed as his successor.",
-            "source": "synthetic",
-            "date": null,
+            "text": "Allianz is struggling to sell its banking unit, Dresdner, despite ongoing negotiations with potential buyers like Commerzbank and Santander, due to price disagreements and market volatility impacting Dresdner Kleinwort's value.",
+            "source": "The New York Times",
+            "date": "2008-08-07T21:45:27+0000",
             "benchmarking": {
                 "model update triples": {
                     "unchanged": [
                         {
-                            "node_from": "Adidas AG",
-                            "node_to": "Bjørn Gulden",
-                            "relationship": "IS_MANAGED_BY"
+                            "node_from": "Allianz SE",
+                            "node_to": "Union Allgemeine Deutsche Hagel-Versicherungsgesellschaft",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Kraft Versicherungs-AG",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Stuttgarter Verein",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Allianz Infrastructure Czech Holdco I",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Allianz Infrastructure Czech HoldCo II",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Allianz New Europe Holding",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Dresdner Bank",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Allianz Life",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "PIMCO",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Firemans Fund Insurance Company",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Allianz Trade",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Allianz pojišťovna",
+                            "relationship": "OWNS"
                         }
                     ],
                     "added": [],
@@ -67,81 +745,105 @@
             }
         },
         "article_3": {
-            "text": "Adidas AG opens new North American headquarters in Portland, Oregon, strengthening its presence in the US sports market.",
-            "source": "synthetic",
-            "date": null,
+            "text": "Allianz is in advanced talks to sell Dresdner Bank to Commerzbank, abandoning its \"assurbanking\" strategy and creating Germany's second-largest bank after Deutsche Bank.",
+            "source": "The New York Times",
+            "date": "2008-08-29T19:48:58+0000",
             "benchmarking": {
                 "model update triples": {
-                    "unchanged": [
-                        {
-                            "node_from": "Adidas AG",
-                            "node_to": "Herzogenaurach",
-                            "relationship": "HAS_HEADQUARTER_IN"
-                        },
-                        {
-                            "node_from": "Adidas AG",
-                            "node_to": "Linz",
-                            "relationship": "HAS_HEADQUARTER_IN"
-                        }
-                    ],
-                    "added": [
-                        {
-                            "node_from": "Adidas AG",
-                            "node_to": "Portland, Oregon",
-                            "relationship": "HAS_HEADQUARTER_IN"
-                        }
-                    ],
-                    "deleted": []
+                    "unchanged": false,
+                    "added": false,
+                    "deleted": false
                 },
                 "correct update": true,
                 "wikidata structure": true
             }
         },
         "article_4": {
-            "text": "Adidas AG launches 'UltraBoost 23,' its latest running shoe innovation, featuring improved cushioning and energy return.",
-            "source": "synthetic",
-            "date": null,
+            "text": "Commerzbank will acquire Dresdner Bank from Allianz for $14.4 billion, creating Germany's largest bank by customer count and allowing Allianz to refocus on its insurance business.",
+            "source": "The New York Times",
+            "date": "2008-08-31T21:25:58+0000",
             "benchmarking": {
                 "model update triples": {
                     "unchanged": [
                         {
-                            "node_from": "Adidas AG",
-                            "node_to": "sports equipment",
-                            "relationship": "OFFERS"
+                            "node_from": "Allianz SE",
+                            "node_to": "Union Allgemeine Deutsche Hagel-Versicherungsgesellschaft",
+                            "relationship": "OWNS"
                         },
                         {
-                            "node_from": "Adidas AG",
-                            "node_to": "personal care product",
-                            "relationship": "OFFERS"
+                            "node_from": "Allianz SE",
+                            "node_to": "Kraft Versicherungs-AG",
+                            "relationship": "OWNS"
                         },
                         {
-                            "node_from": "Adidas AG",
-                            "node_to": "sportswear",
-                            "relationship": "OFFERS"
+                            "node_from": "Allianz SE",
+                            "node_to": "Stuttgarter Verein",
+                            "relationship": "OWNS"
                         },
                         {
-                            "node_from": "Adidas AG",
-                            "node_to": "footwear",
-                            "relationship": "OFFERS"
+                            "node_from": "Allianz SE",
+                            "node_to": "Allianz Infrastructure Czech Holdco I",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Allianz Infrastructure Czech HoldCo II",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Allianz New Europe Holding",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Firemans Fund Insurance Company",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Allianz Life",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "PIMCO",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Allianz Trade",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Allianz pojišťovna",
+                            "relationship": "OWNS"
                         }
                     ],
                     "added": [
                         {
-                            "node_from": "Adidas AG",
-                            "node_to": "UltraBoost 23",
-                            "relationship": "OFFERS"
+                            "node_from": "Commerzbank",
+                            "node_to": "Dresdner Bank",
+                            "relationship": "OWNS"
                         }
                     ],
-                    "deleted": []
+                    "deleted": [
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Dresdner Bank",
+                            "relationship": "OWNS"
+                        }
+                    ]
                 },
                 "correct update": true,
                 "wikidata structure": true
             }
         },
         "article_5": {
-            "text": "Adidas AG celebrated it's founders Adi Dassler's legacy at the Deutsches Historisches Museum in Berlin, Germany.",
-            "source": "synthetic",
-            "date": null,
+            "text": "German insurance giant Allianz, the lead reinsurer for AirAsia and Malaysia Airlines, faces significant payouts for three major air disasters in 2014, including AirAsia Flight 8501, but the risk is spread among a consortium of reinsurers.",
+            "source": "The New York Times",
+            "date": "2014-12-29T19:42:30+0000",
             "benchmarking": {
                 "model update triples": {
                     "unchanged": null,
@@ -153,79 +855,370 @@
             }
         },
         "article_6": {
-            "text": "Adidas AG partners with Parley for the Oceans to create sustainable sportswear made from recycled ocean plastic.",
-            "source": "synthetic",
-            "date": null,
+            "text": "Allianz SE will spend €9.8 billion (over $12.6 billion) to buy out the remaining 42.4% of its French subsidiary, AGF, streamlining its corporate structure and consolidating its holdings, including those in Spain and Taiwan.",
+            "source": "International Herald Tribune",
+            "date": "2007-01-18T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": false,
+                    "added": false,
+                    "deleted": false
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_7": {
+            "text": "The Giants and Jets are facing public outcry, led by Manhattan Borough President Scott Stringer, over their negotiations with Allianz, a German insurance company with Nazi-era ties, for the naming rights of their new stadium, despite the New Jersey Sports and Exposition Authority's limited power to intervene.",
+            "source": "The New York Times",
+            "date": "2008-09-12T01:41:51+0000",
             "benchmarking": {
                 "model update triples": {
                     "unchanged": [
                         {
-                            "node_from": "Adidas AG",
-                            "node_to": "footwear",
-                            "relationship": "OFFERS"
+                            "node_from": "Allianz SE",
+                            "node_to": "Union Allgemeine Deutsche Hagel-Versicherungsgesellschaft",
+                            "relationship": "OWNS"
                         },
                         {
-                            "node_from": "Adidas AG",
-                            "node_to": "personal care product",
-                            "relationship": "OFFERS"
+                            "node_from": "Allianz SE",
+                            "node_to": "Kraft Versicherungs-AG",
+                            "relationship": "OWNS"
                         },
                         {
-                            "node_from": "Adidas AG",
-                            "node_to": "sports equipment",
-                            "relationship": "OFFERS"
+                            "node_from": "Allianz SE",
+                            "node_to": "Stuttgarter Verein",
+                            "relationship": "OWNS"
                         },
                         {
-                            "node_from": "Adidas AG",
-                            "node_to": "sportswear",
-                            "relationship": "OFFERS"
+                            "node_from": "Allianz SE",
+                            "node_to": "Allianz Infrastructure Czech Holdco I",
+                            "relationship": "OWNS"
                         },
                         {
-                            "node_from": "Adidas AG",
-                            "node_to": "UltraBoost 23",
-                            "relationship": "OFFERS"
+                            "node_from": "Allianz SE",
+                            "node_to": "Allianz Infrastructure Czech HoldCo II",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Allianz New Europe Holding",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Dresdner Bank",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Allianz Life",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "PIMCO",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Firemans Fund Insurance Company",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Allianz Trade",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Allianz pojišťovna",
+                            "relationship": "OWNS"
                         }
                     ],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_8": {
+            "text": "The New York Giants and Jets ended naming rights talks with Allianz, a German insurance company with ties to the Third Reich, after public backlash over the company's Holocaust-era insurance practices.",
+            "source": "The New York Times",
+            "date": "2008-09-12T17:47:05+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": null,
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": false,
+                "wikidata structure": true
+            }
+        },
+        "article_9": {
+            "text": "Federal Reserve officials Charles Evans and Patrick Harker are scheduled to speak, offering potential insights into monetary policy, while Pimco fund inflows are another item of interest for market observers.",
+            "source": "The New York Times",
+            "date": "2017-05-12T13:24:57+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": null,
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": false,
+                "wikidata structure": true
+            }
+        },
+        "article_10": {
+            "text": "Allianz, the Frankfurt-based insurer and financial services company, reached a labor agreement enabling its conversion into a Societas Europea (SE) in October, simplifying cross-border mergers.",
+            "source": "International Herald Tribune",
+            "date": "2006-09-21T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Union Allgemeine Deutsche Hagel-Versicherungsgesellschaft",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Kraft Versicherungs-AG",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Stuttgarter Verein",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Allianz Infrastructure Czech Holdco I",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Allianz Infrastructure Czech HoldCo II",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Allianz New Europe Holding",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Dresdner Bank",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Allianz Life",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "PIMCO",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Firemans Fund Insurance Company",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Allianz Trade",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Allianz SE",
+                            "node_to": "Allianz pojišťovna",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        }
+    },
+    "Daimler Truck Holding AG": {
+        "article_1": {
+            "text": "Daimler-Benz is considering fully integrating its Mercedes-Benz automotive unit into the parent company, a move aimed at increasing responsiveness and quality.",
+            "source": "The New York Times",
+            "date": "1996-10-18T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": false,
+                "wikidata structure": false
+            }
+        },
+        "article_2": {
+            "text": "Chinese businessman Li Shufu, chairman of Zhejiang Geely Holding Group (owner of Geely Automobile and Volvo Cars), acquired a 9.69% stake in Daimler, the German maker of Mercedes-Benz, for $9 billion.",
+            "source": "The New York Times",
+            "date": "2018-02-23T21:57:46+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [],
                     "added": [
                         {
-                            "node_from": "Adidas AG",
-                            "node_to": "Parley for the Oceans",
-                            "relationship": "PARTNERS_WITH"
+                            "node_from": "Li Shufu",
+                            "node_to": "Zhejiang Geely Holding Group",
+                            "relationship": "IS_MANAGED_BY"
+                        },
+                        {
+                            "node_from": "Zhejiang Geely Holding Group",
+                            "node_to": "Geely Automobile",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Zhejiang Geely Holding Group",
+                            "node_to": "Volvo Cars",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Zhejiang Geely Holding Group",
+                            "node_to": "9.69% stake in Daimler",
+                            "relationship": "OWNS"
                         }
                     ],
                     "deleted": []
                 },
                 "correct update": true,
-                "wikidata structure": false
+                "wikidata structure": true
             }
         },
-        "article_7": {
-            "text": "Adidas AG joins the Dow Jones Sustainability Index, recognizing its commitment to environmental and social responsibility.",
-            "source": "synthetic",
-            "date": null,
+        "article_3": {
+            "text": "Kirk Kerkorian's Tracinda Corporation is suing DaimlerChrysler, claiming the 1998 \"merger of equals\" was a deceptive takeover of Chrysler, which DaimlerChrysler denies, citing full disclosure in the merger's proxy statement.",
+            "source": "The New York Times",
+            "date": "2001-05-10T05:00:00+0000",
             "benchmarking": {
                 "model update triples": {
                     "unchanged": [
                         {
-                            "node_from": "Adidas AG",
-                            "node_to": "CDAX",
-                            "relationship": "IS_LISTED_IN"
+                            "node_from": "Daimler Truck",
+                            "node_to": "EvoBus",
+                            "relationship": "OWNS"
                         },
                         {
-                            "node_from": "Adidas AG",
-                            "node_to": "DAX",
-                            "relationship": "IS_LISTED_IN"
+                            "node_from": "Daimler Truck",
+                            "node_to": "Daimler Buses",
+                            "relationship": "OWNS"
                         },
                         {
-                            "node_from": "Adidas AG",
-                            "node_to": "EURO STOXX 50",
-                            "relationship": "IS_LISTED_IN"
+                            "node_from": "Daimler Truck",
+                            "node_to": "Daimler Truck North America",
+                            "relationship": "OWNS"
                         }
                     ],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_4": {
+            "text": "Struggling Dutch truck maker DAF NV, facing substantial losses, confirmed talks with Daimler-Benz AG regarding a potential strategic alliance, though Daimler denied rumors of an acquisition and stated discussions focused on distribution network coordination.",
+            "source": "International Herald Tribune",
+            "date": "1992-08-28T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Daimler Truck",
+                            "node_to": "EvoBus",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Daimler Truck",
+                            "node_to": "Daimler Buses",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Daimler Truck",
+                            "node_to": "Daimler Truck North America",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_5": {
+            "text": "Daimler-Benz, the maker of Mercedes automobiles, is taking control of Messerschmitt-Bolkow-Blohm, West Germany's largest aerospace company, with government assistance, creating a powerful high-technology giant despite concerns from shareholders and unions about the expansion and its potential impact.",
+            "source": "The New York Times",
+            "date": "1988-08-15T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [],
                     "added": [
                         {
-                            "node_from": "Adidas AG",
-                            "node_to": "Dow Jones Sustainability Index",
-                            "relationship": "IS_LISTED_IN"
+                            "node_from": "Daimler-Benz",
+                            "node_to": "Messerschmitt-Bolkow-Blohm",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_6": {
+            "text": "Due to the slumping European car market, Daimler, maker of Mercedes-Benz, abandoned its 2013 profit forecast, while Ford, despite European losses, saw a net profit increase thanks to North American sales, and Volkswagen remains confident in meeting its 2013 targets.",
+            "source": "International Herald Tribune",
+            "date": "2013-04-24T12:56:29+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Daimler Truck",
+                            "node_to": "EvoBus",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Daimler Truck",
+                            "node_to": "Daimler Buses",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Daimler Truck",
+                            "node_to": "Daimler Truck North America",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_7": {
+            "text": "West German Economics Minister Helmut Haussmann approved Daimler-Benz's takeover of Messerschmitt-Bolkow-Blohm (M.B.B.), requiring divestitures in defense-related holdings to maintain competition, thus restructuring the aerospace industry and reducing government subsidies to Airbus Industrie.",
+            "source": "The New York Times",
+            "date": "1989-09-09T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [],
+                    "added": [
+                        {
+                            "node_from": "Daimler-Benz",
+                            "node_to": "Messerschmitt-Bolkow-Blohm",
+                            "relationship": "OWNS"
                         }
                     ],
                     "deleted": []
@@ -235,68 +1228,325 @@
             }
         },
         "article_8": {
-            "text": "Adidas AG expands its partnership with Major League Soccer (MLS), becoming the official outfitter for all MLS teams.",
-            "source": "synthetic",
-            "date": null,
+            "text": "Daimler-Benz AG, known for its Mercedes vehicles, plans to acquire a majority stake in electronics maker AEG AG, potentially making Daimler-Benz the largest industrial company in West Germany.",
+            "source": "The New York Times",
+            "date": "1985-10-15T05:00:00+0000",
             "benchmarking": {
                 "model update triples": {
-                    "unchanged": [
-                        {
-                            "node_from": "Adidas AG",
-                            "node_to": "Ashworth",
-                            "relationship": "OWNS"
-                        },
-                        {
-                            "node_from": "Adidas AG",
-                            "node_to": "TaylorMade Golf Company",
-                            "relationship": "OWNS"
-                        },
-                        {
-                            "node_from": "Adidas AG",
-                            "node_to": "Adidas (Canada)",
-                            "relationship": "OWNS"
-                        },
-                        {
-                            "node_from": "Adidas AG",
-                            "node_to": "TrackYourRun",
-                            "relationship": "OWNS"
-                        },
-                        {
-                            "node_from": "Adidas AG",
-                            "node_to": "Adidas (Netherlands)",
-                            "relationship": "OWNS"
-                        },
-                        {
-                            "node_from": "Adidas AG",
-                            "node_to": "adidas Runtastic",
-                            "relationship": "OWNS"
-                        }
-                    ],
-                    "added": [
-                        {
-                            "node_from": "Adidas AG",
-                            "node_to": "Major League Soccer",
-                            "relationship": "PARTNERS_WITH"
-                        }
-                    ],
+                    "unchanged": [],
+                    "added": [],
                     "deleted": []
                 },
-                "correct update": true,
+                "correct update": false,
                 "wikidata structure": false
             }
         },
         "article_9": {
-            "text": "Thomas Rabe appointed to the Adidas AG Supervisory Board, bringing extensive experience in the media and entertainment industry.",
-            "source": "synthetic",
-            "date": null,
+            "text": "Daimler-Benz AG, Germany's largest corporation, reached a compromise with the SEC, allowing it to become the first German company to issue shares in the US, marking a breakthrough for German companies seeking international recognition and addressing the SEC's concerns about German accounting transparency.",
+            "source": "International Herald Tribune",
+            "date": "1993-03-25T05:00:00+0000",
             "benchmarking": {
                 "model update triples": {
                     "unchanged": [],
                     "added": [
                         {
-                            "node_from": "Adidas AG",
-                            "node_to": "Thomas Rabe",
-                            "relationship": "HAS_BOARD_MEMBER"
+                            "node_from": "Daimler-Benz AG",
+                            "node_to": "US",
+                            "relationship": "IS_LISTED_IN"
+                        }
+                    ],
+                    "deleted": []
+                },
+                "correct update": false,
+                "wikidata structure": false
+            }
+        },
+        "article_10": {
+            "text": "Daimler-Benz, seeking to diversify beyond its automotive focus, announced its purchase of 24.9% of AEG and its intent to gain control of the electronics company, marking its third major high-tech acquisition following Dornier and MTU.",
+            "source": "The New York Times",
+            "date": "1985-10-21T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Daimler Truck",
+                            "node_to": "EvoBus",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Daimler Truck",
+                            "node_to": "Daimler Buses",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Daimler Truck",
+                            "node_to": "Daimler Truck North America",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        }
+    },
+    "Deutsche Bank AG": {
+        "article_1": {
+            "text": "Bank of America filed two suspicious activity reports (SARs) years after processing $170 million in payments from customer Leon Black to Jeffrey Epstein, prompting a Senate Finance Committee investigation into potential money laundering violations and the efficacy of delayed SAR filings.",
+            "source": "The New York Times",
+            "date": "2024-12-13T17:15:58+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": false,
+                "wikidata structure": false
+            }
+        },
+        "article_2": {
+            "text": "A New York appeals court expressed skepticism about a $450 million fraud judgment against Donald Trump and the Trump Organization, questioning the attorney general's jurisdiction and the penalty's size, despite acknowledging Trump inflated his net worth to secure loans from lenders like Deutsche Bank.",
+            "source": "The New York Times",
+            "date": "2024-09-27T01:05:18+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Deutsche Bank",
+                            "node_to": "Deutsche Bank Polska",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Bank",
+                            "node_to": "Deutsche Bank",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Bank",
+                            "node_to": "Deutsche Bank Trust Company Americas",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Bank",
+                            "node_to": "Aktiengesellschaft für Vermögensverwertung",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Bank",
+                            "node_to": "Deutsche Beamten-Zentralbank",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Bank",
+                            "node_to": "Deutsche Postbank",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_3": {
+            "text": "Japanese regulators are investigating Deutsche Bank's seven Tokyo businesses, including those acquired from Banker's Trust, similar to ongoing investigations into Credit Suisse and Lehman Brothers.",
+            "source": "The New York Times",
+            "date": "1999-08-27T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": null,
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_4": {
+            "text": "Following the departure of Frank Quattrone and his team to Credit Suisse First Boston, Deutsche Bank Securities Inc., the securities unit of Germany's largest bank Deutsche Bank A.G., is considering acquiring an investment bank to fill the gap.",
+            "source": "The New York Times",
+            "date": "1998-07-09T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Deutsche Bank",
+                            "node_to": "Christian Sewing",
+                            "relationship": "IS_MANAGED_BY"
+                        }
+                    ],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": false,
+                "wikidata structure": false
+            }
+        },
+        "article_5": {
+            "text": "Retail sales saw a 4% year-over-year increase during a strong holiday season, but not all retailers fared equally well, while athleisure brand Vuori continued its rise and The Washington Post announced a new mission focused on broader storytelling.",
+            "source": "The New York Times",
+            "date": "1997-09-30T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": false,
+                "wikidata structure": false
+            }
+        },
+        "article_6": {
+            "text": "Deutsche Bank's second-quarter earnings were boosted by acquisitions in retail banking and wealth management.",
+            "source": "The New York Times",
+            "date": "2011-04-28T19:31:24+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Deutsche Bank",
+                            "node_to": "Deutsche Bank Polska",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Bank",
+                            "node_to": "Deutsche Bank",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Bank",
+                            "node_to": "Deutsche Bank Trust Company Americas",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Bank",
+                            "node_to": "Aktiengesellschaft für Vermögensverwertung",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Bank",
+                            "node_to": "Deutsche Beamten-Zentralbank",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Bank",
+                            "node_to": "Deutsche Postbank",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_7": {
+            "text": "Deutsche Bank, Germany's largest bank, reported a 55% surge in nine-month profit to 2.38 billion marks ($1.37 billion) due to strong investment product sales, particularly in equities, mutual funds, and hedging instruments.",
+            "source": "The New York Times",
+            "date": "1997-10-30T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": null,
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_8": {
+            "text": "Deutsche Bank shares rose as much as 3% on speculation of a merger with Chase Manhattan Corporation, closing at 160.7 marks despite initially falling due to dividend ineligibility.",
+            "source": "The New York Times",
+            "date": "1998-05-23T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Deutsche Bank",
+                            "node_to": "Deutsche Bank Polska",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Bank",
+                            "node_to": "Deutsche Bank",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Bank",
+                            "node_to": "Deutsche Bank Trust Company Americas",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Bank",
+                            "node_to": "Aktiengesellschaft für Vermögensverwertung",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Bank",
+                            "node_to": "Deutsche Beamten-Zentralbank",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Bank",
+                            "node_to": "Deutsche Postbank",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_9": {
+            "text": "To help finance its $10.1 billion acquisition of Bankers Trust Corporation, Deutsche Bank will sell €1.3 billion in bonds exchangeable for 1.7% of Allianz stock, leveraging its existing €7.7 billion stake in the insurer.",
+            "source": "The New York Times",
+            "date": "1998-12-09T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Deutsche Bank",
+                            "node_to": "Deutsche Bank Polska",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Bank",
+                            "node_to": "Deutsche Bank",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Bank",
+                            "node_to": "Deutsche Bank Trust Company Americas",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Bank",
+                            "node_to": "Aktiengesellschaft für Vermögensverwertung",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Bank",
+                            "node_to": "Deutsche Beamten-Zentralbank",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Bank",
+                            "node_to": "Deutsche Postbank",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "added": [
+                        {
+                            "node_from": "Deutsche Bank",
+                            "node_to": "Bankers Trust Corporation",
+                            "relationship": "OWNS"
                         }
                     ],
                     "deleted": []
@@ -306,39 +1556,1871 @@
             }
         },
         "article_10": {
-            "text": "Sportware Company Adidas is no longer part of the CDAX after a couple of bad quarters, says company spokesperson",
-            "source": "synthetic",
-            "date": null,
+            "text": "Deutsche Bank is laying off up to 100 US employees this week as part of a global cost-cutting effort to improve profitability, despite awarding annual bonuses and recent North American expansion efforts.",
+            "source": "The New York Times",
+            "date": "1998-02-24T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": false,
+                "wikidata structure": false
+            }
+        }
+    },
+    "Deutsche Börse AG": {
+        "article_1": {
+            "text": "To secure shareholder approval for their merger, NYSE Euronext and Deutsche Börse will pay a special dividend—€2 per share to Deutsche Börse shareholders and €0.94 (US$1.37) per NYSE Euronext share.",
+            "source": "The New York Times",
+            "date": "2011-06-07T16:48:07+0000",
             "benchmarking": {
                 "model update triples": {
                     "unchanged": [
                         {
-                            "node_from": "Adidas AG",
-                            "node_to": "Dow Jones Sustainability Index",
-                            "relationship": "IS_LISTED_IN"
+                            "node_from": "Deutsche Börse",
+                            "node_to": "360T",
+                            "relationship": "OWNS"
                         },
                         {
-                            "node_from": "Adidas AG",
-                            "node_to": "DAX",
-                            "relationship": "IS_LISTED_IN"
+                            "node_from": "Deutsche Börse",
+                            "node_to": "Eurex",
+                            "relationship": "OWNS"
                         },
                         {
-                            "node_from": "Adidas AG",
-                            "node_to": "EURO STOXX 50",
-                            "relationship": "IS_LISTED_IN"
+                            "node_from": "Deutsche Börse",
+                            "node_to": "Stoxx Limited",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Börse",
+                            "node_to": "Clearstream",
+                            "relationship": "OWNS"
                         }
                     ],
                     "added": [],
-                    "deleted": [
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_2": {
+            "text": "To gain regulatory approval for their $9 billion merger, Deutsche Börse and NYSE Euronext plan to sell some European derivatives businesses and open Eurex Clearing to competitors.",
+            "source": "The New York Times",
+            "date": "2011-11-18T11:49:59+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
                         {
-                            "node_from": "Adidas AG",
-                            "node_to": "CDAX",
-                            "relationship": "IS_LISTED_IN"
+                            "node_from": "Deutsche Börse",
+                            "node_to": "360T",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Börse",
+                            "node_to": "Eurex",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Börse",
+                            "node_to": "Stoxx Limited",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Börse",
+                            "node_to": "Clearstream",
+                            "relationship": "OWNS"
                         }
-                    ]
+                    ],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": false,
+                "wikidata structure": false
+            }
+        },
+        "article_3": {
+            "text": "Deutsche Börse secured over 80% shareholder approval for its $9 billion merger with NYSE Euronext, clearing a major hurdle, though regulatory approval is still pending.",
+            "source": "The New York Times",
+            "date": "2011-07-14T15:42:55+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": false,
+                    "added": false,
+                    "deleted": false
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_4": {
+            "text": "Deutsche Börse secured 60.2% of its shares in a tender offer for its $9 billion merger with NYSE Euronext, falling short of the 75% needed by the deadline but remaining hopeful while facing further regulatory hurdles.",
+            "source": "The New York Times",
+            "date": "2011-07-13T15:14:03+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Deutsche Börse",
+                            "node_to": "360T",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Börse",
+                            "node_to": "Eurex",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Börse",
+                            "node_to": "Stoxx Limited",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Börse",
+                            "node_to": "Clearstream",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_5": {
+            "text": "Deutsche Börse will appeal the European Commission's decision to block its merger with NYSE Euronext, contesting the regulator's assessment of the derivatives market and seeking to potentially recoup fees.",
+            "source": "The New York Times",
+            "date": "2012-03-20T11:04:36+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Deutsche Börse",
+                            "node_to": "360T",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Börse",
+                            "node_to": "Eurex",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Börse",
+                            "node_to": "Stoxx Limited",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Börse",
+                            "node_to": "Clearstream",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_6": {
+            "text": "Facing regulatory hurdles in Europe, Deutsche Börse and NYSE Euronext extended the deadline for their $9 billion merger to March 31, 2012, despite US approval, having offered further concessions to address competition concerns in the derivatives market.",
+            "source": "The New York Times",
+            "date": "2011-12-28T15:44:56+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Deutsche Börse",
+                            "node_to": "360T",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Börse",
+                            "node_to": "Eurex",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Börse",
+                            "node_to": "Stoxx Limited",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Börse",
+                            "node_to": "Clearstream",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_7": {
+            "text": "Deutsche Börse and the London Stock Exchange are in talks to merge, creating a major European market operator, a move potentially influenced by Brexit and increased competition from electronic exchanges.",
+            "source": "The New York Times",
+            "date": "2016-02-23T16:01:58+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Deutsche Börse",
+                            "node_to": "360T",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Börse",
+                            "node_to": "Eurex",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Börse",
+                            "node_to": "Stoxx Limited",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Börse",
+                            "node_to": "Clearstream",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_8": {
+            "text": "Deutsche Börse's improved bid for Euronext, while facing opposition in both Germany and France, is still less attractive to Euronext than the NYSE Group's offer, despite German political and financial support for a European merger.",
+            "source": "The New York Times",
+            "date": "2006-06-21T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Deutsche Börse",
+                            "node_to": "360T",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Börse",
+                            "node_to": "Eurex",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Börse",
+                            "node_to": "Stoxx Limited",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Börse",
+                            "node_to": "Clearstream",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_9": {
+            "text": "Deutsche Börse will appeal the European Commission's rejection of its merger with NYSE Euronext, while NYSE Euronext, though disagreeing with the decision, will not participate in the appeal.",
+            "source": "The New York Times",
+            "date": "2012-03-22T14:55:55+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Deutsche Börse",
+                            "node_to": "360T",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Börse",
+                            "node_to": "Eurex",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Börse",
+                            "node_to": "Stoxx Limited",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Börse",
+                            "node_to": "Clearstream",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_10": {
+            "text": "The London Stock Exchange Group and Deutsche Börse agreed to an all-stock merger, creating a European exchange giant led by Carsten Kengeter, despite potential competition from Intercontinental Exchange and regulatory hurdles related to the upcoming Brexit vote.",
+            "source": "The New York Times",
+            "date": "2016-03-16T08:16:59+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Deutsche Börse",
+                            "node_to": "360T",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Börse",
+                            "node_to": "Eurex",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Börse",
+                            "node_to": "Stoxx Limited",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Börse",
+                            "node_to": "Clearstream",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "added": [
+                        {
+                            "node_from": "London Stock Exchange Group",
+                            "node_to": "Deutsche Börse",
+                            "relationship": "PARTNERS_WITH"
+                        }
+                    ],
+                    "deleted": []
                 },
                 "correct update": true,
                 "wikidata structure": true
             }
         }
     },
+    "Deutsche Post AG": {
+        "article_1": {
+            "text": "Germany's Deutsche Post A.G. will acquire Swiss freight company Danzas Holding A.G. for $1 billion, expanding its delivery capabilities to heavier packages.",
+            "source": "The New York Times",
+            "date": "1998-12-11T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "Deutsche Post Direkt",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "Deutsche Post Fleet",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL Global Forwarding",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL Hub Leipzig",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL Air UK",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL Automotive s.r.o.",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL Information Services (Europe)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "Deutsche Post Adress",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL Express (Czech Republic)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL Global Forwarding (CZ)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "ADAC Postbus",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "added": [
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "Danzas Holding A.G.",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_2": {
+            "text": "DHL Airways CEO John Dasburg, along with investors Richard Blum and Michael Klein, will buy the remaining 95% stake in the airline from Deutsche Post and William Robinson for $57 million, potentially resolving concerns over the German company's control of the US-based carrier.",
+            "source": "The New York Times",
+            "date": "2003-05-22T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "Deutsche Post Direkt",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "Deutsche Post Fleet",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "Danzas Holding A.G.",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL Global Forwarding",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL Hub Leipzig",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL Air UK",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL Automotive s.r.o.",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL Information Services (Europe)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL Express (Czech Republic)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL Global Forwarding (CZ)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "Deutsche Post Adress",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "ADAC Postbus",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "added": [
+                        {
+                            "node_from": "Michael Klein",
+                            "node_to": "DHL",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "John Dasburg",
+                            "node_to": "DHL",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Richard Blum",
+                            "node_to": "DHL",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "deleted": [
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL",
+                            "relationship": "OWNS"
+                        }
+                    ]
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_3": {
+            "text": "The European Commission ordered Deutsche Post AG to repay €572 million in illegal state aid for undercutting rivals in the parcel delivery market between 1994-1998, marking the third such action against the German postal service in just over a year.",
+            "source": "International Herald Tribune",
+            "date": "2002-06-20T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "Deutsche Post Direkt",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "Deutsche Post Fleet",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "Danzas Holding A.G.",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL Global Forwarding",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL Hub Leipzig",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL Air UK",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL Automotive s.r.o.",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL Information Services (Europe)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL Express (Czech Republic)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL Global Forwarding (CZ)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "Deutsche Post Adress",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "ADAC Postbus",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_4": {
+            "text": "Deutsche Post, Europe's largest postal service, is expected to acquire British logistics giant Exel for €5.5 billion ($6.73 billion), expanding Deutsche Post's reach beyond mail delivery and giving the combined companies nearly 10% of the global logistics market.",
+            "source": "The New York Times",
+            "date": "2005-09-19T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": false,
+                    "added": false,
+                    "deleted": false
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_5": {
+            "text": "Amazon.com expanded its agreement with Deutsche Post and DHL to reduce shipping times for its international customers, who make up 25% of sales, and also announced a new service selling electronic versions of research reports and articles.",
+            "source": "International Herald Tribune",
+            "date": "2001-07-20T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [],
+                    "added": [
+                        {
+                            "node_from": "Amazon.com",
+                            "node_to": "Deutsche Post",
+                            "relationship": "PARTNERS_WITH"
+                        },
+                        {
+                            "node_from": "Amazon.com",
+                            "node_to": "Electronic versions of research reports and articles",
+                            "relationship": "OFFERS"
+                        },
+                        {
+                            "node_from": "Amazon.com",
+                            "node_to": "DHL",
+                            "relationship": "PARTNERS_WITH"
+                        }
+                    ],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_6": {
+            "text": "Deutsche Post CEO Klaus Zumwinkel resigned amidst a criminal tax evasion investigation involving a Liechtenstein foundation, drawing sharp criticism from German political leaders and further fueling public debate about executive pay and corporate responsibility.",
+            "source": "The New York Times",
+            "date": "2008-02-18T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [],
+                    "added": [],
+                    "deleted": [
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "Tobias Meyer",
+                            "relationship": "IS_MANAGED_BY"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "Frank Appel",
+                            "relationship": "IS_MANAGED_BY"
+                        }
+                    ]
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_7": {
+            "text": "Despite averting a postal strike, Deutsche Post AG (69% government-owned) faces investor concern over rising wage costs, a potential €500 million state aid repayment, and continued reliance on its domestic mail business, causing its share price to slump below its €21 IPO price.",
+            "source": "International Herald Tribune",
+            "date": "2002-06-18T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "Deutsche Post Direkt",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "Deutsche Post Fleet",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "Danzas Holding A.G.",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "Amazon",
+                            "relationship": "PARTNERS_WITH"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL Global Forwarding",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL Hub Leipzig",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL Air UK",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL Automotive s.r.o.",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL Information Services (Europe)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL Express (Czech Republic)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL Global Forwarding (CZ)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "Deutsche Post Adress",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "ADAC Postbus",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_8": {
+            "text": "The European Commission ordered Deutsche Post to repay €572 million in public subsidies for unfairly undercutting parcel delivery rivals, a ruling prompted by a UPS complaint and lauded by competitors.",
+            "source": "The New York Times",
+            "date": "2002-06-20T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "Deutsche Post Direkt",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "Deutsche Post Fleet",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "Danzas Holding A.G.",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "Amazon",
+                            "relationship": "PARTNERS_WITH"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL Global Forwarding",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL Hub Leipzig",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL Air UK",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL Automotive s.r.o.",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL Information Services (Europe)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL Express (Czech Republic)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL Global Forwarding (CZ)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "Deutsche Post Adress",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "ADAC Postbus",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_9": {
+            "text": "Postal regulators ordered Deutsche Poste to open part of its delivery network to competitor UPS, forcing the European mail giant to forward UPS packages at a discounted rate, just days after Deutsche Poste bolstered its market dominance by acquiring a controlling stake in DHL.",
+            "source": "The New York Times",
+            "date": "2000-09-19T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "Deutsche Post Direkt",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "Deutsche Post Fleet",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "Danzas Holding A.G.",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "Amazon",
+                            "relationship": "PARTNERS_WITH"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL Global Forwarding",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL Hub Leipzig",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL Air UK",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL Automotive s.r.o.",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL Information Services (Europe)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL Express (Czech Republic)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "DHL Global Forwarding (CZ)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "Deutsche Post Adress",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "ADAC Postbus",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "added": [
+                        {
+                            "node_from": "Deutsche Post AG",
+                            "node_to": "UPS",
+                            "relationship": "PARTNERS_WITH"
+                        }
+                    ],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_10": {
+            "text": "Retail sales saw a 4% year-over-year increase during a strong holiday season, but not all retailers thrived, while athleisure brand Vuori continued its rise and The Washington Post announced a new mission focused on broader storytelling.",
+            "source": "The New York Times",
+            "date": "1998-03-26T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        }
+    },
+    "Mercedes-Benz": {
+        "article_1": {
+            "text": "Days before the Super Bowl, Louisiana Governor Jeff Landry led an effort to relocate homeless residents near the New Orleans Superdome to a temporary warehouse shelter, a move criticized by advocates as disruptive and prioritizing image over long-term housing solutions.",
+            "source": "The New York Times",
+            "date": "2025-01-16T02:58:34+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": null,
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_2": {
+            "text": "Despite a deadly attack on Bourbon Street the day before, the Sugar Bowl between the University of Georgia and Notre Dame proceeded with heightened security and a moment of silence for the victims, though some empty seats reflected the impact of the tragedy and subsequent game postponement.",
+            "source": "The New York Times",
+            "date": "2025-01-02T22:05:44+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": null,
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_3": {
+            "text": "The Sugar Bowl playoff game between Notre Dame and Georgia was postponed from Wednesday night to Thursday afternoon following a deadly vehicle attack on Bourbon Street in New Orleans.",
+            "source": "The New York Times",
+            "date": "2025-01-01T21:07:50+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": null,
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_4": {
+            "text": "The global auto industry is facing a downturn due to several factors, including a challenging technological shift to electric vehicles, rising competition from Chinese automakers, changing government policies, and economic headwinds, impacting companies like Nissan, Volkswagen, Stellantis, BMW, and Mercedes-Benz, while GM and Toyota are experiencing some success with their respective EV and hybrid strategies.",
+            "source": "The New York Times",
+            "date": "2024-12-15T08:00:14+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Mercedes-Benz",
+                            "node_to": "automotive industry",
+                            "relationship": "IS_ACTIVE_IN"
+                        }
+                    ],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": false
+            }
+        },
+        "article_5": {
+            "text": "A Mercedes-Benz EQE 350 electric sedan fire in a South Korean apartment complex parking lot, with a battery supplied by Farasis Energy, damaged nearly 900 cars, injured 23 people, and fueled safety concerns about EVs despite their statistically lower fire risk than gasoline cars.",
+            "source": "The New York Times",
+            "date": "2024-08-27T04:01:21+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": null,
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_6": {
+            "text": "The Mercedes-Benz GLK distinguishes itself with its bold, angular styling, reminiscent of the G-Class SUV, rather than the typical rounded crossover design.",
+            "source": "The New York Times",
+            "date": "2011-09-12T05:01:52+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Mercedes-Benz",
+                            "node_to": "truck",
+                            "relationship": "OFFERS"
+                        },
+                        {
+                            "node_from": "Mercedes-Benz",
+                            "node_to": "commercial vehicle",
+                            "relationship": "OFFERS"
+                        },
+                        {
+                            "node_from": "Mercedes-Benz",
+                            "node_to": "bus",
+                            "relationship": "OFFERS"
+                        },
+                        {
+                            "node_from": "Mercedes-Benz",
+                            "node_to": "engine",
+                            "relationship": "OFFERS"
+                        },
+                        {
+                            "node_from": "Mercedes-Benz",
+                            "node_to": "passenger car",
+                            "relationship": "OFFERS"
+                        }
+                    ],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_7": {
+            "text": "Unable to access the article \"None,\" so I cannot provide a summary.  Please provide the article text.",
+            "source": "The New York Times",
+            "date": "2009-04-10T17:51:39+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": null,
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_8": {
+            "text": "Please provide me with the article you would like me to summarize.",
+            "source": "The New York Times",
+            "date": "2007-04-05T01:13:53+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": null,
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_9": {
+            "text": "Mercedes-Benz USA, now handling Smart car operations, has launched a $25-35 million \"Unbig. Uncar.\" campaign developed by Merkley & Partners to revitalize lagging sales by promoting the Smart car as a lifestyle choice for eco-conscious consumers.",
+            "source": "The New York Times",
+            "date": "2011-09-16T19:16:36+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [],
+                    "added": [
+                        {
+                            "node_from": "Mercedes-Benz USA",
+                            "node_to": "Smart car",
+                            "relationship": "OFFERS"
+                        },
+                        {
+                            "node_from": "Mercedes-Benz USA",
+                            "node_to": "Merkley & Partners",
+                            "relationship": "PARTNERS_WITH"
+                        }
+                    ],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_10": {
+            "text": "At the New York auto show, Mercedes-Benz unveiled the Concept A-Class, a stylish compact car slated for US production in three years, signaling the brand's new focus on premium small cars amid rising gas prices and a $1.4 billion dealer investment in US store upgrades, including the impressive new Mercedes-Benz Manhattan facility with free customer parking.",
+            "source": "The New York Times",
+            "date": "2011-04-20T14:58:20+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Mercedes-Benz",
+                            "node_to": "truck",
+                            "relationship": "OFFERS"
+                        },
+                        {
+                            "node_from": "Mercedes-Benz",
+                            "node_to": "commercial vehicle",
+                            "relationship": "OFFERS"
+                        },
+                        {
+                            "node_from": "Mercedes-Benz",
+                            "node_to": "bus",
+                            "relationship": "OFFERS"
+                        },
+                        {
+                            "node_from": "Mercedes-Benz",
+                            "node_to": "engine",
+                            "relationship": "OFFERS"
+                        },
+                        {
+                            "node_from": "Mercedes-Benz",
+                            "node_to": "passenger car",
+                            "relationship": "OFFERS"
+                        }
+                    ],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        }
+    },
+    "Merck KGaA": {
+        "article_1": {
+            "text": "German drugmaker Merck KgaA plans a hostile €14.9 billion ($17.73 billion) takeover bid for rival Schering, which Schering intends to reject, arguing the offer undervalues the company.",
+            "source": "The New York Times",
+            "date": "2006-03-12T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Merck (United Kingdom)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Seven Seas Limited",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Merck (India)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Merck (Canada)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Merck SL",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_2": {
+            "text": "Germany's Merck KGaA will acquire most of Pfizer's NM Pharma generic drug business in Stockholm for €53.8 million ($65 million) to become the leading generics seller in Scandinavia.",
+            "source": "The New York Times",
+            "date": "2004-08-27T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Merck (United Kingdom)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Seven Seas Limited",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Merck (India)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Merck (Canada)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Merck SL",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "added": [
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "NM Pharma",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_3": {
+            "text": "Germany's Merck KGaA will acquire US-based biotechnology company CN Biosciences, a manufacturer of life science products with $50 million in annual sales, for $150 million ($25/share).",
+            "source": "The New York Times",
+            "date": "1998-11-20T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "NM Pharma",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Merck (United Kingdom)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Seven Seas Limited",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Merck (India)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Merck (Canada)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Merck SL",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "added": [
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "CN Biosciences",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_4": {
+            "text": "Facing a €14.6 billion hostile takeover bid from Merck KGaA, Schering AG has hired Dresdner Kleinwort Wasserstein and Morgan Stanley to develop a defense strategy against the offer, which includes a 24% premium for shareholders.",
+            "source": "The New York Times",
+            "date": "2006-03-23T11:41:39+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "NM Pharma",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Merck (United Kingdom)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Seven Seas Limited",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Merck (India)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "CN Biosciences",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Merck (Canada)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Merck SL",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_5": {
+            "text": "Merck KGaA plans a hostile €14.9 billion ($17.7 billion) takeover bid for Schering, the world's largest maker of oral contraceptives, which Schering intends to reject.",
+            "source": "The New York Times",
+            "date": "2006-03-13T12:00:02+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "NM Pharma",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Merck (United Kingdom)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Seven Seas Limited",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Merck (India)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "CN Biosciences",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Merck (Canada)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Merck SL",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_6": {
+            "text": "Germany's Merck KGaA plans a hostile $17.7 billion takeover bid for rival Schering AG, the world's largest maker of oral contraceptives, but Schering intends to reject the offer as undervaluing the company.",
+            "source": "The New York Times",
+            "date": "2006-03-13T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "NM Pharma",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Merck (United Kingdom)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Seven Seas Limited",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Merck (India)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "CN Biosciences",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Merck (Canada)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Merck SL",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_7": {
+            "text": "German drugmaker Merck KGaA's generics unit, valued at over €4 billion, has drawn interest from private equity firms Cinven, Permira, and Texas Pacific Group.",
+            "source": "The New York Times",
+            "date": "2007-01-12T13:38:58+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "NM Pharma",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Merck (United Kingdom)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Seven Seas Limited",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Merck (India)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "CN Biosciences",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Merck (Canada)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Merck SL",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_8": {
+            "text": "Germany's Merck KGaA will pay $50 million to partner with SmithKline Beecham and Human Genome Sciences until June 2001, researching new pharmaceuticals using the latter companies' genetic technology.",
+            "source": "The New York Times",
+            "date": "1996-07-17T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "NM Pharma",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Merck (United Kingdom)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Seven Seas Limited",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Merck (India)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "CN Biosciences",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Merck (Canada)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Merck SL",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "added": [
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Human Genome Sciences",
+                            "relationship": "PARTNERS_WITH"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "SmithKline Beecham",
+                            "relationship": "PARTNERS_WITH"
+                        }
+                    ],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_9": {
+            "text": "GlaxoSmithKline, Merck, and Novartis led the 2010 Access to Medicine Index, ranking pharmaceutical companies' efforts to provide medicines to the poor, followed by improved performers Gilead and Pfizer, while European companies generally outperformed American and Japanese companies, with Indian generics manufacturers Ranbaxy, Cipla, and Dr. Reddy's topping a separate list.",
+            "source": "The New York Times",
+            "date": "2010-06-28T20:48:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "NM Pharma",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "SmithKline Beecham",
+                            "relationship": "PARTNERS_WITH"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Merck (United Kingdom)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Human Genome Sciences",
+                            "relationship": "PARTNERS_WITH"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Merck (India)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Seven Seas Limited",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "CN Biosciences",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Merck (Canada)",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "Merck SL",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_10": {
+            "text": "Eli Lilly & Co. will buy an experimental insomnia drug from Germany's Merck KGaA for $29 million plus fees and royalties, allowing Lilly to expand its central nervous system research and Merck KGaA to focus on cancer and heart disease treatments.",
+            "source": "The New York Times",
+            "date": "2004-10-28T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Merck KGaA",
+                            "node_to": "liquid crystal",
+                            "relationship": "OFFERS"
+                        }
+                    ],
+                    "added": [
+                        {
+                            "node_from": "Eli Lilly & Co.",
+                            "node_to": "experimental insomnia drug",
+                            "relationship": "OFFERS"
+                        }
+                    ],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        }
+    },
+    "MTU Aero Engines AG": {
+        "article_1": {
+            "text": "Pan Am chose Pratt & Whitney and its International Aero Engines consortium (including Rolls-Royce) for $269 million worth of engines for 28 new Airbus jetliners, a significant win for the PW4000 and V2500 engines and a blow to competitor General Electric.",
+            "source": "The New York Times",
+            "date": "1985-01-24T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Airbus SE",
+                            "node_to": "Airbus Helicopters",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Airbus SE",
+                            "node_to": "Airbus Commercial Aircraft",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Airbus SE",
+                            "node_to": "Airbus UK",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Airbus SE",
+                            "node_to": "STELIA Aerospace",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Airbus SE",
+                            "node_to": "Airbus Defence and Space",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Airbus SE",
+                            "node_to": "Airbus Operations S.A.S.",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Airbus SE",
+                            "node_to": "Laboratoire Sciences de lUnivers au Cerfacs",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Airbus SE",
+                            "node_to": "ATR",
+                            "relationship": "OWNS"
+                        },
+                        {
+                            "node_from": "Airbus SE",
+                            "node_to": "Infoterra Ltd",
+                            "relationship": "OWNS"
+                        }
+                    ],
+                    "added": [
+                        {
+                            "node_from": "Pan Am",
+                            "node_to": "Pratt & Whitney",
+                            "relationship": "PARTNERS_WITH"
+                        },
+                        {
+                            "node_from": "Pan Am",
+                            "node_to": "International Aero Engines",
+                            "relationship": "PARTNERS_WITH"
+                        }
+                    ],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_2": {
+            "text": "A February 1965 British government defense white paper may allow for American aircraft production in Britain.",
+            "source": "The New York Times",
+            "date": "1965-01-03T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_3": {
+            "text": "At its eighth annual dinner, the Aero Club of America was informed that $150,000 in prize money for the Panama-Pacific Exposition air race had been deposited at the Anglo and London-Paris National Bank of San Francisco.",
+            "source": "The New York Times",
+            "date": "1914-03-20T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": null,
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_4": {
+            "text": "Automotive engineers are providing vital contributions to the war effort by collaborating with the government to improve aero motors, war trucks (three standardized models are being developed), and tractors, highlighting the importance of engineering in modern warfare and specifically mentioning the design of the Liberty engine.",
+            "source": "The New York Times",
+            "date": "1918-01-06T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [
+                        {
+                            "node_from": "Daimler Truck",
+                            "node_to": "truck",
+                            "relationship": "OFFERS"
+                        },
+                        {
+                            "node_from": "Daimler Truck",
+                            "node_to": "bus",
+                            "relationship": "OFFERS"
+                        },
+                        {
+                            "node_from": "Daimler Truck",
+                            "node_to": "coach",
+                            "relationship": "OFFERS"
+                        }
+                    ],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_5": {
+            "text": "The New York Board of Trade announced a new program to promote local aeronautics, with a meeting of leading companies scheduled for October 11, 1929, at their headquarters.",
+            "source": "The New York Times",
+            "date": "1929-10-06T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": null,
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_6": {
+            "text": "The third annual National Motor Boat and Engine Show opened at Mechanics' Hall in Boston on January 22, 1910, featuring an \"aero iceplane\" and news of one-design power craft orders for Thousand Islands yachtsmen racing.",
+            "source": "The New York Times",
+            "date": "1910-01-23T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": null,
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_7": {
+            "text": "I lack the ability to access external websites or specific articles, including the one cited from the New York Times archive. Therefore, I cannot summarize the article's content.",
+            "source": "The New York Times",
+            "date": "1930-08-26T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": null,
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_8": {
+            "text": "The Lovelace-Thompson plant will enter one of their new monoplanes in the Chicago air race.",
+            "source": "The New York Times",
+            "date": "1910-09-24T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_9": {
+            "text": "The transcontinental record-holding monoplane Yankee Doodle crashed in the Bradshaw Mountains of Arizona due to rain and fog, killing its occupants, Collyer and Tucker.",
+            "source": "The New York Times",
+            "date": "1928-11-05T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": null,
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        },
+        "article_10": {
+            "text": "Despite the Treaty of Versailles restrictions, Germany has achieved a dominant position in commercial aviation, giving them leverage in international negotiations.",
+            "source": "The New York Times",
+            "date": "1925-10-11T05:00:00+0000",
+            "benchmarking": {
+                "model update triples": {
+                    "unchanged": [],
+                    "added": [],
+                    "deleted": []
+                },
+                "correct update": true,
+                "wikidata structure": true
+            }
+        }
+    }
+}

@@ -28,8 +28,8 @@ def main():
     except Exception as e:
         print(f"Connection failed: {e}")
 
-    build_graph_bool = True
-    update_graph_bool = False
+    build_graph_bool = False
+    update_graph_bool = True
     benchmark_bool = True
     benchmark_statistics_bool = True
 
@@ -75,8 +75,8 @@ def main():
         WikidataCache.strip_cache()
         WikidataCache.print_current_stats()
         print("---")
-    real_articles_json = generate_real_articles(companies_to_include_in_graph)
-    save_to_json(real_articles_json)
+    #real_articles_json = generate_real_articles(companies_to_include_in_graph)
+    #save_to_json(real_articles_json)
     if update_graph_bool:
         '''
         If update_graph_bool == True, then 
@@ -87,7 +87,7 @@ def main():
 
         print(Fore.LIGHTMAGENTA_EX + f"\n--- Stated updating existing neo4j graph ---\n" + Style.RESET_ALL)
 
-        filepath = "files/benchmarking_data/real_articles_benchmarked.json"
+        filepath = "files/benchmarking_data/real_articles_temp.json"
         try:
             with open(filepath, 'r+', encoding='utf-8') as f:
                 synthetic_articles_json = json.load(f)
@@ -171,7 +171,7 @@ def main():
         correct_structure = 0
         incorrect_structure = 0
 
-        filepath = "files/benchmarking_data/synthetic_articles_benchmarked.json"
+        filepath = "files/benchmarking_data/real_articles_benchmarked.json"
         try:
             with open(filepath, 'r+', encoding='utf-8') as f:
                 synthetic_articles_json = json.load(f)
