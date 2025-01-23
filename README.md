@@ -40,7 +40,7 @@ username = neo4j
 password = your neo4j password
 
 [gemini]
-api_key = your api key
+api_key = your Gemini api key
 
 [nytimes]
-api_key = your api key
+api_key = your NYTimes api key
