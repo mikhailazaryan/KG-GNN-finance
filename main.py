@@ -4,7 +4,8 @@ from datetime import datetime, timezone
 from neo4j import GraphDatabase
 from colorama import init, Fore, Style
 
-from articles import preprocess_news
+
+from articles import preprocess_news, generate_real_articles, save_to_json
 from graphbuilder import build_graph_from_initial_node, reset_graph
 from graphupdater import update_neo4j_graph
 from wikidata.wikidataCache import WikidataCache
@@ -27,14 +28,17 @@ def main():
     except Exception as e:
         print(f"Connection failed: {e}")
 
-    build_graph_bool = False
-    update_graph_bool = True
+    build_graph_bool = True
+    update_graph_bool = False
     benchmark_bool = True
     benchmark_statistics_bool = True
 
     # this builds the initial graph from wikidata
-    companies_to_include_in_graph = ["MTU Aero Engines AG"]
-    companies_to_include_in_graph = ["Adidas AG", "Airbus SE", "Allianz SE"]
+    #companies_to_include_in_graph = ["Daimler Truck Holding AG"]
+    #companies_to_include_in_graph = ["Adidas AG", "Airbus SE", "Allianz SE"]
+    companies_to_include_in_graph = ["Adidas AG", "Airbus SE", "Allianz SE", "Daimler Truck Holding AG",
+                                     "Deutsche Bank AG", "Deutsche Börse AG", "Deutsche Post AG", "Mercedes-Benz",
+                                     "Merck KGaA", "MTU Aero Engines AG"]
     DAX_companies = ["Adidas AG", "Airbus SE", "Allianz SE", "BASF SE", "Bayer AG", "Beiersdorf AG",
                      "Bayerische Motoren Werke AG", "Brenntag SE", "Commerzbank AG", "Continental AG", "Covestro AG",
                      "Daimler Truck Holding AG", "Deutsche Bank AG", "Deutsche Börse AG", "Deutsche Post AG",
@@ -46,7 +50,7 @@ def main():
                      "Sartorius AG", "Siemens AG", "Siemens Energy AG", "Siemens Healthineers AG", "Symrise AG",
                      "Volkswagen AG", "Vonovia SE", "Zalando SE"]
 
-    companies_to_include_in_graph = DAX_companies
+    #companies_to_include_in_graph = DAX_companies
 
     date_from = datetime(2020, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
     date_until = datetime(2024, 12, 31, 0, 0, 0, tzinfo=timezone.utc)
@@ -71,7 +75,8 @@ def main():
         WikidataCache.strip_cache()
         WikidataCache.print_current_stats()
         print("---")
-
+    real_articles_json = generate_real_articles(companies_to_include_in_graph)
+    save_to_json(real_articles_json)
     if update_graph_bool:
         '''
         If update_graph_bool == True, then 
@@ -82,7 +87,7 @@ def main():
 
         print(Fore.LIGHTMAGENTA_EX + f"\n--- Stated updating existing neo4j graph ---\n" + Style.RESET_ALL)
 
-        filepath = "files/benchmarking_data/synthetic_articles_benchmarked.json"
+        filepath = "files/benchmarking_data/real_articles_benchmarked.json"
         try:
             with open(filepath, 'r+', encoding='utf-8') as f:
                 synthetic_articles_json = json.load(f)
@@ -94,7 +99,7 @@ def main():
             if company in companies_to_include_in_graph:
                 for article_key, article_data in articles.items():
                     try:
-                        filepath = "files/benchmarking_data/synthetic_articles_benchmarked.json"
+                        filepath = "files/benchmarking_data/real_articles_benchmarked.json"
                         with open(filepath, 'r+', encoding='utf-8') as z:
                             synthetic_articles_benchmarked_json = json.load(z)
                             if synthetic_articles_benchmarked_json[company][article_key]["benchmarking"]["correct update"] is not None:
@@ -151,7 +156,7 @@ def main():
                     except KeyError as e:
                         print(f"Error: Key not found in article synthetic_articles_json: {e}")
 
-                    filepath = "files/benchmarking_data/synthetic_articles_benchmarked.json"
+                    filepath = "files/benchmarking_data/real_articles_benchmarked.json"
                     with open(filepath, 'w', encoding='utf-8') as f:
                         json.dump(synthetic_articles_json, f, indent=4, ensure_ascii=False)
                         print(f"successfully saved '{synthetic_articles_json[company][article_key]}' to '{filepath}'")

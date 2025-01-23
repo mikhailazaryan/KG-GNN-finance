@@ -2,13 +2,32 @@ import json
 import feedparser
 import configparser
 import google.generativeai as genai
+import requests
+from newspaper import Article
+import lxml
+from bs4 import BeautifulSoup
+import time
 
+
+# Initialize the generative model
 model = genai.GenerativeModel("gemini-1.5-pro-latest")
 config = configparser.ConfigParser()
 config.read('config.ini')
 genai.configure(api_key=config['gemini']['api_key'])
 
 output_file_path = "files/benchmarking_data/real_articles_temp.json"
+
+def scrape_article(url):
+    try:
+        # Initialize the article object
+        article = Article(url)
+        # Download and parse the article
+        article.download()
+        article.parse()
+        return article.text
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
 
 
 def fetch_news(search_term, max_articles=10):
@@ -23,20 +42,23 @@ def fetch_news(search_term, max_articles=10):
         list: A list of dictionaries, each containing details of a news article.
     """
     search_term = search_term.replace(" ", "+")
-    gn_url = f"https://news.google.com/rss/search?q={search_term}&hl=en-US&gl=US&ceid=US:en"
-    gn_feed = feedparser.parse(gn_url)
-    print(f"Generated RSS URL: {gn_url}")
-
+    bugfree_sources = "\"The New York Times\",  \"International New York Times\", \"International Herald Tribune\""
+    bugfree_sources = bugfree_sources.replace(" ", "+")
     articles = []
+    response = requests.get(f"https://api.nytimes.com/svc/search/v2/articlesearch.json?q={search_term}&fq=source:({bugfree_sources})&sort=relevance&api-key={config['nytimes']['api_key']}")
+    data = response.json()['response']['docs']
+    #print(data)
 
-    if gn_feed.entries:
-        print(f"Found {len(gn_feed.entries)} articles. Limiting to {max_articles}.")
-        for news_item in gn_feed.entries[:max_articles]:  # Limit the number of articles
-            print(f"Processing article {news_item}: {news_item.title}")
+    if True:
+        print(f"Found {len(data)} articles.")
+        for news_item in data[:max_articles]:  # Limit the number of articles
+            print(f"Processing article: {news_item['snippet']}")
+            full_text = scrape_article(news_item['web_url'])
+            summary = preprocess_news(full_text)
             article = {
-                "text": news_item.summary,
-                "source": news_item.link,
-                "date": news_item.published if "published" in news_item else None,
+                "text": summary,
+                "source": news_item['source'],
+                "date": news_item['pub_date'],
                 "benchmarking": {
                     "model update triples": {
                         "unchanged": [],
@@ -50,19 +72,29 @@ def fetch_news(search_term, max_articles=10):
             articles.append(article)
     else:
         print(f"No news found for the term: {search_term}")
-
     return articles
 
+def preprocess_news(full_text):
+    """Uses the LLM to condense a news article into one sentence."""
+    prompt = f"""
+    You are a summarization assistant. Your task is to access the full text of the article {full_text} and then summarize this article from this into a single sentence. Keep the main event and relevant company details. 
+    
+    """
+    result = model.generate_content(prompt, generation_config={"temperature": 0.2})
+    return result.text.strip()
+#THIS IS AN EXAMPLE:
+#    Input: "Jochen Hanebeck Appointed New CEO of Infineon: Munich-based Infineon’s supervisory board announced it has appointed Jochen Hanebeck as the new CEO, effective April 1, 2022. He will succeed Reinhard Ploss, in place since 2012. Hanebeck, a member of the management board and chief operations officer (COO) since 2016, has been offered a five-year CEO contract, until March 2027, Infineon’s supervisory board announced today (Nov. 25). The supervisory board, Ploss and Hanebeck will work together to develop a transition plan in the coming months. "
+#    Output: "Jochen Hanebeck is replacing Reinhard Ploss as the new CEO of infineon effective April 1, 2022"
 
 def generate_real_articles(companies):
     """
-    Build a JSON structure for synthetic articles.
+    Build a JSON structure for real articles.
 
     Args:
         companies (list): List of company names for which to fetch articles.
 
     Returns:
-        dict: A dictionary structured as synthetic articles JSON.
+        dict: A dictionary structured as real articles JSON.
     """
     real_articles = {}
 
@@ -649,19 +681,3 @@ def build_synthetic_articles_json(companies: list):
     with open("files/benchmarking_data/real_articles_temp.json", "w", encoding='utf-8') as f:
         json.dump(temp, f, indent=4, ensure_ascii=False)
 
-
-# Following functions are currently not needed
-def preprocess_news(article):
-    """Uses the LLM to condense a news article into one sentence."""
-    prompt = f"""
-    You are a summarization assistant. Your task is to summarize a news article into a single sentence. Keep the main event and relevant company details. 
-
-    Example:
-    Input: "Jochen Hanebeck Appointed New CEO of Infineon: Munich-based Infineon’s supervisory board announced it has appointed Jochen Hanebeck as the new CEO, effective April 1, 2022. He will succeed Reinhard Ploss, in place since 2012. Hanebeck, a member of the management board and chief operations officer (COO) since 2016, has been offered a five-year CEO contract, until March 2027, Infineon’s supervisory board announced today (Nov. 25). The supervisory board, Ploss and Hanebeck will work together to develop a transition plan in the coming months. "
-    Output: "Jochen Hanebeck is replacing Reinhard Ploss as the new CEO of infineon effective April 1, 2022"
-    
-    Please summarize the following article in one sentence:
-    {article}
-    """
-    result = model.generate_content(prompt, generation_config={"temperature": 0.2})
-    return result.text.strip()
