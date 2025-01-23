@@ -1,13 +1,8 @@
 import json
-import feedparser
 import configparser
 import google.generativeai as genai
 import requests
 from newspaper import Article
-import lxml
-from bs4 import BeautifulSoup
-import time
-
 
 # Initialize the generative model
 model = genai.GenerativeModel("gemini-1.5-pro-latest")

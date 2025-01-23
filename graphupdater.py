@@ -1,6 +1,5 @@
 import configparser
 import json
-from json import JSONDecodeError
 import google.generativeai as genai
 from datetime import datetime, timezone
 from colorama import Fore, Style

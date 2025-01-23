@@ -29,8 +29,8 @@ def main():
         print(f"Connection failed: {e}")
 
     build_graph_bool = False
-    update_graph_bool = True
-    benchmark_bool = True
+    update_graph_bool = False
+    benchmark_bool = False
     benchmark_statistics_bool = True
 
     # this builds the initial graph from wikidata
