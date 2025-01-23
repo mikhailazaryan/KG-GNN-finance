@@ -41,3 +41,6 @@ password = your neo4j password
 
 [gemini]
 api_key = your api key
+
+[nytimes]
+api_key = your api key
