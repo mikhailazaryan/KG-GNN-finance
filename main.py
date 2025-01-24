@@ -1,199 +1,258 @@
 import configparser
 import json
 from datetime import datetime, timezone
-from neo4j import GraphDatabase
+import colorama
 from colorama import init, Fore, Style
-
+from neo4j import GraphDatabase
 
 from articles import preprocess_news, generate_real_articles, save_to_json
-from graphbuilder import build_graph_from_initial_node, reset_graph
+from graphbuilder import reset_graph, build_graph_from_root
 from graphupdater import update_neo4j_graph
 from wikidata.wikidataCache import WikidataCache
 
+# Initialize colorama for colored output
+colorama.init()
 
-def main():
-    init()  # for colorama
+# Configuration and constants
+CONFIG_FILE = 'config.ini'
+BENCHMARK_FILE = "files/benchmarking_data/synthetic_articles_benchmarked.json"  # Consistent file path
+REAL_ARTICLES_BENCHMARK_FILE = "files/benchmarking_data/real_articles_benchmarked.json"
 
-    ## Setup connection to Neo4j
+
+def connect_to_neo4j(config_file=CONFIG_FILE):
+    """Establishes a connection to the Neo4j database."""
     config = configparser.ConfigParser()
-    config.read('config.ini')
-    neo4j_uri = config['neo4j']['uri']
-    username = config['neo4j']['username']
-    password = config['neo4j']['password']
-    driver = GraphDatabase.driver(neo4j_uri, auth=(username, password))
-
+    config.read(config_file)
     try:
+        driver = GraphDatabase.driver(
+            config['neo4j']['uri'],
+            auth=(config['neo4j']['username'], config['neo4j']['password'])
+        )
         driver.verify_connectivity()
         print("Connection successful!")
+        return driver
     except Exception as e:
         print(f"Connection failed: {e}")
+        return None
 
-    build_graph_bool = False
-    update_graph_bool = False
-    benchmark_bool = False
-    benchmark_statistics_bool = True
 
-    # this builds the initial graph from wikidata
-    #companies_to_include_in_graph = ["Daimler Truck Holding AG"]
-    #companies_to_include_in_graph = ["Adidas AG", "Airbus SE", "Allianz SE"]
-    companies_to_include_in_graph = ["Adidas AG", "Airbus SE", "Allianz SE", "Daimler Truck Holding AG",
-                                     "Deutsche Bank AG", "Deutsche Börse AG", "Deutsche Post AG", "Mercedes-Benz",
-                                     "Merck KGaA", "MTU Aero Engines AG"]
+def build_knowledge_graph(driver, companies, date_range, included_nodes, search_depth):
+    """Builds the initial knowledge graph in Neo4j."""
+    reset_graph(driver)
+    print("Resetting graph.")
+
+    for company_name in companies:
+        print(Fore.GREEN + f"\n--- Started building graph for {company_name} ---\n" + Style.RESET_ALL)
+        build_graph_from_root(company_name, "Company", date_range, included_nodes, search_depth,
+                              driver)
+        print(Fore.GREEN + f"\n--- Finished building graph for {company_name} ---\n" + Style.RESET_ALL)
+
+    print(
+        f"\n--- Successfully finished building neo4j graph for companies {companies} with a depth of {search_depth} ---\n")
+    WikidataCache.strip_cache()
+    WikidataCache.print_current_stats()
+
+
+def update_knowledge_graph(driver, companies, included_nodes, benchmark_mode=False,
+                           filepath=BENCHMARK_FILE):
+    """Updates the knowledge graph based on articles in a JSON file."""
+
+    print(Fore.LIGHTMAGENTA_EX + f"\n--- Started updating existing neo4j graph ---\n" + Style.RESET_ALL)
+
+    try:
+        with open(filepath, 'r+', encoding='utf-8') as f:
+            articles_json = json.load(f)
+    except FileNotFoundError:
+        print(Fore.RED + f"Error: File not found: {filepath}" + Style.RESET_ALL)
+        return
+
+    for company, articles in articles_json.items():
+        if company in companies:
+            print("---")
+            for article_key, article_data in articles.items():
+                try:
+                    # Check if already benchmarked
+                    with open(filepath, 'r', encoding='utf-8') as z:
+                        articles_benchmarked_json = json.load(z)
+                        if articles_benchmarked_json[company][article_key].get("benchmarking", {}).get(
+                                "correct update") is not None:
+                            print(
+                                f"Skipping {company}, {article_key} because it seems to have already been benchmarked")
+                            continue  # Skip to the next article
+
+                    print("---")
+                    print(f"Company: {company}, Article Nr: {article_key}, Article Text: {article_data['text']}")
+                    added, deleted, unchanged = update_neo4j_graph(article_data['text'], companies, included_nodes,
+                                                                   included_nodes, driver=driver)
+
+                    if benchmark_mode:
+                        benchmark_update(filepath, company, article_key, articles_json, added, deleted, unchanged)
+
+                except KeyError as e:
+                    raise KeyError(f"Error: Key not found in article data: {e}")
+
+    print(Fore.LIGHTMAGENTA_EX + f"\n--- Finished updating existing neo4j graph ---\n" + Style.RESET_ALL)
+
+
+def benchmark_update(filepath, company, article_key, articles_json, added, deleted, unchanged):
+    """Handles the benchmarking logic for a single article update."""
+
+    articles_json[company][article_key].setdefault("benchmarking", {})["model update triples"] = {
+        "unchanged": unchanged, "added": added, "deleted": deleted
+    }
+
+    for question in ["correct update", "wikidata structure"]:
+        while True:
+            user_input = input(f"Is the {question} for {company} - {article_key} correct? [y/n]: ")
+            if user_input.lower() in ('y', 'n'):
+                articles_json[company][article_key]["benchmarking"][question] = user_input.lower() == 'y'
+                break
+            else:
+                print("Invalid input. Please enter 'y' or 'n'.")
+
+    with open(filepath, 'w', encoding='utf-8') as f:  # Save after each article in benchmark mode
+        json.dump(articles_json, f, indent=4, ensure_ascii=False)
+        print(f"Successfully saved updates for '{company} - {article_key}' to '{filepath}'")
+    print("---")
+
+
+def calculate_benchmark_statistics(filepath: str) -> dict:
+    """
+    Calculates comprehensive benchmark statistics from a JSON file containing article data.
+
+    Args:
+        filepath: Path to the JSON file containing benchmark data
+
+    Returns:
+        Dictionary containing various statistics including success rates and counts
+
+    """
+    stats = {
+        'total_articles': 0,
+        'correct_updates': 0,
+        'incorrect_updates': 0,
+        'correct_structure': 0,
+        'incorrect_structure': 0,
+        'update_success_rate': 0.0,
+        'structure_success_rate': 0.0,
+        'companies_analyzed': set(),
+        'articles_per_company': {},
+        'success_by_company': {}
+    }
+
+    try:
+        with open(filepath, 'r', encoding='utf-8') as f:
+            articles_json = json.load(f)
+    except FileNotFoundError:
+        print(f"Error: Benchmark file not found: {filepath}")
+        return stats
+
+    # Process each article
+    for company, articles in articles_json.items():
+        stats['companies_analyzed'].add(company)
+        company_stats = {
+            'total': 0,
+            'correct_updates': 0,
+            'correct_structure': 0
+        }
+
+        for article_key, article_data in articles.items():
+            stats['total_articles'] += 1
+            company_stats['total'] += 1
+
+            benchmarking = article_data.get("benchmarking", {})
+
+            # Update statistics
+            if benchmarking.get("correct update") is True:
+                stats['correct_updates'] += 1
+                company_stats['correct_updates'] += 1
+            elif benchmarking.get("correct update") is False:
+                stats['incorrect_updates'] += 1
+
+            # Structure statistics
+            if benchmarking.get("wikidata structure") is True:
+                stats['correct_structure'] += 1
+                company_stats['correct_structure'] += 1
+            elif benchmarking.get("wikidata structure") is False:
+                stats['incorrect_structure'] += 1
+
+        # Store company-specific stats
+        stats['articles_per_company'][company] = company_stats['total']
+        if company_stats['total'] > 0:
+            stats['success_by_company'][company] = {
+                'update_rate': (company_stats['correct_updates'] / company_stats['total']) * 100,
+                'structure_rate': (company_stats['correct_structure'] / company_stats['total']) * 100
+            }
+
+    # Calculate success rates
+    if stats['total_articles'] > 0:
+        stats['update_success_rate'] = (stats['correct_updates'] / stats['total_articles']) * 100
+        stats['structure_success_rate'] = (stats['correct_structure'] / stats['total_articles']) * 100
+
+    # Print detailed statistics
+    print("\n=== Benchmark Statistics ===")
+    print(f"\nOverall Metrics:")
+    print(f"Total Articles Analyzed: {stats['total_articles']}")
+    print(f"Number of Companies: {len(stats['companies_analyzed'])}")
+    print(f"\nSuccess Rates:")
+    print(f"Update Success Rate: {stats['update_success_rate']:.2f}%")
+    print(f"Structure Success Rate: {stats['structure_success_rate']:.2f}%")
+
+    print(f"\nDetailed Counts:")
+    print(f"Correct Updates: {stats['correct_updates']}")
+    print(f"Incorrect Updates: {stats['incorrect_updates']}")
+    print(f"Correct Structure: {stats['correct_structure']}")
+    print(f"Incorrect Structure: {stats['incorrect_structure']}")
+
+    print("\nPer-Company Statistics:")
+    for company in stats['companies_analyzed']:
+        print(f"\n{company}:")
+        print(f"  Articles: {stats['articles_per_company'][company]}")
+        if company in stats['success_by_company']:
+            print(f"  Update Success Rate: {stats['success_by_company'][company]['update_rate']:.2f}%")
+            print(f"  Structure Success Rate: {stats['success_by_company'][company]['structure_rate']:.2f}%")
+
+    return stats
+
+
+def main():
+    driver = connect_to_neo4j()
+    if not driver:
+        return  # Exit if connection failed
+
+    # Configuration
+    build_graph = True
+    update_graph = True
+    benchmark = True
+    benchmark_stats = True
+
+    companies = ["Adidas AG", "Airbus SE", "Allianz SE", "BASF SE", "Beiersdorf AG"]
     DAX_companies = ["Adidas AG", "Airbus SE", "Allianz SE", "BASF SE", "Bayer AG", "Beiersdorf AG",
                      "Bayerische Motoren Werke AG", "Brenntag SE", "Commerzbank AG", "Continental AG", "Covestro AG",
                      "Daimler Truck Holding AG", "Deutsche Bank AG", "Deutsche Börse AG", "Deutsche Post AG",
                      "Deutsche Telekom AG", "E.ON SE", "Fresenius SE & Co. KGaA", "Hannover Rück SE",
-                     "Heidelbergcement AG", "Henkel AG & Co. KGaA", "Infineon Technologies AG",
-                     "Mercedes-Benz", "Merck KGaA", "MTU Aero Engines AG",
-                     "Munich RE AG", "Porsche AG",
+                     "Heidelbergcement AG", "Henkel AG & Co. KGaA", "Infineon Technologies AG", "Mercedes-Benz",
+                     "Merck KGaA", "MTU Aero Engines AG", "Munich RE AG", "Porsche AG",
                      "Porsche Automobil Holding SE", "QIAGEN N.V.", "Rheinmetall AG", "RWE AG", "SAP SE",
                      "Sartorius AG", "Siemens AG", "Siemens Energy AG", "Siemens Healthineers AG", "Symrise AG",
                      "Volkswagen AG", "Vonovia SE", "Zalando SE"]
 
-    #companies_to_include_in_graph = DAX_companies
+    date_range = (datetime(2020, 1, 1, tzinfo=timezone.utc), datetime(2024, 12, 31, tzinfo=timezone.utc))
 
-    date_from = datetime(2020, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
-    date_until = datetime(2024, 12, 31, 0, 0, 0, tzinfo=timezone.utc)
-    nodes_to_include = ["Company", "Industry_Field", "Manager", "Founder", "Board_Member", "City", "Country",
-                        "Product_or_Service", "Employer", "StockMarketIndex"]
+    included_nodes = ["Company", "Industry_Field", "Manager", "Founder", "Board_Member", "City", "Country",
+                      "Product_or_Service", "Employer", "StockMarketIndex"]
     search_depth = 1
 
-    if build_graph_bool:
-        reset_graph(driver)
-        for company_name in companies_to_include_in_graph:
-            print(Fore.GREEN + f"\n---Started building graph for {company_name}---\n" + Style.RESET_ALL)
-            build_graph_from_initial_node(company_name, "Company", date_from, date_until, nodes_to_include,
-                                          search_depth, driver)
-            print(Fore.GREEN + f"\n--- Finished building graph for {company_name}---\n" + Style.RESET_ALL)
+    if build_graph:
+        build_knowledge_graph(driver, companies, date_range, included_nodes, search_depth)
 
-            # reduce unuseful cache information in 30% of the time,
+    filepath = filepath = "files/benchmarking_data/synthetic_articles_benchmarked.json"
 
-        print(
-            f"\n--- Successfully finished building neo4j graph for companies {companies_to_include_in_graph} with a depth of {search_depth} ---\n")
+    if update_graph:
+        update_knowledge_graph(driver, companies, included_nodes, benchmark_mode=benchmark, filepath=filepath)
 
-        print("---")
-        WikidataCache.strip_cache()
-        WikidataCache.print_current_stats()
-        print("---")
-    #real_articles_json = generate_real_articles(companies_to_include_in_graph)
-    #save_to_json(real_articles_json)
-    if update_graph_bool:
-        '''
-        If update_graph_bool == True, then 
-            (1) opens filepath = "files/benchmarking_data/synthetic_articles.json" and loads articles
-            (2) updates KG according to articles
-            (3) saves updates into variables added, deleted and unchanged.
-        '''
-
-        print(Fore.LIGHTMAGENTA_EX + f"\n--- Stated updating existing neo4j graph ---\n" + Style.RESET_ALL)
-
-        filepath = "files/benchmarking_data/real_articles_temp.json"
-        try:
-            with open(filepath, 'r+', encoding='utf-8') as f:
-                synthetic_articles_json = json.load(f)
-        except FileNotFoundError:
-            print(f"Error: File not found: {filepath}")
-            return
-
-        for company, articles in synthetic_articles_json.items():
-            if company in companies_to_include_in_graph:
-                for article_key, article_data in articles.items():
-                    try:
-                        filepath = "files/benchmarking_data/real_articles_benchmarked.json"
-                        with open(filepath, 'r+', encoding='utf-8') as z:
-                            synthetic_articles_benchmarked_json = json.load(z)
-                            if synthetic_articles_benchmarked_json[company][article_key]["benchmarking"]["correct update"] is not None:
-                                print(f"skipping {company}, {article_key} because it seems to have already been benchmarked")
-                                continue
-
-                        print("---")
-                        print(f"Company: {company}, Article Nr: {article_key}, Article Text: {article_data['text']}")
-                        added, deleted, unchanged = update_neo4j_graph(article_data['text'],
-                                                                       companies_to_include_in_graph,
-                                                                       nodes_to_include, date_from,
-                                                                       date_until, nodes_to_include,
-                                                                       search_depth_new_nodes=1,
-                                                                       search_depth_for_changes=search_depth,
-                                                                       driver=driver)
-
-                        if benchmark_bool:
-                            '''
-                            If benchmark_bool == True, then 
-                                (1) saves the updates (addd, deleted, unchanged) into synthetic_articles_benchmarked.json
-                                (2) asks for keyboard input whether the updates were correct and adhered to the wikidata structure
-                                (3) also saves these infos into synthetic_articles_benchmarked.json
-                            '''
-                            synthetic_articles_json[company][article_key]["benchmarking"]["model update triples"]["unchanged"] = unchanged
-                            synthetic_articles_json[company][article_key]["benchmarking"]["model update triples"]["added"] = added
-                            synthetic_articles_json[company][article_key]["benchmarking"]["model update triples"]["deleted"] = deleted
-
-                            while True:  # Loop until valid input is received
-                                user_input = input(f"Is the update for {company} - {article_key} correct? [y/n]: ")
-                                if user_input.lower() == 'y':
-                                    synthetic_articles_json[company][article_key]["benchmarking"]["correct update"] = True
-                                    break
-                                elif user_input.lower() == 'n':
-                                    synthetic_articles_json[company][article_key]["benchmarking"]["correct update"] = False
-                                    break
-                                else:
-                                    print("Invalid input. Please enter 'y' or 'n'.")
-
-                            while True:  # Loop until valid input is received
-                                user_input = input(
-                                    f"Is the update in accordance with the wikidata structure for {company} - {article_key} correct? [y/n]: ")
-                                if user_input.lower() == 'y':
-                                    synthetic_articles_json[company][article_key]["benchmarking"]["wikidata structure"] = True
-                                    break
-                                elif user_input.lower() == 'n':
-                                    synthetic_articles_json[company][article_key]["benchmarking"]["wikidata structure"] = False
-                                    break
-                                else:
-                                    print("Invalid input. Please enter 'y' or 'n'.")
-
-                            print(synthetic_articles_json[company][article_key])
-
-
-                    except KeyError as e:
-                        print(f"Error: Key not found in article synthetic_articles_json: {e}")
-
-                    filepath = "files/benchmarking_data/real_articles_benchmarked.json"
-                    with open(filepath, 'w', encoding='utf-8') as f:
-                        json.dump(synthetic_articles_json, f, indent=4, ensure_ascii=False)
-                        print(f"successfully saved '{synthetic_articles_json[company][article_key]}' to '{filepath}'")
-                    print("---")
-
-                print(Fore.LIGHTMAGENTA_EX + f"\n--- Finished updating existing neo4j graph ---\n" + Style.RESET_ALL)
-
-    if benchmark_statistics_bool:
-        total = 0
-        correct_update = 0
-        incorrect_update = 0
-        correct_structure = 0
-        incorrect_structure = 0
-
-        filepath = "files/benchmarking_data/real_articles_benchmarked.json"
-        try:
-            with open(filepath, 'r+', encoding='utf-8') as f:
-                synthetic_articles_json = json.load(f)
-        except FileNotFoundError:
-            print(f"Error: File not found: {filepath}")
-            return
-
-        for company, articles in synthetic_articles_json.items():
-                for article_key, article_data in articles.items():
-                    total += 1
-                    if synthetic_articles_json[company][article_key]["benchmarking"]["correct update"] == True:
-                        correct_update += 1
-                    elif synthetic_articles_json[company][article_key]["benchmarking"]["correct update"] == False:
-                        incorrect_update += 1
-                    if synthetic_articles_json[company][article_key]["benchmarking"]["wikidata structure"] == True:
-                        correct_structure += 1
-                    elif synthetic_articles_json[company][article_key]["benchmarking"]["wikidata structure"] == False:
-                        incorrect_structure += 1
-
-
-
-        print(f"total = {total}, correct_update = {correct_update}, incorrect_update = {incorrect_update}, correct_structure = {correct_structure}, incorrect_structure = {incorrect_structure}")
+    if benchmark_stats:
+        calculate_benchmark_statistics(filepath=filepath)
 
 
 if __name__ == "__main__":

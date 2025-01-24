@@ -3,13 +3,13 @@ import json
 import google.generativeai as genai
 from datetime import datetime, timezone
 from colorama import Fore, Style
+from neo4j import Driver
+from typing import List, Dict, Tuple, Optional
 
-from graphbuilder import \
-    create_new_node, create_relationship_in_graph, \
-    get_node_relationships, get_wikidata_id_from_name, \
-    get_properties, get_graph_information, \
-    update_relationship_property, get_current_customID_n
 from wikidata.wikidata import wikidata_wbsearchentities
+from graphbuilder import create_relationship, get_node_relationships, \
+    get_relationship_triples, update_relationship_property, get_latest_custom_id, \
+    find_node_by_wikidata_id, create_new_node, build_node_properties
 
 model = genai.GenerativeModel("gemini-1.5-pro-latest")
 config = configparser.ConfigParser()
@@ -18,6 +18,61 @@ genai.configure(api_key=config['gemini']['api_key'])
 
 global custom_id
 custom_id = None
+
+
+def update_neo4j_graph(article: str, companies: List[str], node_types: List[str], nodes_to_include: List[str],
+                       driver) -> Tuple[List[Dict], List[Dict], List[Dict]]:
+    """Updates Neo4j graph based on article analysis and company relationships.
+
+    Identifies changes in company relationships from article content and updates
+    the Neo4j graph accordingly by adding new relationships and marking old ones
+    as ended.
+
+    Args:
+        article: Text content of the article
+        companies: List of company names to analyze
+        node_types: List of possible node types
+        nodes_to_include: List of node types to include in graph
+        driver: Neo4j driver instance
+
+    Returns:
+        Tuple containing lists of:
+        - added relationships
+        - deleted relationships
+        - unchanged relationships
+
+    """
+    # Find central company and node type requiring change
+    company = find_company_at_center(article, companies, 1, 3)
+    node_type = find_node_type(article, node_types)
+
+    if company == "None":
+        print(Fore.RED + f"No central company found in article: '{article}'" + Style.RESET_ALL)
+        return [], [], []
+
+    if node_type == "None":
+        print(Fore.RED + f"No node type requiring change found in article: '{article}'" + Style.RESET_ALL)
+        return [], [], []
+
+    print(Fore.GREEN + f"Analyzing changes for {company} ({node_type})" + Style.RESET_ALL)
+
+    # Get existing relationships
+    relevant_triples = get_relationship_triples(company, node_label=node_type, driver=driver)
+
+    # Find changes
+    added, deleted, unchanged = find_change_triples(
+        article, company, node_type, relevant_triples, 1, 4, driver
+    )
+
+    # Process additions
+    for triple in added:
+        _add_relationship(triple, nodes_to_include, driver)
+
+    # Process deletions
+    for triple in deleted:
+        _mark_relationship_ended(triple, driver)
+
+    return added, deleted, unchanged
 
 
 def find_change_triples(article, name_company_at_center, node_type_requiring_change, relevant_triples, attempt,
@@ -42,25 +97,25 @@ def find_change_triples(article, name_company_at_center, node_type_requiring_cha
     3. Update the existing graph-triples according to the article. 
 
     Example input:
-    
+
     Article: "Allianz SE bought Ergo Group'
     Input: {{triples: [{{'node_from': 'Allianz SE', 'relationship': 'OWNS', 'node_to': 'Dresdner Bank'}}, {{'node_from': 'Allianz SE', 'relationship': 'OWNS', 'node_to': 'Euler Hermes'}}]}}
     Output triples: {{triples: [{{'node_from': 'Allianz SE', 'relationship': 'OWNS', 'node_to': 'Dresdner Bank'}}, {{'node_from': 'Allianz SE', 'relationship': 'OWNS', 'node_to': 'Euler Hermes'}}, {{'node_from': 'Allianz SE', 'relationship': 'OWNS', 'node_to': 'Ergo Group'}}]}}
-    
+
     Article: "Allianz SE fired it's old CEO Oliver Bäte, the new CEO is Boris Hilgat"
     Input triples: {{triples: [{{'node_from': 'Allianz SE', 'relationship': 'IS_MANAGED_BY', 'node_to': 'Oliver Bäte'}}]}}
     Output triples: {{triples: [{{'node_from': 'Allianz SE', 'relationship': 'IS_MANAGED_BY', 'node_to': 'Boris Hilgat'}}]}}
-    
+
     Article: "Company A divests its Environmental Science Professional business called EnvSciPro to Company B, a British private equity firm, for $2.6 billion.
     Input triples: {{'node_from': 'Company A', 'relationship': 'OFFERS', 'node_to': 'EnvSciPro'}}
     Output triples: {{triples: [{{'node_from': 'Company B', 'relationship': 'OFFERS', 'node_to': 'EnvSciPro'}}]}}
 
-    
-    
+
+
     Please analyze the following:
     Article: "{article.replace("'", "")}"
     Input triples: {relevant_triples} 
-    
+
     Please stick to the following relationships: OWNS, PARTNERS_WITH, IS_ACTIVE_IN, IS_MANAGED_BY, WAS_FOUNDED_BY, HAS_BOARD_MEMBER, HAS_HEADQUARTER_IN, OFFERS, IS_LISTED_IN. If none of these relationships fit, then do not make any changes.
     Remember to only output a valid json with the format {{triples:[{{'node_from': '', 'relationship': '', 'node_to': ''}}]}}
     """
@@ -91,109 +146,17 @@ def find_change_triples(article, name_company_at_center, node_type_requiring_cha
         return added, deleted, intersection
     except Exception as e:
         print(Fore.RED + f"JSONDecodeError: '{e}' with result: '{result}', try again" + Style.RESET_ALL)
-        find_change_triples(article, name_company_at_center, node_type_requiring_change, relevant_triples, attempt + 1, max_attempt,
+        find_change_triples(article, name_company_at_center, node_type_requiring_change, relevant_triples, attempt + 1,
+                            max_attempt,
                             driver)
     return False, False, False
 
 
-def update_neo4j_graph(article, companies, node_types, date_from, date_until, nodes_to_include, search_depth_new_nodes,
-                       search_depth_for_changes, driver):
-    name_company_at_center = find_company_at_center(article, companies, 1, 3)
-    label_node_requiring_change = find_node_type(article, node_types)
-    relevant_triples = get_graph_information(name_company_at_center, node_label=label_node_requiring_change, driver=driver)
-    #relevant_triples = get_graph_information(name_company_at_center, driver=driver)
-
-
-    if name_company_at_center != "None":
-        print(
-            Fore.GREEN + f"'{name_company_at_center}' is the company at center for the article '{article}' and companies '{companies}'." + Style.RESET_ALL)
-    else:
-        print(Fore.RED + f"Could not find company at center for the article '{article}'." + Style.RESET_ALL)
-        return [], [], relevant_triples
-
-    if label_node_requiring_change != "None":
-        print(
-            Fore.GREEN + f"'{label_node_requiring_change}' is the node type which requires a change." + Style.RESET_ALL)
-    else:
-        print(Fore.RED + f"Could not find node type which requires change for article '{article}'." + Style.RESET_ALL)
-        return [], [], relevant_triples
-
-
-    added, deleted, unchanged = find_change_triples(article, name_company_at_center, label_node_requiring_change,
-                                                    relevant_triples, 1, 4,
-                                                    driver)
-
-    if added:
-        for add in added:
-            try:
-                node_type_from, node_type_to = determine_triple_types(add, nodes_to_include, 1, 3)
-                if node_type_from is None or node_type_to is None:
-                    print(Fore.RED + f"Could not find node type of added nodes for triple {add}." + Style.RESET_ALL)
-                    continue
-
-                node_from = add.get("node_from")
-                relationship_type = add.get("relationship")
-                node_to = add.get("node_to")
-
-                id_node_from = get_wikidata_id_from_name(node_from, driver)
-                if id_node_from is None:
-                    id_node_from = wikidata_wbsearchentities(node_from, id_or_name='id')
-                if id_node_from == "No wikidata entry found":
-                    id_node_from = _get_and_increment_customID(driver)
-                id_node_from = create_new_node(id_node_from, node_type_from,
-                                               properties_dict=get_properties(id_node_from, node_type_from, node_from),
-                                               driver=driver, node_name=node_from)
-
-                id_node_to = get_wikidata_id_from_name(node_to, driver)
-                if id_node_to is None:
-                    id_node_to = wikidata_wbsearchentities(node_to, id_or_name='id')
-                if id_node_to == "No wikidata entry found":
-                    id_node_to = _get_and_increment_customID(driver)
-
-                id_node_to = create_new_node(id_node_to, node_type_to,
-                                             properties_dict=get_properties(id_node_to, node_type_to,
-                                                                            node_to), driver=driver, node_name=node_to)
-
-                create_relationship_in_graph("OUTBOUND", relationship_type, id_node_from, id_node_to,
-                                             str(datetime.now().replace(tzinfo=timezone.utc)), "NA", driver,
-                                             name_org_node=node_from, name_rel_node=node_to)
-            except KeyError as e:
-                print(Fore.RED + f"Key Error for {add}. Error: {e}." + Style.RESET_ALL)
-    if deleted:
-        for delete in deleted:
-            try:
-                node_from = delete.get("node_from")
-                relationship_type = delete.get("relationship")
-                node_to = delete.get("node_to")
-
-                id_node_from = get_wikidata_id_from_name(node_from, driver)
-                if id_node_from is None:
-                    id_node_from = wikidata_wbsearchentities(node_from, id_or_name='id')
-
-                id_node_to = get_wikidata_id_from_name(node_to, driver)
-                if id_node_to is None:
-                    id_node_to = wikidata_wbsearchentities(node_to, id_or_name='id')
-
-                node_relationships = get_node_relationships(id_node_from, id_node_to, driver)
-                for rel in node_relationships:
-                    if rel['rel_end_time'] == "NA":
-                        updated_rel_elementID, updated_property_value = update_relationship_property(rel['rel_id'], "end_time",
-                                                                             str(datetime.now().replace(
-                                                                                 tzinfo=timezone.utc)), driver)
-                        if updated_rel_elementID:
-                            print(Fore.GREEN + f"Relationship with from: '{node_from}' to '{node_to}' with relationship_type = '{relationship_type}' and element ID '{updated_rel_elementID}' updated 'end_time' from '{rel['rel_end_time']}' to '{updated_property_value}'" + Style.RESET_ALL)
-
-
-            except KeyError as e:
-                print(Fore.RED + f"Key Error for {delete}. Error: {e}." + Style.RESET_ALL)
-
-    return added, deleted, unchanged
-
 def determine_triple_types(triple, nodes_to_include, attempt, max_attempt, ):
-        if attempt >= max_attempt:
-            return None, None
+    if attempt >= max_attempt:
+        return None, None
 
-        prompt = f"""
+    prompt = f"""
         You are a classification assistant. You provide data to keep a Knowledge Graph about a company up to date. 
         Your task is to analyze a graph triple and select the the single best fitting node_type from a list.       
 
@@ -219,21 +182,23 @@ def determine_triple_types(triple, nodes_to_include, attempt, max_attempt, ):
         Available node_types: {nodes_to_include}       
         """
 
-        result = model.generate_content(prompt, generation_config=genai.GenerationConfig(temperature=0.2)).text
-        result = result.replace("```json", "").replace("```", "").replace("'", "\"").replace("Output: ", "")
+    result = model.generate_content(prompt, generation_config=genai.GenerationConfig(temperature=0.2)).text
+    result = result.replace("```json", "").replace("```", "").replace("'", "\"").replace("Output: ", "")
 
-        try:
-            result = json.loads(result)
-            type_node_from = result.get("type_node_from")
-            type_node_to = result.get("type_node_to")
-            if (type_node_from in nodes_to_include) and (type_node_to in nodes_to_include):
-                print(Fore.GREEN + f"Determined type_node_from = '{type_node_from}' and type_node_to = '{type_node_to}'" + Style.RESET_ALL)
-                return type_node_from, type_node_to
-            else:
-                determine_triple_types(triple, nodes_to_include, attempt + 1, max_attempt)
-        except Exception as e:
-            print(Fore.RED + f"JSONDecodeError while trying to determine node types: '{e}' with result: '{result}', try again" + Style.RESET_ALL)
+    try:
+        result = json.loads(result)
+        type_node_from = result.get("type_node_from")
+        type_node_to = result.get("type_node_to")
+        if (type_node_from in nodes_to_include) and (type_node_to in nodes_to_include):
+            print(
+                Fore.GREEN + f"Determined type_node_from = '{type_node_from}' and type_node_to = '{type_node_to}'" + Style.RESET_ALL)
+            return type_node_from, type_node_to
+        else:
             determine_triple_types(triple, nodes_to_include, attempt + 1, max_attempt)
+    except Exception as e:
+        print(
+            Fore.RED + f"JSONDecodeError while trying to determine node types: '{e}' with result: '{result}', try again" + Style.RESET_ALL)
+        determine_triple_types(triple, nodes_to_include, attempt + 1, max_attempt)
 
 
 def find_company_at_center(article, companies, attempt, max_attempt):
@@ -279,26 +244,6 @@ def find_company_at_center(article, companies, attempt, max_attempt):
     return result
 
 
-def article_describes_relevant_change(article):
-
-    prompt = f"""
-    You are a classification assistant. You provide data to keep a Knowledge Graph about a company up to date. 
-    Your task is to analyze a news article and determine if the news article is already relevant. 
-
-    #todo
-   
-
-    
-    Please analyze the following:
-    Article: "{article}"
-    """
-
-    enum = ["relevant", "not relevant"]
-
-    result = _generate_result_from_llm(prompt, enum=enum, max_output_tokens=10, temperature=0.4)
-    return result.text
-
-
 def find_node_type(article, node_types):
     if "None" not in node_types:
         node_types.append("None")
@@ -315,7 +260,7 @@ def find_node_type(article, node_types):
     3. Select ONE node_type which has to be modified, added or deleted according to the article.
 
     Example input:
-    
+
     Article: "Mercedes-Benz announces new electric vehicle model 'S-Class' with 500-mile range"
     Available node_types = ["Company", "Industry_Field", "Person", "City", "Country", "Product_or_Service", "Employer", "StockMarketIndex", "None"]
     Output: Product_or_Service
@@ -325,12 +270,12 @@ def find_node_type(article, node_types):
     Available node_types = ["Company", "Industry_Field", "Person", "City", "Country", "Product_or_Service", "Employer", "StockMarketIndex", "None"]
     Output: City
     Reasoning: As their headquarter is changing it's location, Citiy is the correct node_type which requires change 
-            
+
     Article: "Allianz SE is no longer active in the insurance industry",
     Available node_types = ["Company", "Industry_Field", "Person", "City", "Country", "Product_or_Service", "Employer", "StockMarketIndex", "None"]
     Output: Industry_Field
     Reasoning: The node 'Insurance Industry' of type Industry_Field is most likely to require a change. 
-            
+
 
     Please analyze the following:
     Article: "{article}"
@@ -341,20 +286,96 @@ def find_node_type(article, node_types):
     return result
 
 
+"""functions below are helper functions"""
+
+
 def _get_and_increment_customID(driver):
     global custom_id
 
-    custom_id = get_current_customID_n(driver)
+    custom_id = get_latest_custom_id(driver)
     custom_id += 1
 
     custom_node_id = "CustomID" + str(custom_id)
     return custom_node_id
 
 
-def _get_datetime_now_and_max():
-    rel_wikidata_start_time = str(datetime.now().replace(tzinfo=timezone.utc))
-    rel_wikidata_end_time = str(datetime.max.replace(tzinfo=timezone.utc))
-    return rel_wikidata_start_time, rel_wikidata_end_time
+def _add_relationship(triple: Dict, nodes_to_include: List[str], driver) -> None:
+    """Helper function to add new relationship to graph."""
+    try:
+        # Determine node types
+        node_type_from, node_type_to = determine_triple_types(triple, nodes_to_include, 1, 3)
+        if not all([node_type_from, node_type_to]):
+            print(Fore.RED + f"Missing node type for triple {triple}" + Style.RESET_ALL)
+            return
+
+        name_node_from = triple["node_from"]
+        name_node_to = triple["node_to"]
+
+        # Create/get nodes and relationship
+        id_node_from = _get_or_create_node_id(name_node_from, driver)
+        id_node_to = _get_or_create_node_id(name_node_to, driver)
+
+
+        create_new_node(
+            id_node_from,
+            node_type_from,
+            properties=build_node_properties(id_node_from, node_type_from, name_node_from),
+            driver=driver,
+        )
+
+        create_new_node(
+            id_node_to,
+            node_type_to,
+            properties=build_node_properties(id_node_to, node_type_to, name_node_to),
+            driver=driver,
+        )
+
+
+        create_relationship(
+            triple["relationship"],
+            id_node_from,
+            id_node_to,
+            str(datetime.now(timezone.utc)),
+            "NA",
+            driver,
+            name_org_node=triple["node_from"],
+            name_rel_node=triple["node_to"]
+        )
+    except KeyError as e:
+        print(Fore.RED + f"Error adding relationship {triple}: {e}" + Style.RESET_ALL)
+
+
+def _mark_relationship_ended(triple: Dict, driver) -> None:
+    """Helper function to mark relationship as ended."""
+    try:
+        # Find nodes
+        source_id = find_node_by_wikidata_id(triple["node_from"], driver) or \
+                    wikidata_wbsearchentities(triple["node_from"], id_or_name='id')
+        target_id = find_node_by_wikidata_id(triple["node_to"], driver) or \
+                    wikidata_wbsearchentities(triple["node_to"], id_or_name='id')
+
+        # Update end time for active relationships
+        relationships = get_node_relationships(source_id, target_id, driver)
+        for rel in relationships:
+            if rel['rel_end_time'] == "NA":
+                _update_end_time(rel, triple, driver)
+
+    except KeyError as e:
+        print(Fore.RED + f"Error ending relationship {triple}: {e}" + Style.RESET_ALL)
+
+
+def _update_end_time(rel: Dict, triple: Dict, driver) -> None:
+    """Helper function to update relationship end time."""
+    rel_id, end_time = update_relationship_property(
+        rel['rel_id'],
+        "end_time",
+        str(datetime.now(timezone.utc)),
+        driver
+    )
+    if rel_id:
+        print(Fore.GREEN +
+              f"Updated end time for {triple['node_from']} -> {triple['node_to']} to {end_time}" +
+              Style.RESET_ALL)
 
 
 def _generate_result_from_llm(prompt, enum=None, ResponseSchema=None, temperature=0.5, max_output_tokens=30):
@@ -386,6 +407,42 @@ def _generate_result_from_llm(prompt, enum=None, ResponseSchema=None, temperatur
         raise KeyError(f"No enum or ResponseSchema provided")
 
 
+def _get_or_create_node_id(node_name: str, driver: Driver) -> str:
+    """Gets existing node ID or creates new node with generated ID.
+
+    Attempts to find existing node by Wikidata ID, then searches Wikidata,
+    and finally creates custom ID if needed.
+
+    Args:
+        node_name: Name of node to find/create
+        driver: Neo4j driver instance
+
+    Returns:
+        str: Node ID (either existing or newly created)
+    """
+    # Try to find existing node or get Wikidata ID
+    node_id = (
+            find_node_by_wikidata_id(node_name, driver) or
+            wikidata_wbsearchentities(node_name, id_or_name='id')
+    )
+
+    # Generate custom ID if needed
+    if node_id == "No wikidata entry found":
+        node_id = _get_and_increment_customID(driver)
+
+    # Create/update node and return ID
+    return node_id
+
+
+"""functions below are  currently not in use , but might be used for future functionality"""
+
+
+def _get_datetime_now_and_max():
+    rel_wikidata_start_time = str(datetime.now().replace(tzinfo=timezone.utc))
+    rel_wikidata_end_time = str(datetime.max.replace(tzinfo=timezone.utc))
+    return rel_wikidata_start_time, rel_wikidata_end_time
+
+
 def _update_node_properties_dict(article, properties_dict, response_schema):
     # todo: currently not implemented, does not support changing of node properties
     prompt = f"""
@@ -401,7 +458,7 @@ def _update_node_properties_dict(article, properties_dict, response_schema):
                 Article: "Allianz SE changed it's name to Algorithmic GmbH"
                 Input properties_dict = {{"employee_number": "", "net_profit": "", "name": "Allianz SE", "isin": "DE0349284901929"}}
                 Output: name
-        
+
 
                 Please analyze the following:
                 Article: "{article}"
@@ -425,11 +482,15 @@ def _update_node_properties_dict(article, properties_dict, response_schema):
            Article: "Allianz SE changed it's name to Algorithmic GmbH"
            Input dictionary = {{'name': 'Allianz SE'}}
            Output dictionary = {{'new_value': 'Algorithmic GmbH'}}
-           
+
            Please analyze the following:
            Article: "{article}"
            properties_dict: {property}        
            """
+
+    class ResponseSchema(response_schema.ResponseSchema):
+        # todo
+        test = "test"
 
     result = _generate_result_from_llm(prompt, ResponseSchema=ResponseSchema, temperature=0.3, max_output_tokens=40)
     updated_node_property = json.loads(result)
