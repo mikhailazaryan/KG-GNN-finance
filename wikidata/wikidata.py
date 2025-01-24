@@ -4,9 +4,6 @@ import json
 from wikidata.wikidataCache import wikidata_cache
 
 
-## Code partially from https://www.jcchouinard.com/wikidata-api-python/
-
-
 def wikidata_wbsearchentities(query_string: str, id_or_name: str = 'id') -> str:
     """Searches Wikidata entities by query string and returns ID or label.
 
@@ -42,7 +39,7 @@ def wikidata_wbsearchentities(query_string: str, id_or_name: str = 'id') -> str:
     data = wikidata_cache.get_data('wbsearchentities', query_string, params)
 
     if not data['search']:
-        #print(Fore.YELLOW +f"No Wikidata entry found for: {query_string}" + Style.RESET_ALL)
+        # print(Fore.YELLOW +f"No Wikidata entry found for: {query_string}" + Style.RESET_ALL)
         return "No wikidata entry found"
 
     try:
