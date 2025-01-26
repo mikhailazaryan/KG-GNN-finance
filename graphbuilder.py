@@ -659,7 +659,7 @@ def _get_relationship_dict(wikidata_id, label):
                     "relationship_type": "HAS_BOARD_MEMBER",
                 },
                 "Financial_Data": {
-                    "wikidata_entries": _get_wikidata_financial_rels(data, wikidata_id, ["P2403"]),
+                    "wikidata_entries": _get_wikidata_financial_rels(data, wikidata_id, ["P2139"]),
                     "label": "Financial_Data",
                     "relationship_type": "HAS_FINANCIAL_DATA",
                 }
