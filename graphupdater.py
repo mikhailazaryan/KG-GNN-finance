@@ -292,7 +292,7 @@ def find_node_type(article, node_types):
 def _get_and_increment_customID(driver):
     global custom_id
 
-    custom_id = get_latest_custom_id(driver)
+    custom_id = get_latest_custom_id("CustomID", driver)
     custom_id += 1
 
     custom_node_id = "CustomID" + str(custom_id)

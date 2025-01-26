@@ -152,7 +152,8 @@ def create_new_node(wikidata_id: str, label: str, properties: dict, driver) -> U
                 raise Exception(
                     f"Error creating node with wikidata_id: {wikidata_id} and node properties: {properties}")
         else:
-            print(Fore.GREEN + f"Node with wikidata_id: {wikidata_id} and properties '{properties}' already exists and has therefore not been added" + Style.RESET_ALL)
+            print(
+                Fore.GREEN + f"Node with wikidata_id: {wikidata_id} and properties '{properties}' already exists and has therefore not been added" + Style.RESET_ALL)
 
             return wikidata_id
 
@@ -378,6 +379,25 @@ def build_node_properties(wikidata_id: str, label: str, name: Optional[str] = No
         }
 
     # Fetch Wikidata information
+    if wikidata_id.startswith("FinancialID"):  # FinancialID--2013-12-31--Q3895
+        financial_id = wikidata_id.split("--")[2]
+        point_in_time = wikidata_id.split("--")[1]
+        data = wikidata_wbgetentities(financial_id)
+        #note: the following is not the most time efficient, solutions could be cached to improve runtime
+        return {
+            "name": wikidata_id,
+            "label": "Financial_Data",
+            "wikidata_id": wikidata_id,
+            "total assets": _get_wikidata_financial_entry("P2403", financial_id, point_in_time, data),
+            "total equity": _get_wikidata_financial_entry("P2137", financial_id, point_in_time, data),
+            "total revenue": _get_wikidata_financial_entry("P2139", financial_id, point_in_time, data),
+            "net profit": _get_wikidata_financial_entry("P2295", financial_id, point_in_time, data),
+            "operating income": _get_wikidata_financial_entry("P3362", financial_id, point_in_time, data),
+            "market capitalization": _get_wikidata_financial_entry("P2226", financial_id, point_in_time, data),
+            "assets under management": _get_wikidata_financial_entry("P4103", financial_id, point_in_time, data),
+            "employee_number": _get_wikidata_financial_entry("P1128", financial_id, point_in_time, data),
+        }
+
     data = wikidata_wbgetentities(wikidata_id)
     properties = _get_label_specific_properties(label, wikidata_id, data)
 
@@ -441,7 +461,7 @@ def reset_graph(driver):
         session.run("MATCH(n) DETACH DELETE n")
 
 
-def get_latest_custom_id(driver: Driver) -> int:
+def get_latest_custom_id(starts_with: str, driver: Driver) -> int:
     """Retrieves the highest numeric value from existing CustomID nodes in Neo4j.
 
     Queries the Neo4j database for nodes with wikidata_ids starting with 'CustomID'
@@ -449,15 +469,16 @@ def get_latest_custom_id(driver: Driver) -> int:
     the next CustomID in sequence.
 
     Args:
+        starts_with: what kind of custom id to search for ("customID", "financialID")
         driver: Neo4j driver instance for database connection
 
     Returns:
         int: Highest CustomID number found, or 0 if no CustomID nodes exist
     """
-    query = """
+    query = f"""
         MATCH (n)
-        WHERE n.wikidata_id STARTS WITH 'CustomID'
-        RETURN toInteger(substring(n.wikidata_id, 8)) as custom_id
+        WHERE n.wikidata_id STARTS WITH '{starts_with}'
+        RETURN toInteger(substring(n.wikidata_id, {len(starts_with)})) as custom_id
         ORDER BY custom_id DESC
         LIMIT 1
     """
@@ -473,7 +494,7 @@ def get_latest_custom_id(driver: Driver) -> int:
 def _get_wikidata_entry(key, wikidata_id, wikidata, name=False, time=False):
     if time:
         try:
-            return str(parse_datetime_to_iso(
+            return str(_parse_datetime_to_iso(
                 wikidata.get("entities").get(wikidata_id).get("claims").get(key)[0].get("mainsnak").get(
                     "datavalue").get("value").get("time")))
         except:
@@ -491,6 +512,29 @@ def _get_wikidata_entry(key, wikidata_id, wikidata, name=False, time=False):
                         Fore.RED + f"Error: for wikidata_id {wikidata_id}, because Wikidata entry exists but no label/name defined by Wikidata. Returning NA" + Style.RESET_ALL)
                     return "NA"
             return "NA"
+
+
+def _get_wikidata_financial_entry(key, wikidata_id, date, wikidata):
+    result = {}
+    try:
+        for entry in wikidata.get("entities").get(wikidata_id).get("claims").get(key):
+            try:
+                amount = entry.get("mainsnak").get("datavalue").get("value").get("amount")
+            except KeyError:
+                amount = "NA"
+            try:
+                point_in_time = entry.get("qualifiers").get("P585")[0].get("datavalue").get("value").get("time")
+                point_in_time = _parse_datetime_to_iso(point_in_time)
+                point_in_time = point_in_time.strftime('%Y-%m-%d')
+            except KeyError:
+                point_in_time = "NA"
+            result[point_in_time] = amount
+        result = result.get(date)
+        return result
+    except:
+        return "NA"
+
+
 
 
 def _get_label_specific_properties(label: str, wikidata_id: str, data: Dict) -> Dict:
@@ -572,63 +616,53 @@ def _get_relationship_dict(wikidata_id, label):
                     "wikidata_entries": _get_wikidata_rels(data, wikidata_id, ["P361"]),
                     "label": "StockMarketIndex",
                     "relationship_type": "IS_LISTED_IN",
-                    "relationship_direction": "OUTBOUND",
                 },
                 "Industry_Field": {
                     "wikidata_entries": _get_wikidata_rels(data, wikidata_id, ["P452"]),
                     "label": "Industry_Field",
                     "relationship_type": "IS_ACTIVE_IN",
-                    "relationship_direction": "OUTBOUND"
                 },
                 "Subsidiary": {
                     "wikidata_entries": _get_wikidata_rels(data, wikidata_id, ["P355"]),
                     # removed P1830 because also included buildings, football clubs etx
                     "label": "Company",
                     "relationship_type": "OWNS",
-                    "relationship_direction": "OUTBOUND"
                 },
                 "Owner": {
                     "wikidata_entries": _get_wikidata_rels(data, wikidata_id, ["127"]),
                     "label": "Company",
                     "relationship_type": "IS_OWNED_BY",
-                    "relationship_direction": "OUTBOUND"
                 },
                 "City": {
                     "wikidata_entries": _get_wikidata_rels(data, wikidata_id, ["P159"]),
                     "label": "City",
                     "relationship_type": "HAS_HEADQUARTER_IN",
-                    "relationship_direction": "OUTBOUND"
                 },
                 "Product_or_Service": {
                     "wikidata_entries": _get_wikidata_rels(data, wikidata_id, ["P1056"]),
                     "label": "Product_or_Service",
                     "relationship_type": "OFFERS",
-                    "relationship_direction": "OUTBOUND"
                 },
                 "Founder": {
                     "wikidata_entries": _get_wikidata_rels(data, wikidata_id, ["P112"]),
                     "label": "Founder",
                     "relationship_type": "WAS_FOUNDED_BY",
-                    "relationship_direction": "OUTBOUND"
                 },
                 "Manager": {
                     "wikidata_entries": _get_wikidata_rels(data, wikidata_id, ["P169", "P1037"]),
                     "label": "Manager",
                     "relationship_type": "IS_MANAGED_BY",
-                    "relationship_direction": "OUTBOUND"
                 },
                 "Board_Member": {
                     "wikidata_entries": _get_wikidata_rels(data, wikidata_id, ["P3320"]),
                     "label": "Board_Member",
                     "relationship_type": "HAS_BOARD_MEMBER",
-                    "relationship_direction": "OUTBOUND"
+                },
+                "Financial_Data": {
+                    "wikidata_entries": _get_wikidata_financial_rels(data, wikidata_id, ["P2403"]),
+                    "label": "Financial_Data",
+                    "relationship_type": "HAS_FINANCIAL_DATA",
                 }
-                # "Financial_Data": {
-                #     "wikidata_entries": _get_wikidata_rels(data, wikidata_id, ["P3320"]),
-                #     "label": "Financial_Data",
-                #     "relationship_type": "HAS_FINANCIAL_DATA",
-                #     "relationship_direction": "OUTBOUND"
-                # }
             }
             return relationship_dict
         elif label == "StockMarketIndex":
@@ -641,7 +675,6 @@ def _get_relationship_dict(wikidata_id, label):
                     "wikidata_entries": _get_wikidata_rels(data, wikidata_id, ["P17"]),
                     "label": "Country",
                     "relationship_type": "LOCATED_IN",
-                    "relationship_direction": "OUTBOUND"
                 }
             }
         elif label == "Country":
@@ -649,15 +682,15 @@ def _get_relationship_dict(wikidata_id, label):
         elif label == "Product_or_Service":
             relationship_dict = {}
         elif label in ["Manager", "Founder", "Board_Member"]:
-            relationship_dict = {}
             relationship_dict = {
                 "Employer": {
                     "wikidata_entries": _get_wikidata_rels(data, wikidata_id, ["P108"]),
                     "label": "Company",
                     "relationship_type": "EMPLOYED_BY",
-                    "relationship_direction": "OUTBOUND"
                 }
             }
+        elif label == "Financial_Data":
+            relationship_dict = {}
         else:
             raise Exception(f"Label {label} is not supported")
         return relationship_dict
@@ -688,9 +721,42 @@ def _get_wikidata_rels(data: dict, wikidata_id: str, property_ids: list) -> list
                 end_time = "NA"
             try:
                 id = entry["mainsnak"]["datavalue"]["value"]["id"]
-            except KeyError:
+            except KeyError as e:
                 print(
-                    Fore.YELLOW + f"Key Error for single relationship for wikidata_id {wikidata_id}, skipping this relationship" + Style.RESET_ALL)
+                    Fore.YELLOW + f"Key Error for single relationship for wikidata_id {wikidata_id}, skipping this relationship. Error {e}" + Style.RESET_ALL)
+                continue
+            result.append({"id": id, "start_time": start_time, "end_time": end_time})
+
+    if max_branching_factor is not None:
+        result = result[:max_branching_factor]
+
+    return result
+
+def _get_wikidata_financial_rels(data: dict, wikidata_id: str, property_ids: list) -> list[dict[str, Union[Union[datetime, str], Any]]]:
+    result = []
+
+    for property_id in property_ids:
+        try:
+            entries = data["entities"][wikidata_id]["claims"][property_id]
+        except KeyError:
+            # print(Fore.YELLOW + f"Key Error {property_id} for wikidata_id {wikidata_id}, skipping this key" + Style.RESET_ALL)
+            continue
+        for entry in entries:
+            try:
+                start_time = entry["qualifiers"]["P585"][0]["datavalue"]["value"]["time"]  # start time
+                start_time = _parse_datetime_to_iso(start_time)
+            except KeyError:
+                start_time = "NA"
+            try:
+                end_time = start_time.replace(year=start_time.year + 1)
+            except KeyError or ValueError:
+                # Handle Feb 29 edge case
+                end_time = start_time.replace(year=start_time.year + 1, day=28)
+            try:
+                id = "FinancialID" + "--" + (start_time.strftime('%Y-%m-%d') + "--" + str(wikidata_id))
+            except KeyError as e:
+                print(
+                    Fore.YELLOW + f"Key Error for financial relationship for wikidata_id {wikidata_id}, skipping this relationship. Error {e}" + Style.RESET_ALL)
                 continue
             result.append({"id": id, "start_time": start_time, "end_time": end_time})
 
@@ -883,5 +949,3 @@ def delete_node(wikidata_id: str, driver) -> Union[str, bool]:
             f"Error deleting node: {str(e)}" +
             Style.RESET_ALL
         )
-
-# test
