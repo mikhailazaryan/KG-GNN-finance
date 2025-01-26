@@ -3,5 +3,4 @@ colorama
 configparser
 google-generativeai
 requests
-json
 newspaper4k

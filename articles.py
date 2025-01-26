@@ -2,7 +2,7 @@ import json
 import configparser
 import google.generativeai as genai
 import requests
-#from newspaper import Article #todo uncomment
+from newspaper import Article
 
 # Initialize the generative model
 model = genai.GenerativeModel("gemini-1.5-pro-latest")
