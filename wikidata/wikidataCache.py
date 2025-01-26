@@ -7,12 +7,12 @@ from typing import Dict
 
 os.environ['GRPC_VERBOSITY'] = 'ERROR'
 
+
 class WikidataCache:
     # Class-level counters
     cache_hits = 0
     internet_retrievals = 0
     request_times = []
-
 
     def __init__(self, cache_file='files/wikidata_cache/wikidata.json'):
         self.cache_file = cache_file
@@ -93,14 +93,15 @@ class WikidataCache:
         start_time = time.time()
 
         # Make actual request
-        time.sleep(0.0) # no sleep time as this seems to be the fastest, no obvious punishment for making a lot of requests
+        time.sleep(
+            0.0)  # no sleep time as this seems to be the fastest, no obvious punishment for making a lot of requests
         result = _make_request(params)
 
-        #result = _strip_results(result)
+        # result = _strip_results(result)
 
         # Calculate request time and store it
         request_time = time.time() - start_time
-        #print(f"Request time: {request_time}")
+        # print(f"Request time: {request_time}")
         WikidataCache.request_times.append(request_time)
 
         if print_update:
@@ -122,7 +123,8 @@ class WikidataCache:
         total_requests = WikidataCache.cache_hits + WikidataCache.internet_retrievals
         print(f"Total requests: {total_requests}")
         if WikidataCache.cache_hits > 0 or WikidataCache.internet_retrievals > 0:
-            cache_hit_ratio = (WikidataCache.cache_hits / (WikidataCache.cache_hits + WikidataCache.internet_retrievals) * 100).__round__(3)
+            cache_hit_ratio = (WikidataCache.cache_hits / (
+                        WikidataCache.cache_hits + WikidataCache.internet_retrievals) * 100).__round__(3)
             print(f"Which is a cache hit ratio of {cache_hit_ratio}%\n\n")
 
         if WikidataCache.internet_retrievals > 0:
@@ -144,8 +146,8 @@ class WikidataCache:
 
         allowed_keys = {'P17', 'P452', 'P1056', 'P108', 'P361', 'P169', 'P946',
                         'P3320', 'P570', 'P1830', 'P373', '127', 'P569', 'P112',
-                        'P159', 'P1037', 'P571', 'P355', 'P2403', 'P2137', 'P2139', 'P2295', 'P3362', 'P2226', 'P749', 'P749'}
-
+                        'P159', 'P1037', 'P571', 'P355', 'P2403', 'P2137', 'P2139', 'P2295', 'P3362', 'P2226', 'P749',
+                        'P749', 'P4103', 'P1128'}
 
         try:
             if 'wbgetentities' in cache_instance.cache:
@@ -158,9 +160,8 @@ class WikidataCache:
                         keys_to_strip = [key for key in claims.keys() if key not in allowed_keys]
 
                         for key in keys_to_strip:
-                            #claims.pop(key)
+                            # claims.pop(key)
                             cache_instance.cache['wbgetentities'][entry_id]["entities"][entry_id]["claims"].pop(key)
-
 
             cache_instance._save_cache(cache_instance.cache)
             print("Cache successfully stripped")
@@ -178,9 +179,6 @@ def _make_request(params: Dict) -> Dict:
         raise Exception(f'Error making request: {e}')
 
 
-
 # Initialize wikidata globally
 wikidata_cache = WikidataCache()
 print_update = False
-
-

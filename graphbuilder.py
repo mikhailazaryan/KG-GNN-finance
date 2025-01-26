@@ -383,7 +383,7 @@ def build_node_properties(wikidata_id: str, label: str, name: Optional[str] = No
         financial_id = wikidata_id.split("--")[2]
         point_in_time = wikidata_id.split("--")[1]
         data = wikidata_wbgetentities(financial_id)
-        #note: the following is not the most time efficient, solutions could be cached to improve runtime
+        # note: the following is not the most time efficient, solutions could be cached to improve runtime
         return {
             "name": wikidata_id,
             "label": "Financial_Data",
@@ -533,8 +533,6 @@ def _get_wikidata_financial_entry(key, wikidata_id, date, wikidata):
         return result
     except:
         return "NA"
-
-
 
 
 def _get_label_specific_properties(label: str, wikidata_id: str, data: Dict) -> Dict:
@@ -732,7 +730,12 @@ def _get_wikidata_rels(data: dict, wikidata_id: str, property_ids: list) -> list
 
     return result
 
-def _get_wikidata_financial_rels(data: dict, wikidata_id: str, property_ids: list) -> list[dict[str, Union[Union[datetime, str], Any]]]:
+
+def _get_wikidata_financial_rels(data: dict, wikidata_id: str, property_ids: list) -> list[
+    dict[str, Union[Union[datetime, str], Any]]]:
+    # note: maybe there is a more elegant way to get the notes, as we now rely on P2129/total_revenue,
+    # which might not be available although other financial data might be available
+
     result = []
 
     for property_id in property_ids:
