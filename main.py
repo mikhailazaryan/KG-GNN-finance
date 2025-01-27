@@ -221,13 +221,13 @@ def main():
         return  # Exit if connection failed
 
     # Configuration
-    build_graph = True
+    build_graph = False
     update_graph = True
     benchmark = True
     benchmark_stats = True
 
-    companies = ["Vonovia SE"]
-    DAX_companies = ["Adidas AG", "Airbus SE", "Allianz SE", "BASF SE", "Bayer AG", "Beiersdorf AG",
+    companies = ["Adidas AG", "Airbus SE", "BASF SE", "Vonovia SE"]
+    companiesDAX = ["Adidas AG", "Airbus SE", "Allianz SE", "BASF SE", "Bayer AG", "Beiersdorf AG",
                      "Bayerische Motoren Werke AG", "Brenntag SE", "Commerzbank AG", "Continental AG", "Covestro AG",
                      "Daimler Truck Holding AG", "Deutsche Bank AG", "Deutsche Börse AG", "Deutsche Post AG",
                      "Deutsche Telekom AG", "E.ON SE", "Fresenius SE & Co. KGaA", "Hannover Rück SE",
@@ -237,11 +237,11 @@ def main():
                      "Sartorius AG", "Siemens AG", "Siemens Energy AG", "Siemens Healthineers AG", "Symrise AG",
                      "Volkswagen AG", "Vonovia SE", "Zalando SE"]
 
-    date_range = (datetime(2021, 1, 1, tzinfo=timezone.utc), datetime(2024, 12, 31, tzinfo=timezone.utc))
+    date_range = (datetime(2015, 1, 1, tzinfo=timezone.utc), datetime(2024, 12, 31, tzinfo=timezone.utc))
 
     included_nodes = ["Company", "Industry_Field", "Manager", "Founder", "Board_Member", "City", "Country",
                       "Product_or_Service", "Employer", "StockMarketIndex", "Financial_Data"]
-    search_depth = 2
+    search_depth = 1
 
     if build_graph:
         build_knowledge_graph(driver, companies, date_range, included_nodes, search_depth)

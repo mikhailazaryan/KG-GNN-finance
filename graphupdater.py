@@ -1,10 +1,12 @@
 import configparser
 import json
+import re
+
 import google.generativeai as genai
 from datetime import datetime, timezone
 from colorama import Fore, Style
 from neo4j import Driver
-from typing import List, Dict, Tuple, Optional
+from typing import List, Dict, Tuple, Optional, Any
 
 from wikidata.wikidata import wikidata_wbsearchentities
 from graphbuilder import create_relationship, get_node_relationships, \
@@ -61,8 +63,13 @@ def update_neo4j_graph(article: str, companies: List[str], node_types: List[str]
 
     # Find changes
     added, deleted, unchanged = find_change_triples(
-        article, company, node_type, relevant_triples, 1, 4, driver
-    )
+        article, company, node_type, relevant_triples, 1, 4, driver)
+
+    # These checks can be used to iterate on find_change_triples for a back and forth until checks are passing, although this will require a lot of extra compute
+    formal_check = formal_sanity_check(added, deleted, relevant_triples)
+    reasoning_check = llm_sanity_check(added, deleted, relevant_triples, article)
+    print("Formal sanity check: " + str(formal_check))
+    print("Reasoning sanity check: " + str(reasoning_check))
 
     # Process additions
     for triple in added:
@@ -286,6 +293,153 @@ def find_node_type(article, node_types):
     return result
 
 
+def formal_sanity_check(added, deleted, relevant_triples) -> dict:
+    """
+    Performs sanity checks on proposed knowledge graph updates.
+
+    Args:
+        added: List of triples to be added
+        deleted: List of triples to be deleted
+        relevant_triples: List of existing triples in the graph
+        article: Text of the news article
+
+    Returns:
+        dict: Contains validation results with format:
+            {
+                'correct_update': bool,
+                'reasoning': str,
+                'how_to_correct_the_mistake': str
+            }
+    """
+    result = {
+        'correct_update': True,
+        'reasoning': '',
+        'how_to_correct_the_mistake': ''
+    }
+
+    # Check 1: Verify we're not simultaneously adding and deleting the same triple
+    overlapping_triples = [t for t in added if t in deleted]
+    if overlapping_triples:
+        result.update({
+            'correct_update': False,
+            'reasoning': f"Contradiction: Same triple(s) appearing in both added and deleted lists: {overlapping_triples}",
+            'how_to_correct_the_mistake': "Review the triples and ensure no triple is both added and deleted"
+        })
+        return result
+
+    # Check 2: Verify deleted triples exist in relevant_triples
+    invalid_deletions = [t for t in deleted if t not in relevant_triples]
+    if invalid_deletions:
+        result.update({
+            'correct_update': False,
+            'reasoning': f"Invalid deletion: Attempting to delete non-existent triples: {invalid_deletions}",
+            'how_to_correct_the_mistake': "Only delete triples that exist in the current graph"
+        })
+        return result
+
+    # Check 3: Verify relationship types are valid
+    valid_relationships = {
+        "OWNS", "PARTNERS_WITH", "IS_ACTIVE_IN", "IS_MANAGED_BY",
+        "WAS_FOUNDED_BY", "HAS_BOARD_MEMBER", "HAS_HEADQUARTER_IN",
+        "OFFERS", "IS_LISTED_IN"
+    }
+
+    invalid_relationships = []
+    for triple in added + deleted:
+        if triple['relationship'] not in valid_relationships:
+            invalid_relationships.append(triple)
+
+    if invalid_relationships:
+        result.update({
+            'correct_update': False,
+            'reasoning': f"Invalid relationship types found: {invalid_relationships}",
+            'how_to_correct_the_mistake': f"Use only valid relationship types: {valid_relationships}"
+        })
+        return result
+
+    # If all checks pass
+    if result['correct_update']:
+        result[
+            'reasoning'] = "All sanity checks passed: Changes are consistent with current graph and article content"
+        result['how_to_correct_the_mistake'] = "No corrections needed"
+
+    return result
+
+
+def llm_sanity_check(added, deleted, relevant_triples, article):
+    """
+    Validates the logical reasoning of proposed knowledge graph updates.
+
+    Args:
+        added: List of triples to be added
+        deleted: List of triples to be deleted
+        relevant_triples: List of existing triples in the graph
+        article: Text of the news article
+
+    Returns:
+        dict: Validation results with format:
+            {
+                'correct_update': bool,
+                'reasoning': str,
+                'how_to_correct_the_mistake': str
+            }
+    """
+
+    prompt = f"""
+    You are a validation expert for knowledge graph updates. Your task is to analyze whether the proposed changes to a knowledge graph make logical sense given the article content.
+
+    Context:
+    - Article: "{article}"
+    - Existing triples in graph: {relevant_triples}
+    - Proposed additions: {added}
+    - Proposed deletions: {deleted}
+
+    Please analyze the following aspects:
+
+    1. Temporal Logic:
+    - Are the changes based on events that have actually happened (not just announcements or possibilities)?
+    - Do the changes respect chronological order of events?
+
+    2. Causal Logic:
+    - Is there a clear cause-effect relationship supporting each change?
+    - Are the changes supported by explicit statements in the article?
+
+    3. Business Logic:
+    - Do the changes align with typical business relationships and operations?
+    - Are the relationship types appropriate for the entities involved?
+
+    4. Consistency:
+    - Are there any contradictions between added and deleted triples?
+    - Do the changes maintain the graph's overall consistency?
+
+    5. Completeness:
+    - Are all relevant changes from the article captured?
+    - Are there any unnecessary changes not supported by the article?
+
+    Please provide your analysis in the following JSON format:
+    {{
+        'correct_update': boolean,
+        'reasoning': "Detailed explanation of why the updates are correct or incorrect",
+        'how_to_correct_the_mistake': "If incorrect, provide specific guidance on how to fix the issues"
+    }}
+
+    Only respond with valid JSON. Focus on logical reasoning rather than technical validation.
+    """
+
+    response = model.generate_content(prompt, generation_config=genai.GenerationConfig(temperature=0.6)).text
+
+    try:
+        return _parse_llm_reasoning_check_response(response)
+    except json.JSONDecodeError as e:
+        print("response:" + response)
+        print("error:" + str(e))
+        return {
+            'correct_update': False,
+            'reasoning': 'Failed to parse validation response',
+            'how_to_correct_the_mistake': 'Please review the updates manually'
+        }
+
+
 """functions below are helper functions"""
 
 
@@ -315,7 +469,6 @@ def _add_relationship(triple: Dict, nodes_to_include: List[str], driver) -> None
         id_node_from = _get_or_create_node_id(name_node_from, driver)
         id_node_to = _get_or_create_node_id(name_node_to, driver)
 
-
         create_new_node(
             id_node_from,
             node_type_from,
@@ -329,7 +482,6 @@ def _add_relationship(triple: Dict, nodes_to_include: List[str], driver) -> None
             properties=build_node_properties(id_node_to, node_type_to, name_node_to),
             driver=driver,
         )
-
 
         create_relationship(
             triple["relationship"],
@@ -432,6 +584,42 @@ def _get_or_create_node_id(node_name: str, driver: Driver) -> str:
 
     # Create/update node and return ID
     return node_id
+
+
+def _parse_llm_reasoning_check_response(response: str) -> Dict[str, Any]:
+    """
+    Parse LLM response with robust handling of problematic characters.
+
+    Args:
+        response: Raw string response from LLM
+    """
+    default = {
+        "correct_update": False,
+        "reasoning": "Failed to parse response",
+        "how_to_correct_the_mistake": None
+    }
+
+    try:
+        # Extract each field separately using regex
+        correct_update_match = re.search(r'"correct_update":\s*(true|false)', response)
+        reasoning_match = re.search(r'"reasoning":\s*"([^"]*(?:"[^"]*"[^"]*)*)"', response)
+        correction_match = re.search(r'"how_to_correct_the_mistake":\s*(null|"[^"]*")', response)
+
+        if not correct_update_match:
+            return default
+
+        result = {
+            "correct_update": correct_update_match.group(1).lower() == 'true',
+            "reasoning": reasoning_match.group(1) if reasoning_match else "No reasoning provided",
+            "how_to_correct_the_mistake": None if (not correction_match or correction_match.group(1) == 'null')
+            else correction_match.group(1).strip('"')
+        }
+
+        return result
+
+    except Exception as e:
+        print(f"Failed to parse response: {e}")
+        return default
 
 
 """functions below are  currently not in use , but might be used for future functionality"""
