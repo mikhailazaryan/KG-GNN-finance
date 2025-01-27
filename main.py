@@ -221,10 +221,10 @@ def main():
         return  # Exit if connection failed
 
     # Configuration
-    build_graph = False
+    build_graph = True
     update_graph = True
     benchmark = True
-    benchmark_stats = True
+    benchmark_stats = False
 
     companies = ["Adidas AG", "Airbus SE", "BASF SE", "Vonovia SE"]
     companiesDAX = ["Adidas AG", "Airbus SE", "Allianz SE", "BASF SE", "Bayer AG", "Beiersdorf AG",
@@ -246,7 +246,8 @@ def main():
     if build_graph:
         build_knowledge_graph(driver, companies, date_range, included_nodes, search_depth)
 
-    filepath = filepath = "files/benchmarking_data/synthetic_articles_benchmarked.json"
+    filepath = "files/benchmarking_data/synthetic_articles_benchmarked.json"
+    filepath = "files/benchmarking_data/demo_article.json"
 
     if update_graph:
         update_knowledge_graph(driver, companies, included_nodes, benchmark_mode=benchmark, filepath=filepath)

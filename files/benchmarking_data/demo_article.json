@@ -1,0 +1,18 @@
+{
+  "Adidas AG": {
+    "article_1": {
+      "text": "Adidas has changed it's headquarter to Heilbron, Germany",
+      "source": null,
+      "date": null,
+      "benchmarking": {
+        "model update triples": {
+          "unchanged": [],
+          "added": [],
+          "deleted": []
+        },
+        "correct update": null,
+        "wikidata structure": null
+      }
+    }
+  }
+}
