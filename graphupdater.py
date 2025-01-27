@@ -68,8 +68,14 @@ def update_neo4j_graph(article: str, companies: List[str], node_types: List[str]
     # These checks can be used to iterate on find_change_triples for a back and forth until checks are passing, although this will require a lot of extra compute
     formal_check = formal_sanity_check(added, deleted, relevant_triples)
     reasoning_check = llm_sanity_check(added, deleted, relevant_triples, article)
-    print("Formal sanity check: " + str(formal_check))
-    print("Reasoning sanity check: " + str(reasoning_check))
+    if formal_check["correct_update"]:
+        print(Fore.GREEN + "Formal sanity check: " + str(formal_check) + Style.RESET_ALL)
+    else:
+        print(Fore.RED + "Formal sanity check: " + str(formal_check) + Style.RESET_ALL)
+    if reasoning_check["correct_update"]:
+        print(Fore.GREEN + "Reasoning sanity check: " + str(reasoning_check) + Style.RESET_ALL)
+    else:
+        print(Fore.RED + "Reasoning sanity check: " + str(reasoning_check) + Style.RESET_ALL)
 
     # Process additions
     for triple in added:
@@ -431,12 +437,11 @@ def llm_sanity_check(added, deleted, relevant_triples, article):
     try:
         return _parse_llm_reasoning_check_response(response)
     except json.JSONDecodeError as e:
-        print("response:" + response)
-        print("error:" + str(e))
         return {
             'correct_update': False,
             'reasoning': 'Failed to parse validation response',
-            'how_to_correct_the_mistake': 'Please review the updates manually'
+            'how_to_correct_the_mistake': 'Please review the updates manually',
+            'JSONDecodeError': str(e)
         }
 
 
@@ -594,9 +599,9 @@ def _parse_llm_reasoning_check_response(response: str) -> Dict[str, Any]:
         response: Raw string response from LLM
     """
     default = {
-        "correct_update": False,
-        "reasoning": "Failed to parse response",
-        "how_to_correct_the_mistake": None
+        'correct_update': False,
+        'reasoning': "Failed to parse response",
+        'how_to_correct_the_mistake': None
     }
 
     try:
@@ -609,9 +614,9 @@ def _parse_llm_reasoning_check_response(response: str) -> Dict[str, Any]:
             return default
 
         result = {
-            "correct_update": correct_update_match.group(1).lower() == 'true',
-            "reasoning": reasoning_match.group(1) if reasoning_match else "No reasoning provided",
-            "how_to_correct_the_mistake": None if (not correction_match or correction_match.group(1) == 'null')
+            'correct_update': correct_update_match.group(1).lower() == 'true',
+            'reasoning': reasoning_match.group(1) if reasoning_match else 'No reasoning provided',
+            'how_to_correct_the_mistake': None if (not correction_match or correction_match.group(1) == 'null')
             else correction_match.group(1).strip('"')
         }
 
